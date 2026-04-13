@@ -1,0 +1,10 @@
+---
+title: "Nairobi Runners Analysis"
+---
+
+Welcome to the project. Use the navigation bar above to:
+
+- Read the **[Full Report](report.qmd)** with findings and methodology.
+- Explore the **[Interactive Dashboard](https://agucharles.shinyapps.io/nairobi-runners/)** to filter and visualize the data yourself.
+
+This site runs entirely in your browser—no server required.

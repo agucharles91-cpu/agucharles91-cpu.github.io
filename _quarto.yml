@@ -1,0 +1,18 @@
+project:
+  type: website
+  output-dir: docs
+  render:
+    - index.qmd
+    - report.qmd
+
+website:
+  title: "Nairobi Runners Project"
+  navbar:
+    left:
+      - text: "Home"
+        href: index.qmd
+      - text: "Full Report"
+        href: report.qmd
+      - text: "Interactive Dashboard"
+        href: https://agucharles.shinyapps.io/nairobi-runners/
+  page-footer: "© 2026 | Built with Quarto"

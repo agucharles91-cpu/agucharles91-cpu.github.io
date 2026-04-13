@@ -1,0 +1,10 @@
+name: nairobi-runners
+title:
+username: agucharles
+account: agucharles
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 17119588
+bundleId: 11843236
+url: https://agucharles.shinyapps.io/nairobi-runners/
+version: 1

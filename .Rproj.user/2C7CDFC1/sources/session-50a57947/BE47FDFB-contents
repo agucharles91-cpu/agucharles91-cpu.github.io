@@ -1,0 +1,310 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# app.R  — Garmin Wearable Analytics Shiny App  v3.0
+# 14 participants | garmin_merged_14p.csv | 10 modules
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Packages ──────────────────────────────────────────────────────────────────
+library(shiny)
+library(shinydashboard)
+library(tidyverse)
+library(lubridate)
+library(DT)
+library(scales)
+library(zoo)
+library(cowplot)
+
+# ── Source helpers & modules ─────────────────────────────────────────────────
+source("helpers/plot_themes.R")
+source("helpers/stat_helpers.R")
+source("data/data_prep.R")
+
+source("modules/mod_overview.R")
+source("modules/mod_sleep.R")
+source("modules/mod_architecture.R")
+source("modules/mod_training.R")
+source("modules/mod_recovery.R")
+source("modules/mod_extra.R")   # vo2max, individual, explorer
+
+# ── Load data (once at startup) ───────────────────────────────────────────────
+garmin_full <- load_garmin("data/garmin_merged_14p_confirmV2.csv")
+
+ALL_USERS     <- sort(unique(garmin_full$User_id))
+ALL_COHORTS   <- levels(garmin_full$analysis_cohort)
+DATE_MIN      <- min(garmin_full$calendar_date)
+DATE_MAX      <- max(garmin_full$calendar_date)
+
+# ── UI ────────────────────────────────────────────────────────────────────────
+ui <- dashboardPage(
+  skin = "blue",
+
+  dashboardHeader(
+    title = tags$span(
+      tags$img(src = "https://img.icons8.com/ios-filled/20/ffffff/pulse.png",
+               style = "margin-right:8px;vertical-align:middle;"),
+      "Garmin Wearable Analytics v3.0"
+    ),
+    titleWidth = 320
+  ),
+
+  # ── Sidebar ────────────────────────────────────────────────────────────────
+  dashboardSidebar(
+    width = 260,
+    tags$head(tags$link(rel="stylesheet", type="text/css", href="custom.css")),
+
+    # ── Global filters ──────────────────────────────────────────────────────
+    div(style="padding:14px 14px 0;",
+      tags$p(tags$b("Global Filters"), style="color:#93C5FD;font-size:0.82rem;margin-bottom:6px;"),
+
+      checkboxGroupInput("participants", "Participants",
+        choices  = ALL_USERS,
+        selected = ALL_USERS,
+        inline   = FALSE
+      ),
+
+      dateRangeInput("date_range", "Date range",
+        start  = format(DATE_MIN, "%Y-%m-%d"),
+        end    = format(DATE_MAX, "%Y-%m-%d"),
+        min    = format(DATE_MIN, "%Y-%m-%d"),
+        max    = format(DATE_MAX, "%Y-%m-%d"),
+        format = "yyyy-mm-dd", separator = " → "
+      ),
+
+      selectInput("cohort_filter", "Analysis cohort",
+        choices = c(
+          "Full sleep metrics (n=9,700)" = "full",
+          "All participants (n=12,760)"  = "all"
+        ),
+        selected = "full"
+      ),
+
+      hr(),
+
+      checkboxInput("show_no_sleep",
+        label = tags$span(style = "color:#94A3B8;font-size:0.82rem;",
+          "Include P006/P013/P015 (no sleep data)"),
+        value = FALSE),
+
+      hr(),
+
+      tags$p("Cohort guide:", style="color:#93C5FD;font-size:0.75rem;margin:0 0 4px;"),
+      tags$ul(style="color:#BAE6FD;font-size:0.73rem;padding-left:16px;line-height:1.6;",
+        tags$li("full → n=9,700 (sleep metrics valid)"),
+        tags$li("no_sleep_stages → P006+P013+P015")
+      )
+    ),
+
+    sidebarMenu(id = "tabs",
+      menuItem("Overview",          tabName="overview",      icon=icon("tachometer-alt")),
+      menuItem("Sleep Analysis",    tabName="sleep",         icon=icon("moon")),
+      menuItem("Sleep Architecture",tabName="architecture",  icon=icon("layer-group")),
+      menuItem("Training Load",     tabName="training",      icon=icon("running")),
+      menuItem("VO₂max",            tabName="vo2max",        icon=icon("heartbeat")),
+      menuItem("Recovery Metrics",  tabName="recovery",      icon=icon("heart")),
+      menuItem("Individual Dive",   tabName="individual",    icon=icon("user")),
+      menuItem("Cohort Comparison", tabName="comparison",    icon=icon("chart-bar")),
+      menuItem("Data Explorer",     tabName="explorer",      icon=icon("table"))
+    ),
+
+    # ── Staging legend ──────────────────────────────────────────────────────
+    div(style="padding:10px 14px;border-top:1px solid #1e3a5f;margin-top:auto;",
+      tags$p("Staging legend (P006)", style="color:#93C5FD;font-size:0.75rem;margin:0 0 4px;"),
+      tags$ul(style="color:#94A3B8;font-size:0.71rem;padding-left:14px;line-height:1.7;",
+        tags$li(tags$span(style="color:#60A5FA;","native_4stage"), " — 13 orig. participants"),
+        tags$li(tags$span(style="color:#94A3B8;","P006"), " → no_sleep_stages (like P013/P015)")
+      )
+    )
+  ),
+
+  # ── Body ────────────────────────────────────────────────────────────────────
+  dashboardBody(
+    tabItems(
+
+      tabItem(tabName="overview",
+        h2(icon("tachometer-alt"), " Overview Dashboard", style="color:#1B3A6B;margin-bottom:12px;"),
+        mod_overview_ui("overview")
+      ),
+
+      tabItem(tabName="sleep",
+        h2(icon("moon"), " Sleep Analysis", style="color:#1B3A6B;margin-bottom:12px;"),
+        mod_sleep_ui("sleep")
+      ),
+
+      tabItem(tabName="architecture",
+        h2(icon("layer-group"), " Sleep Architecture & Circadian Rhythm",
+           style="color:#1B3A6B;margin-bottom:12px;"),
+        mod_arch_ui("arch")
+      ),
+
+      tabItem(tabName="training",
+        h2(icon("running"), " Training Load", style="color:#1B3A6B;margin-bottom:12px;"),
+        mod_training_ui("training")
+      ),
+
+      tabItem(tabName="vo2max",
+        h2(icon("heartbeat"), " VO₂max Trajectories", style="color:#1B3A6B;margin-bottom:12px;"),
+        mod_vo2_ui("vo2")
+      ),
+
+      tabItem(tabName="recovery",
+        h2(icon("heart"), " Recovery Metrics", style="color:#1B3A6B;margin-bottom:12px;"),
+        mod_recovery_ui("recovery")
+      ),
+
+      tabItem(tabName="individual",
+        h2(icon("user"), " Individual Deep Dive", style="color:#1B3A6B;margin-bottom:12px;"),
+        mod_individual_ui("individual")
+      ),
+
+      tabItem(tabName="comparison",
+        h2(icon("chart-bar"), " Cohort Comparison", style="color:#1B3A6B;margin-bottom:12px;"),
+
+        fluidRow(
+          column(3,
+            box(width=12, title="Controls", status="primary", solidHeader=TRUE,
+              checkboxGroupInput("comp_metrics", "Metrics to compare",
+                choices = c(
+                  "TSD"="TSD", "SE"="SE", "REMSleepProp"="REMSleepProp_final",
+                  "VO2max"="VO2max_imputed_final",
+                  "RHR"="DailyRestingHeartRate_clean",
+                  "Session Load"="SessionLoad",
+                  "SleepMidpoint"="SleepMidpoint",
+                  "BB net"="BB_net"
+                ),
+                selected=c("TSD","SE","VO2max_imputed_final","DailyRestingHeartRate_clean")
+              ),
+              selectInput("comp_norm","Normalise",
+                c("None"="none","Z-score"="zscore","Min-max"="minmax","Rank"="rank"),
+                "zscore")
+            )
+          ),
+          column(9,
+            tabBox(width=12,
+              tabPanel("Correlation Heatmap", plotOutput("comp_corr",  height="420px")),
+              tabPanel("Ridge Plots",         plotOutput("comp_ridge", height="420px")),
+              tabPanel("Parallel Coords",     plotOutput("comp_para",  height="420px")),
+              tabPanel("Pairwise Scatter",    plotOutput("comp_pairs", height="420px"))
+            )
+          )
+        )
+      ),
+
+      tabItem(tabName="explorer",
+        h2(icon("table"), " Data Explorer", style="color:#1B3A6B;margin-bottom:12px;"),
+        mod_explorer_ui("explorer")
+      )
+    )
+  )
+)
+
+# ── Server ────────────────────────────────────────────────────────────────────
+server <- function(input, output, session) {
+
+  # ── Global reactive: apply sidebar filters ─────────────────────────────────
+  r_data <- reactive({
+    req(input$participants, input$date_range)
+
+    allowed_cohorts <- if (input$cohort_filter == "full") c("full") else
+                       c("full", "no_sleep_stages")
+
+    garmin_full %>%
+      filter(User_id      %in% input$participants) %>%
+      filter(calendar_date >= input$date_range[1],
+             calendar_date <= input$date_range[2]) %>%
+      filter(analysis_cohort %in% allowed_cohorts)
+  })
+
+  # ── Module calls ────────────────────────────────────────────────────────────
+  mod_overview_server("overview",    r_data)
+  mod_sleep_server(   "sleep",       r_data)
+  mod_arch_server(    "arch",        r_data)
+  mod_training_server("training",    r_data)
+  mod_vo2_server(     "vo2",         r_data)
+  mod_recovery_server("recovery",    r_data)
+  mod_individual_server("individual",r_data)
+  mod_explorer_server("explorer",    r_data)
+
+  # ── Cohort Comparison (inline, not modularised) ─────────────────────────────
+  r_comp <- reactive({
+    req(input$comp_metrics)
+    df <- r_data() %>%
+      filter(analysis_cohort == "full") %>%
+      select(User_id, calendar_date, all_of(input$comp_metrics)) %>%
+      filter(if_all(all_of(input$comp_metrics), ~ !is.na(.)))
+
+    if (input$comp_norm == "zscore") {
+      df <- df %>% mutate(across(all_of(input$comp_metrics),
+                                  ~ (. - mean(., na.rm=TRUE)) / sd(., na.rm=TRUE)))
+    } else if (input$comp_norm == "minmax") {
+      df <- df %>% mutate(across(all_of(input$comp_metrics),
+                                  ~ (. - min(.,na.rm=TRUE)) / (max(.,na.rm=TRUE)-min(.,na.rm=TRUE))))
+    } else if (input$comp_norm == "rank") {
+      df <- df %>% mutate(across(all_of(input$comp_metrics), rank))
+    }
+    df
+  })
+
+  output$comp_corr <- renderPlot({
+    df_num <- r_comp() %>% select(all_of(input$comp_metrics)) %>%
+      filter(complete.cases(.))
+    req(nrow(df_num) > 5, ncol(df_num) > 1)
+    cor_mat <- cor(df_num, use="pairwise.complete.obs")
+    cor_long <- as.data.frame(as.table(cor_mat)) %>%
+      rename(x=Var1, y=Var2, r=Freq)
+    ggplot(cor_long, aes(x=x, y=y, fill=r)) +
+      geom_tile(colour="white", linewidth=0.5) +
+      geom_text(aes(label=round(r,2)), size=4, fontface="bold",
+                colour=ifelse(abs(cor_long$r) > 0.5,"white","#1E293B")) +
+      scale_fill_gradient2(low="#2563EB",mid="white",high="#DC2626",midpoint=0,
+                           limits=c(-1,1),name="Pearson r") +
+      scale_x_discrete(labels=function(x)gsub("_"," ",x)) +
+      scale_y_discrete(labels=function(x)gsub("_"," ",x)) +
+      theme_garmin() +
+      theme(axis.text.x=element_text(angle=30,hjust=1)) +
+      labs(x=NULL,y=NULL,title="Pearson correlation matrix",
+           subtitle=paste0("n=",nrow(df_num)," observations  |  normalisation: ",input$comp_norm))
+  })
+
+  output$comp_ridge <- renderPlot({
+    req("ggridges" %in% rownames(installed.packages()))
+    df_long <- r_comp() %>%
+      tidyr::pivot_longer(all_of(input$comp_metrics), names_to="metric", values_to="value")
+    ggplot(df_long, aes(x=value, y=User_id, fill=User_id)) +
+      ggridges::geom_density_ridges(alpha=0.7, scale=0.9) +
+      scale_fill_participants() +
+      facet_wrap(~metric, scales="free_x", ncol=2) +
+      theme_garmin() +
+      labs(x="Value", y=NULL, fill=NULL,
+           title="Metric distribution by participant (ridge plots)")
+  })
+
+  output$comp_para <- renderPlot({
+    df_par <- r_comp() %>%
+      group_by(User_id) %>%
+      summarise(across(all_of(input$comp_metrics), mean, na.rm=TRUE), .groups="drop") %>%
+      tidyr::pivot_longer(-User_id, names_to="metric", values_to="value")
+    ggplot(df_par, aes(x=metric, y=value, colour=User_id, group=User_id)) +
+      geom_line(linewidth=1, alpha=0.8) +
+      geom_point(size=3) +
+      scale_colour_participants() +
+      theme_garmin() +
+      theme(axis.text.x=element_text(angle=30,hjust=1)) +
+      labs(x=NULL,y="Normalised value",colour=NULL,
+           title="Parallel coordinates — mean metric values per participant",
+           subtitle=paste("Normalisation:", input$comp_norm))
+  })
+
+  output$comp_pairs <- renderPlot({
+    df_num <- r_comp() %>% select(User_id, all_of(input$comp_metrics[1:min(4,length(input$comp_metrics))]))
+    req(ncol(df_num) > 2)
+    GGally::ggpairs(df_num, columns=2:ncol(df_num),
+                    aes(colour=User_id, alpha=0.3),
+                    upper=list(continuous="cor"),
+                    lower=list(continuous=GGally::wrap("points",size=0.6,alpha=0.3)),
+                    diag=list(continuous="densityDiag")) +
+      theme_garmin() +
+      labs(title="Pairwise scatter matrix (first 4 selected metrics)")
+  })
+}
+
+# ── Launch ────────────────────────────────────────────────────────────────────
+shinyApp(ui, server)

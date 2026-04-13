@@ -1,0 +1,65 @@
+/* www/custom.css — Garmin Wearable Analytics v4.0 */
+:root {
+  --navy: #1B3A6B; --blue: #2563EB; --teal: #0D9488;
+  --slate: #475569; --border: #CBD5E1; --bg: #F1F5F9;
+  --white: #FFFFFF; --text: #1E293B;
+}
+body { background: var(--bg); font-family: 'Inter','Segoe UI',Arial,sans-serif; }
+
+/* Navbar */
+.navbar,.navbar-default,.main-header .navbar { background-color:var(--navy)!important; border:none!important; }
+.navbar-default .navbar-brand,.main-header .logo { background:#142d55!important; color:#FFF!important; font-weight:700; font-size:1rem; border-bottom:none!important; }
+
+/* Sidebar */
+.main-sidebar,.skin-blue .main-sidebar { background:#0F2448!important; }
+.sidebar-menu>li>a,.skin-blue .sidebar-menu>li>a { color:#CBD5E1!important; font-size:0.88rem; border-left:3px solid transparent; }
+.skin-blue .sidebar-menu>li.active>a,.skin-blue .sidebar-menu>li>a:hover { background:rgba(255,255,255,0.08)!important; color:#FFF!important; border-left-color:var(--teal)!important; }
+
+/* Sidebar input labels — must be white/light */
+.sidebar .control-label,.sidebar label,.sidebar .shiny-input-container label { color:#E2E8F0!important; font-size:0.8rem!important; font-weight:600!important; }
+.sidebar .selectize-input,.sidebar .form-control { background:#1e3a5f!important; border-color:#2d5a8e!important; color:#E2E8F0!important; font-size:0.82rem; border-radius:5px; }
+.sidebar .selectize-dropdown { background:#1e3a5f; color:#E2E8F0; }
+.sidebar .selectize-dropdown .option:hover { background:#2563EB; }
+.sidebar .selectize-input .item { color:#E2E8F0!important; }
+.sidebar hr { border-color:#1e3a5f; margin:10px 0; }
+
+/* TAB HEADINGS — the main fix: dark text on light background */
+.nav-tabs { background:var(--white); border-bottom:2px solid var(--border)!important; }
+.nav-tabs>li>a { color:var(--slate)!important; background:#F8FAFC!important; border:1px solid var(--border)!important; border-bottom:none!important; font-size:0.83rem; font-weight:500; padding:7px 14px; border-radius:5px 5px 0 0!important; margin-right:2px; }
+.nav-tabs>li.active>a,.nav-tabs>li.active>a:focus,.nav-tabs>li.active>a:hover { color:var(--navy)!important; background:var(--white)!important; border-top:2px solid var(--teal)!important; font-weight:700; }
+.nav-tabs>li>a:hover { color:var(--navy)!important; background:#EFF6FF!important; }
+.tab-content { background:var(--white); border:1px solid var(--border); border-top:none; padding:16px; border-radius:0 0 8px 8px; }
+
+/* Boxes */
+.box { border-top:3px solid var(--blue)!important; border-radius:8px!important; box-shadow:0 1px 6px rgba(0,0,0,0.07)!important; background:var(--white)!important; }
+.box.box-primary { border-top-color:var(--navy)!important; }
+.box.box-info    { border-top-color:var(--teal)!important; }
+.box.box-success { border-top-color:#16A34A!important; }
+.box-header { background:#F8FAFC!important; border-bottom:1px solid var(--border)!important; border-radius:6px 6px 0 0; }
+.box-title { color:var(--navy)!important; font-weight:700!important; font-size:0.9rem!important; }
+
+/* Value boxes */
+.small-box { border-radius:8px!important; box-shadow:0 2px 8px rgba(0,0,0,0.1)!important; }
+.small-box:hover { transform:translateY(-1px); transition:transform 0.15s; }
+.small-box .inner h3 { font-size:1.5rem!important; }
+.small-box .inner p  { font-size:0.8rem!important; }
+
+/* Content area */
+.content-wrapper,.right-side { background:var(--bg)!important; }
+
+/* Cohort disclaimer */
+.cohort-note { background:#EFF6FF; border-left:4px solid var(--blue); padding:6px 12px; font-size:0.78rem; color:var(--slate); border-radius:0 4px 4px 0; margin-bottom:10px; }
+
+/* DataTables */
+table.dataTable thead { background:var(--navy); }
+table.dataTable thead th { color:#FFF!important; font-size:0.8rem; }
+table.dataTable tbody tr:hover { background:#EFF6FF!important; }
+table.dataTable.stripe tbody tr.odd { background:#F8FAFC; }
+
+/* Form controls (body) */
+.content-wrapper .control-label { color:var(--text)!important; font-weight:600!important; }
+.content-wrapper .form-control { border-color:var(--border); border-radius:5px; }
+
+/* Alert banners */
+.alert-warning { background:#FEF9C3; border-color:#FDE68A; color:#92400E; border-radius:6px; }
+.alert-info    { background:#EFF6FF; border-color:#BFDBFE; color:#1D4ED8; border-radius:6px; }

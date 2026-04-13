@@ -1,0 +1,16 @@
+# Ignore log and tex files
+*.log
+*.tex
+*_files/
+
+# Ignore old version files
+nairobi_runners_report_*.html
+nairobi_runners_report_*.qmd
+app_*.R
+
+# Ignore R session files
+.Rhistory
+.RData
+.Ruserdata
+/.quarto/
+**/*.quarto_ipynb
