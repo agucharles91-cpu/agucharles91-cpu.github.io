@@ -1,7 +1,0 @@
-1. Install required packages (run once)
-install.packages(c(
-  "shiny", "shinydashboard",
-  "tidyverse", "lubridate",
-  "DT", "scales", "zoo",
-  "cowplot", "ggridges", "GGally"
-))
