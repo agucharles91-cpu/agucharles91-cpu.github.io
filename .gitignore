@@ -14,3 +14,39 @@ app_*.R
 .Ruserdata
 /.quarto/
 **/*.quarto_ipynb
+
+# Old app versions
+app_1.R
+app_16.R
+app_17.R
+Mini_New_App.R
+
+# Report render artefacts
+nairobi_runners_report_4_files/
+nairobi_runners_report_6_files/
+nairobi_runners_report_files/
+report_files/
+test_files/
+nairobi_runners_report_6.log
+nairobi_runners_report_6.tex
+nairobi_runners_report_6.qmd
+report.log
+report.qmd
+report.tex
+nairobi_runners_report_19.html
+
+# Scratch files
+test.html
+test.qmd
+.Rhistory
+
+# Private data
+app/data/garmin_merged_14p.csv
+
+# renv library (large, machine-specific)
+app/renv/library/
+app/renv/staging/
+
+# RStudio internals
+.quarto/
+.Rproj.user/

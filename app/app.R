@@ -21,7 +21,32 @@ library(ggcorrplot)
 # 1. DATA LOADING & PREPARATION
 # ==============================================================================
 
-df_raw <- read_csv("app/data/garmin_merged_14p.csv",
+# ── Startup: verify data file exists before anything else ─────────────────
+if (!file.exists("data/garmin_merged_14p.csv")) {
+  stop(paste0(
+    "DATA FILE NOT FOUND: data/garmin_merged_14p.csv
+",
+    "Place garmin_merged_14p.csv in the data/ subdirectory.
+",
+    "See README.md for setup instructions."
+  ))
+}
+
+# ── Startup: verify required packages are installed ───────────────────────────
+required_pkgs <- c("shiny","bslib","tidyverse","plotly","DT",
+                   "shinycssloaders","zoo","scales","lubridate","mgcv","ggcorrplot")
+missing_pkgs <- required_pkgs[!sapply(required_pkgs, requireNamespace, quietly=TRUE)]
+if (length(missing_pkgs) > 0) {
+  stop(paste0(
+    "Missing required packages: ", paste(missing_pkgs, collapse=", "), "
+",
+    "Install with: install.packages(c('", paste(missing_pkgs, collapse="','"), "'))
+",
+    "Or restore the full environment with: renv::restore()"
+  ))
+}
+
+df_raw <- read_csv("data/garmin_merged_14p.csv",
                    na = c("NA","","N/A"), show_col_types = FALSE) %>%
   arrange(User_id, calendar_date) %>%
   mutate(calendar_date = as.Date(calendar_date))
@@ -36,6 +61,24 @@ sl_67    <- quantile(df_raw$SessionLoad[df_raw$SessionLoad > 0 & !is.na(df_raw$S
 slope_fn <- function(y, x) {
   tryCatch(coef(lm(y ~ x))[2] * 365, error = function(e) NA_real_)
 }
+
+# ── Validate required columns ─────────────────────────────────────────────
+.required_cols <- c("User_id","calendar_date","Sex","Age","analysis_cohort",
+                    "TSD","SE","AwakeSleepProp","DeepSleepProp",
+                    "REMSleepProp_final","DailyRestingHeartRate_clean",
+                    "DailyBodyBattery.chargedValue","DailyBodyBattery.drainedValue",
+                    "SessionLoad","ActivitiesAvgHr","ActivitiesMaxHr",
+                    "ActivitiesAvgSpeed_kmh","RelativeIntensity",
+                    "DailyTotalSteps","VO2max_imputed_final",
+                    "weekday","is_weekend","activity_day")
+.missing_cols <- setdiff(.required_cols, names(df_raw))
+if (length(.missing_cols) > 0) {
+  stop(paste0("Required columns missing from CSV: ",
+              paste(.missing_cols, collapse=", "),
+              "
+Check data_dictionary.md for expected column names."))
+}
+rm(.required_cols, .missing_cols)
 
 garmin <- df_raw %>%
   group_by(User_id) %>%
@@ -194,131 +237,179 @@ ACT_COLORS <- c("Running"="#2C5F8A","Cycling"="#3A6B4A","Strength/HIIT"="#8A2C2C
 # 2. COLOUR & THEME CONSTANTS
 # ==============================================================================
 
-COL_P  <- "#2C5F8A"  # primary steel blue
-COL_S  <- "#8A4A2C"  # secondary terracotta
-COL_G  <- "#3A6B4A"  # good / success
-COL_W  <- "#B07D2C"  # warning amber
-COL_D  <- "#8A2C2C"  # danger red
-COL_N  <- "#6B7280"  # neutral grey
+COL_P  <- "#0055A5"  # primary cobalt blue
+COL_S  <- "#C75000"  # secondary burnt orange
+COL_G  <- "#1A7A4A"  # good / emerald green
+COL_W  <- "#D4860A"  # warning amber
+COL_D  <- "#B5192E"  # danger crimson
+COL_N  <- "#64748B"  # neutral slate
 DIV_PAL <- list(c(0,"#8A2C2C"), c(0.5,"#F5F5F0"), c(1,"#2C5F8A"))
 
 acad_theme <- bs_theme(
   version      = 5,
-  bg           = "#F5F4F0", fg = "#1A1A1A",
-  primary      = "#2C5F8A", secondary = "#6B7280",
-  success      = "#3A6B4A", warning   = "#B07D2C", danger = "#8A2C2C",
-  base_font    = font_google("Lora"),
-  heading_font = font_google("Libre Baskerville"),
+  bg           = "#F1F5F9", fg = "#0F172A",
+  primary      = "#0055A5", secondary = "#64748B",
+  success      = "#1A7A4A", warning   = "#D4860A", danger = "#B5192E",
+  base_font    = font_google("Inter"),
+  heading_font = font_google("DM Serif Display"),
   font_scale   = 0.95
 )
 
 acad_css <- "
-body { background:#EEECE6; color:#1A1A1A; }
-body::before { content:''; position:fixed; inset:0;
-  background-image:repeating-linear-gradient(transparent,transparent 27px,rgba(180,170,150,0.18) 28px);
-  pointer-events:none; z-index:0; }
-.navbar { background:#1A1A1A !important; border-bottom:3px solid #2C5F8A; padding:0 28px;
-  font-family:'Libre Baskerville',Georgia,serif; }
-.navbar-brand { color:#F5F4F0 !important; font-size:16px; font-weight:700;
-  letter-spacing:0.03em; padding:14px 0; }
-.nav-link { color:#BBBBAA !important; font-size:13px; letter-spacing:0.06em;
+/* ── Reset & base ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing:border-box; }
+body { background:#F1F5F9; color:#0F172A;
+  font-family:'Inter',system-ui,sans-serif; }
+
+/* ── Navbar ───────────────────────────────────────────────────── */
+.navbar { background:#0A2540 !important;
+  border-bottom:3px solid #0055A5; padding:0 32px;
+  box-shadow:0 2px 8px rgba(10,37,64,0.25); }
+.navbar-brand { color:#F8FAFC !important; font-size:15px; font-weight:700;
+  letter-spacing:0.02em; padding:14px 0;
+  font-family:'DM Serif Display',Georgia,serif; }
+.nav-link { color:#94A3B8 !important; font-size:12.5px; letter-spacing:0.05em;
   padding:14px 16px !important; border-bottom:3px solid transparent;
-  font-family:'Libre Baskerville',Georgia,serif; }
-.nav-link:hover { color:#F5F4F0 !important; }
-.nav-link.active { color:#F5F4F0 !important; border-bottom:3px solid #2C5F8A !important;
+  font-family:'Inter',sans-serif; font-weight:500; transition:color .15s; }
+.nav-link:hover { color:#F8FAFC !important; }
+.nav-link.active { color:#F8FAFC !important;
+  border-bottom:3px solid #0055A5 !important;
   background:transparent !important; }
-.page-body { background:#F5F4F0; padding:28px 32px; min-height:calc(100vh - 60px); }
-.sec-head { font-family:'Libre Baskerville',Georgia,serif; font-size:20px; font-weight:700;
-  color:#1A1A1A; margin:0 0 4px; padding-bottom:8px; border-bottom:2px solid #2C5F8A; }
-.sec-sub  { font-size:12.5px; color:#6B7280; margin:0 0 22px; font-style:italic;
-  font-family:'Lora',Georgia,serif; line-height:1.5; }
-.acad-card { background:#FAFAF8; border:1px solid #DDD9D0; border-radius:3px;
-  padding:20px 22px; margin-bottom:18px; box-shadow:0 1px 3px rgba(0,0,0,0.06);
-  position:relative; }
-.acad-card::before { content:''; position:absolute; left:0; top:14px; bottom:14px;
-  width:3px; background:#2C5F8A; border-radius:0 2px 2px 0; }
-.card-lbl { font-family:'Libre Baskerville',serif; font-size:10.5px; font-weight:700;
-  text-transform:uppercase; letter-spacing:0.14em; color:#6B7280;
-  margin-bottom:12px; padding-bottom:7px; border-bottom:1px solid #E8E4DE; }
-.kpi-row  { display:flex; gap:14px; margin-bottom:22px; flex-wrap:wrap; }
-.kpi-box  { flex:1; min-width:130px; background:#FAFAF8; border:1px solid #DDD9D0;
-  border-top:3px solid #2C5F8A; border-radius:2px; padding:16px 18px 12px;
-  box-shadow:0 1px 3px rgba(0,0,0,0.05); }
-.kpi-box:nth-child(2){border-top-color:#3A6B4A}
-.kpi-box:nth-child(3){border-top-color:#8A4A2C}
-.kpi-box:nth-child(4){border-top-color:#B07D2C}
-.kpi-box:nth-child(5){border-top-color:#8A2C2C}
-.kpi-val  { font-family:'Libre Baskerville',serif; font-size:30px; font-weight:700;
-  color:#1A1A1A; line-height:1.1; margin:3px 0 5px; }
-.kpi-lbl  { font-size:10.5px; text-transform:uppercase; letter-spacing:0.12em;
-  color:#6B7280; font-family:'Lora',serif; }
-.fil-panel{ background:#FAFAF8; border:1px solid #DDD9D0; border-radius:3px;
-  padding:18px; font-size:12.5px; }
-.fil-panel h5 { font-family:'Libre Baskerville',serif; font-size:11px; font-weight:700;
-  text-transform:uppercase; letter-spacing:0.12em; color:#444; margin-bottom:14px;
-  padding-bottom:7px; border-bottom:1px solid #DDD9D0; }
-.fil-panel label { font-size:12px; color:#555; font-family:'Lora',serif; }
-.anote { background:#F0EDE6; border-left:4px solid #2C5F8A; border-radius:0 3px 3px 0;
-  padding:11px 15px; margin-bottom:18px; font-size:12.5px; color:#444;
-  line-height:1.6; font-family:'Lora',Georgia,serif; font-style:italic; }
-.anote strong { font-style:normal; color:#1A1A1A; }
-.awarn { background:#FDF3E3; border-left:4px solid #B07D2C; border-radius:0 3px 3px 0;
-  padding:11px 15px; margin-bottom:14px; font-size:12.5px; color:#5C3D0E;
-  line-height:1.6; font-family:'Lora',serif; font-style:italic; }
-.awarn strong { font-style:normal; }
-.adanger{ background:#FAE8E8; border-left:4px solid #8A2C2C; border-radius:0 3px 3px 0;
-  padding:11px 15px; margin-bottom:14px; font-size:12.5px; color:#4A0E0E;
-  font-family:'Lora',serif; }
-.tab-content .nav-tabs { border-bottom:2px solid #2C5F8A; margin-bottom:16px; }
-.tab-content .nav-tabs .nav-link { color:#444 !important; background:#F0EDE6;
-  border:1px solid #DDD9D0; border-bottom:none; margin-right:4px;
-  padding:7px 16px !important; border-radius:3px 3px 0 0; font-size:12px;
-  letter-spacing:0.04em; font-family:Lora,Georgia,serif; }
-.tab-content .nav-tabs .nav-link:hover { color:#1A1A1A !important; background:#E8E4DE; }
-.tab-content .nav-tabs .nav-link.active { color:#FAFAF8 !important;
-  background:#2C5F8A !important; border-color:#2C5F8A; }
-.fig-cap { font-size:11px; color:#6B7280; margin-top:7px; line-height:1.5;
-  font-style:italic; font-family:'Lora',serif; padding-top:7px;
-  border-top:1px solid #E8E4DE; }
-pre.shiny-text-output { background:#F0EDE6!important; border:1px solid #DDD9D0!important;
-  border-radius:2px!important; font-size:12px!important; color:#2B2B2B!important;
-  padding:10px 13px!important; }
-table.dataTable { font-family:'Lora',Georgia,serif; font-size:12px;
-  border-collapse:collapse!important; }
-table.dataTable thead th { background:#1A1A1A; color:#F5F4F0;
-  font-family:'Libre Baskerville',serif; font-size:10.5px; text-transform:uppercase;
-  letter-spacing:0.1em; font-weight:700; border:none; padding:9px 11px; }
-table.dataTable tbody tr { border-bottom:1px solid #E8E4DE; }
-table.dataTable tbody tr:hover td { background:#F0EDE6!important; }
-table.dataTable tbody tr.odd  td { background:#FAFAF8; }
-table.dataTable tbody tr.even td { background:#F5F4F0; }
+
+/* ── Page body ────────────────────────────────────────────────── */
+.page-body { background:#FFFFFF; padding:28px 36px;
+  min-height:calc(100vh - 60px);
+  border-radius:0; }
+
+/* ── Section header ───────────────────────────────────────────── */
+.sec-head { font-family:'DM Serif Display',Georgia,serif;
+  font-size:22px; font-weight:400; color:#0A2540;
+  margin:0 0 4px; padding-bottom:10px;
+  border-bottom:2px solid #0055A5; }
+.sec-sub  { font-size:13px; color:#64748B; margin:0 0 22px;
+  font-family:'Inter',sans-serif; line-height:1.6; }
+
+/* ── Cards ────────────────────────────────────────────────────── */
+.acad-card { background:#FFFFFF; border:1px solid #E2E8F0;
+  border-radius:8px; padding:20px 24px; margin-bottom:20px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.06),0 4px 12px rgba(0,0,0,0.04);
+  position:relative; transition:box-shadow .2s; }
+.acad-card:hover { box-shadow:0 2px 8px rgba(0,0,0,0.09),0 6px 20px rgba(0,0,0,0.06); }
+.acad-card::before { content:''; position:absolute; left:0; top:16px;
+  bottom:16px; width:4px; background:#0055A5;
+  border-radius:0 3px 3px 0; }
+.card-lbl { font-family:'Inter',sans-serif; font-size:10px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.16em; color:#64748B;
+  margin-bottom:12px; padding-bottom:8px;
+  border-bottom:1px solid #F1F5F9; }
+
+/* ── KPI boxes ────────────────────────────────────────────────── */
+.kpi-row  { display:flex; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
+.kpi-box  { flex:1; min-width:140px; background:#FFFFFF;
+  border:1px solid #E2E8F0; border-top:4px solid #0055A5;
+  border-radius:8px; padding:16px 20px 14px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+.kpi-box:nth-child(2){ border-top-color:#1A7A4A }
+.kpi-box:nth-child(3){ border-top-color:#C75000 }
+.kpi-box:nth-child(4){ border-top-color:#D4860A }
+.kpi-box:nth-child(5){ border-top-color:#B5192E }
+.kpi-val  { font-family:'DM Serif Display',Georgia,serif;
+  font-size:32px; font-weight:400; color:#0A2540;
+  line-height:1.1; margin:4px 0 6px; }
+.kpi-lbl  { font-size:10px; text-transform:uppercase; letter-spacing:0.14em;
+  color:#64748B; font-family:'Inter',sans-serif; font-weight:600; }
+
+/* ── Filter panel ─────────────────────────────────────────────── */
+.fil-panel { background:#F8FAFC; border:1px solid #E2E8F0;
+  border-radius:8px; padding:16px 20px; font-size:12.5px; }
+.fil-panel h5 { font-family:'Inter',sans-serif; font-size:10px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.14em; color:#475569;
+  margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid #E2E8F0; }
+.fil-panel label { font-size:12px; color:#475569;
+  font-family:'Inter',sans-serif; }
+
+/* ── Annotation boxes ─────────────────────────────────────────── */
+.anote { background:#EFF6FF; border-left:4px solid #0055A5;
+  border-radius:0 6px 6px 0; padding:12px 16px; margin-bottom:18px;
+  font-size:13px; color:#1E3A5F; line-height:1.65;
+  font-family:'Inter',sans-serif; }
+.anote strong { color:#0A2540; }
+.awarn { background:#FFFBEB; border-left:4px solid #D4860A;
+  border-radius:0 6px 6px 0; padding:12px 16px; margin-bottom:14px;
+  font-size:13px; color:#78350F; line-height:1.65;
+  font-family:'Inter',sans-serif; }
+.awarn strong { color:#451A03; }
+.adanger { background:#FEF2F2; border-left:4px solid #B5192E;
+  border-radius:0 6px 6px 0; padding:12px 16px; margin-bottom:14px;
+  font-size:13px; color:#7F1D1D; font-family:'Inter',sans-serif; }
+
+/* ── Inner sub-tabs ───────────────────────────────────────────── */
+.tab-content .nav-tabs { border-bottom:2px solid #E2E8F0; margin-bottom:18px; }
+.tab-content .nav-tabs .nav-link { color:#475569 !important;
+  background:#F8FAFC; border:1px solid #E2E8F0; border-bottom:none;
+  margin-right:4px; padding:7px 18px !important; border-radius:6px 6px 0 0;
+  font-size:12px; letter-spacing:0.03em; font-family:'Inter',sans-serif;
+  font-weight:500; transition:all .15s; }
+.tab-content .nav-tabs .nav-link:hover { color:#0A2540 !important;
+  background:#E2E8F0; }
+.tab-content .nav-tabs .nav-link.active { color:#FFFFFF !important;
+  background:#0055A5 !important; border-color:#0055A5; }
+
+/* ── Figure caption ───────────────────────────────────────────── */
+.fig-cap { font-size:11.5px; color:#64748B; margin-top:8px; line-height:1.6;
+  font-family:'Inter',sans-serif; padding-top:8px;
+  border-top:1px solid #F1F5F9; }
+
+/* ── DataTables ───────────────────────────────────────────────── */
+pre.shiny-text-output { background:#F8FAFC !important;
+  border:1px solid #E2E8F0 !important; border-radius:6px !important;
+  font-size:12px !important; color:#1E293B !important;
+  padding:10px 14px !important; }
+table.dataTable { font-family:'Inter',sans-serif; font-size:12.5px;
+  border-collapse:collapse !important; }
+table.dataTable thead th { background:#0A2540; color:#F8FAFC;
+  font-family:'Inter',sans-serif; font-size:10px; text-transform:uppercase;
+  letter-spacing:0.12em; font-weight:700; border:none; padding:10px 12px; }
+table.dataTable tbody tr { border-bottom:1px solid #F1F5F9; }
+table.dataTable tbody tr:hover td { background:#EFF6FF !important; }
+table.dataTable tbody tr.odd  td { background:#FFFFFF; }
+table.dataTable tbody tr.even td { background:#F8FAFC; }
+
+/* ── Scrollbar ────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width:5px; height:5px; }
-::-webkit-scrollbar-track { background:#EEECE6; }
-::-webkit-scrollbar-thumb { background:#BBBBAA; border-radius:3px; }
-.global-filters { background:#1A1A1A; border-bottom:1px solid #333; padding:7px 28px; }
+::-webkit-scrollbar-track { background:#F1F5F9; }
+::-webkit-scrollbar-thumb { background:#CBD5E1; border-radius:4px; }
+::-webkit-scrollbar-thumb:hover { background:#94A3B8; }
+
+/* ── Global filter bar ────────────────────────────────────────── */
+.global-filters { background:#0A2540; border-bottom:1px solid #1E3A5F;
+  padding:7px 32px; }
 .gf-inner { display:flex; align-items:center; gap:32px; flex-wrap:wrap; }
-.gf-lbl { font-family:'Libre Baskerville',serif; font-size:10px; font-weight:700;
-  text-transform:uppercase; letter-spacing:0.12em; color:#BBBBAA;
+.gf-lbl { font-family:'Inter',sans-serif; font-size:10px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.14em; color:#94A3B8;
   margin-right:8px; white-space:nowrap; }
 .gf-item { display:flex; align-items:center; gap:4px; }
 .gf-item .shiny-input-container { margin:0 !important; }
-.gf-item .form-control { background:#2A2A2A; border:1px solid #444; color:#F0EDE6;
-  font-family:'Lora',serif; font-size:12px; padding:3px 8px; border-radius:2px;
-  height:28px; }
-.gf-item .checkbox-inline { color:#CCCCBB; font-family:'Lora',serif;
+.gf-item .form-control { background:#1E3A5F; border:1px solid #2D5A8E;
+  color:#E2E8F0; font-family:'Inter',sans-serif; font-size:12px;
+  padding:3px 8px; border-radius:4px; height:28px; }
+.gf-item .checkbox-inline { color:#CBD5E1; font-family:'Inter',sans-serif;
   font-size:12px; margin-left:0; padding-left:18px; }
 .gf-item .checkbox-inline input { margin-top:2px; }
-.lag-selector { display:flex; gap:6px; padding:4px 0 8px 0; flex-wrap:wrap; }
+
+/* ── Lag selector buttons ─────────────────────────────────────── */
+.lag-selector { display:flex; gap:8px; padding:6px 0 10px 0; flex-wrap:wrap; }
 .lag-selector .radio-inline { margin:0; }
 .lag-selector input[type=radio] { display:none; }
 .lag-selector input[type=radio]+span {
-  display:inline-block; padding:5px 12px; border-radius:3px;
-  border:1.5px solid #2C5F8A; color:#2C5F8A; cursor:pointer;
-  font-family:Lora,Georgia,serif; font-size:11.5px;
-  background:#FAFAF8; transition:all .15s; white-space:nowrap; }
+  display:inline-block; padding:6px 14px; border-radius:6px;
+  border:1.5px solid #0055A5; color:#0055A5; cursor:pointer;
+  font-family:'Inter',sans-serif; font-size:12px; font-weight:500;
+  background:#FFFFFF; transition:all .15s; white-space:nowrap; }
 .lag-selector input[type=radio]:checked+span {
-  background:#2C5F8A; color:#FAFAF8; border-color:#2C5F8A; }
-.lag-selector input[type=radio]+span:hover { background:#E8EFF6; }
+  background:#0055A5; color:#FFFFFF; border-color:#0055A5;
+  box-shadow:0 1px 4px rgba(0,85,165,0.3); }
+.lag-selector input[type=radio]+span:hover { background:#EFF6FF; }
 "
 
 # ==============================================================================
@@ -327,14 +418,14 @@ table.dataTable tbody tr.even td { background:#F5F4F0; }
 
 acad_layout <- function(p, xlab = "", ylab = "") {
   p %>% layout(
-    font          = list(family = "Georgia,'Times New Roman',serif",
+    font          = list(family = "Inter,system-ui,sans-serif",
                          size = 12, color = "#2B2B2B"),
-    paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
+    paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
     xaxis = list(title = list(text = xlab, font = list(size = 12)),
-                 showgrid = TRUE, gridcolor = "#E8E4DE", tickfont = list(size = 11),
+                 showgrid = TRUE, gridcolor = "#F1F5F9", tickfont = list(size = 11),
                  linecolor = "#CCCCCC", mirror = TRUE, zeroline = FALSE),
     yaxis = list(title = list(text = ylab, font = list(size = 12)),
-                 showgrid = TRUE, gridcolor = "#E8E4DE", tickfont = list(size = 11),
+                 showgrid = TRUE, gridcolor = "#F1F5F9", tickfont = list(size = 11),
                  linecolor = "#CCCCCC", mirror = TRUE, zeroline = FALSE),
     margin = list(l = 55, r = 20, t = 28, b = 52),
     legend = list(bgcolor = "rgba(250,250,248,0.92)", bordercolor = "#CCCCCC",
@@ -346,7 +437,7 @@ fig_card <- function(lbl, pid, ht = "300px", cap = NULL) {
   div(class = "acad-card",
     div(class = "card-lbl", lbl),
     withSpinner(plotlyOutput(pid, height = ht), type = 6,
-                color = COL_P, size = 0.5),
+                color = "#0055A5", size = 0.5),
     if (!is.null(cap)) div(class = "fig-cap", cap)
   )
 }
@@ -354,7 +445,7 @@ fig_card <- function(lbl, pid, ht = "300px", cap = NULL) {
 dtbl_card <- function(lbl, pid, cap = NULL) {
   div(class = "acad-card",
     div(class = "card-lbl", lbl),
-    withSpinner(DTOutput(pid), type = 6, color = COL_P, size = 0.5),
+    withSpinner(DTOutput(pid), type = 6, color = "#0055A5", size = 0.5),
     if (!is.null(cap)) div(class = "fig-cap", cap)
   )
 }
@@ -426,7 +517,11 @@ ui <- navbarPage(
   theme = acad_theme,
   collapsible = TRUE,
   header = tagList(
-    tags$head(tags$style(HTML(acad_css))),
+    tags$head(
+      tags$link(rel="preconnect", href="https://fonts.googleapis.com"),
+      tags$link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin=""),
+      tags$link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap"),
+      tags$style(HTML(acad_css))),
     div(class = "global-filters",
       div(class = "gf-inner",
         div(class = "gf-item",
@@ -473,7 +568,7 @@ ui <- navbarPage(
                "Red = high missingness. Structural gaps (e.g. SessionLoad on rest days, ",
                "REM Proportion for P006/P013/P015) are expected — not data quality failures."),
             withSpinner(plotlyOutput("coverage_heatmap", height = "340px"),
-                        type = 6, color = COL_P, size = 0.5),
+                        type = 6, color = "#0055A5", size = 0.5),
             div(class = "fig-cap",
                 "Body Battery: P008 has 0% coverage (device unsupported). ",
                 "Sleep staging (REM Prop, Sleep Quality): P006, P013, P015 absent due to firmware limitations.")
@@ -499,7 +594,7 @@ ui <- navbarPage(
             an("Each tile = one day. Colour intensity shows running session load (AvgHR × Duration). ",
                "Grey = rest or non-running day."),
             withSpinner(plotlyOutput("activity_calendar", height = "300px"),
-                        type = 6, color = COL_P, size = 0.5),
+                        type = 6, color = "#0055A5", size = 0.5),
             div(class = "fig-cap",
                 "Only running sessions shown. Colour scale capped at 95th percentile of running SessionLoad.")
           )
@@ -612,7 +707,7 @@ ui <- navbarPage(
                "Body Battery is Garmin's proprietary estimate of energy reserves based on HRV, stress, and sleep. ",
                "When the recovery score drops and Body Battery fails to recharge, that is a compounding stress signal worth examining."),
             withSpinner(plotlyOutput("rhr_timeline", height = "360px"),
-                        type = 6, color = COL_P, size = 0.5),
+                        type = 6, color = "#0055A5", size = 0.5),
             div(class = "fig-cap",
                 "Cohort-mean across all participants matching the date and sex filters. The zero line (dashed) separates well-recovered (above) from under-recovered (below) days.")
           )
@@ -783,7 +878,7 @@ ui <- navbarPage(
                                              "Sleep → Recovery"         = "tsd_rec"),
                                  selected = "tsd_rec", inline = TRUE)),
                 withSpinner(plotlyOutput("lag_bars", height = "260px"),
-                            type = 6, color = COL_P, size = 0.5),
+                            type = 6, color = "#0055A5", size = 0.5),
                 div(class = "fig-cap", "Spearman ρ at lags 0–3 days. Switch the pair above to explore all three pathways.")
               )
             ),
@@ -796,7 +891,7 @@ ui <- navbarPage(
                    tags$strong("Top-right: "), "high load, recovery intact = well-adapted. ",
                    tags$strong("Bottom-left: "), "low load, poor recovery = non-training stressor (illness, life stress)."),
                 withSpinner(plotlyOutput("overtraining_scatter", height = "260px"),
-                            type = 6, color = COL_P, size = 0.5),
+                            type = 6, color = "#0055A5", size = 0.5),
                 div(class = "fig-cap",
                     "Red flags: SessionLoad > 75th pct AND Recovery Score < −1.5 AND (TSD < median OR SE < 0.85).")
               )
@@ -862,7 +957,7 @@ ui <- navbarPage(
                    "Fixed effects = population-level associations. ",
                    "Random intercept = each participant's baseline recovery is allowed to vary. ",
                    "This is the minimum statistically appropriate model for this data structure."),
-                withSpinner(DTOutput("lme_tbl"), type = 6, color = COL_P, size = 0.5),
+                withSpinner(DTOutput("lme_tbl"), type = 6, color = "#0055A5", size = 0.5),
                 div(class = "fig-cap",
                     "Std.Err and p-values from lmerTest (Satterthwaite df). Compare with OLS above — coefficients should be similar but SEs will typically be larger.")
               )
@@ -905,7 +1000,7 @@ ui <- navbarPage(
                "Bold black line = cohort mean (LOESS-smoothed). ",
                "Faint horizontal plateaus = LOCF imputation between observed readings."),
             withSpinner(plotlyOutput("vo2_traj", height = "340px"),
-                        type = 6, color = COL_P, size = 0.5),
+                        type = 6, color = "#0055A5", size = 0.5),
             div(class = "fig-cap",
                 "Only participants with ≥ 90 valid VO₂max observations shown.")
           )
@@ -921,7 +1016,7 @@ ui <- navbarPage(
                "Y = SD of RHR deviation (lower = physiologically more stable). ",
                "Bottom-right = resilient. Point size = mean training load."),
             withSpinner(plotlyOutput("resilience_scatter", height = "360px"),
-                        type = 6, color = COL_P, size = 0.5),
+                        type = 6, color = "#0055A5", size = 0.5),
             div(class = "fig-cap", "Ideal quadrant: high positive slope + low RHR variability.")
           )
         )
@@ -934,7 +1029,7 @@ ui <- navbarPage(
             an("Recovery score (coloured line) and sleep duration (grey bars) for the selected participant. ",
                "Triangles = running sessions. Hover for daily detail."),
             withSpinner(plotlyOutput("indiv_timeline", height = "400px"),
-                        type = 6, color = COL_P, size = 0.5)
+                        type = 6, color = "#0055A5", size = 0.5)
           )
         )
       ),
@@ -980,7 +1075,7 @@ ui <- navbarPage(
         column(12,
           div(class = "acad-card",
             div(class = "card-lbl", "Personal summary statistics"),
-            withSpinner(uiOutput("indiv_summary"), type = 6, color = COL_P, size = 0.5)
+            withSpinner(uiOutput("indiv_summary"), type = 6, color = "#0055A5", size = 0.5)
           )
         )
       )
@@ -997,45 +1092,83 @@ server <- function(input, output, session) {
 
   # ── Reactive: global date + sex filter ───────────────────────────────────
   d_global <- reactive({
-    req(input$gf_dates, input$gf_sex)
-    garmin %>%
+    # Only require dates — let validate() handle the sex message explicitly
+    req(input$gf_dates)
+    validate(
+      need(!is.na(input$gf_dates[1]) && !is.na(input$gf_dates[2]),
+           "Please select a valid date range."),
+      need(input$gf_dates[1] <= input$gf_dates[2],
+           "Start date must be before end date."),
+      # isTruthy catches NULL, character(0), and "" — all produced by unchecked boxes
+      need(isTruthy(input$gf_sex) && length(input$gf_sex) > 0,
+           "Please select at least one sex (Male / Female) in the filter bar above.")
+    )
+    d <- garmin %>%
       filter(calendar_date >= input$gf_dates[1],
              calendar_date <= input$gf_dates[2],
              Gender %in% input$gf_sex,
-             is.na(TSD) | (TSD >= 3 & TSD <= 12))   # implausible sleep nights excluded
+             is.na(TSD) | (TSD >= 3 & TSD <= 12))
+    validate(
+      need(nrow(d) > 0,
+           "No data for the selected filters. Try widening the date range or selecting both sexes.")
+    )
+    d
   })
 
   # ── Reactive: training filter (running sessions only) ─────────────────────
   d_train <- reactive({
     d <- d_global() %>% filter(ActivityGroup == "Running" | !activity_day)
+    validate(need(nrow(d) > 0, "No training data for the selected filters."))
     d
   })
 
   d_sleep <- reactive({
-    d_global()
+    d <- d_global()
+    validate(need(nrow(d) > 0, "No sleep data for the selected filters."))
+    d
   })
 
   d_rec <- reactive({
-    d_global()
+    d <- d_global()
+    validate(need(nrow(d) > 0, "No recovery data for the selected filters."))
+    d
   })
 
   # ── Tab 1: Foundation KPIs ────────────────────────────────────────────────
-  output$kpi_n      <- renderText({ n_distinct(garmin$User_id) })
-  output$kpi_days   <- renderText({ format(nrow(garmin), big.mark = ",") })
+  # KPIs react to global filters — use d_global() not garmin
+  output$kpi_n      <- renderText({
+    n_distinct(d_global()$User_id)
+  })
+  output$kpi_days   <- renderText({
+    format(nrow(d_global()), big.mark = ",")
+  })
   output$kpi_train  <- renderText({
-    paste0(round(100 * mean(garmin$activity_day, na.rm = TRUE), 0), "%")
+    d <- d_global()
+    paste0(round(100 * mean(d$activity_day, na.rm = TRUE), 0), "%")
   })
   output$kpi_full   <- renderText({
-    n <- n_distinct(garmin$User_id[garmin$analysis_cohort == "full"])
-    paste0(n, " / 14")
+    d <- d_global()
+    n <- n_distinct(d$User_id[d$analysis_cohort == "full"])
+    paste0(n, " / ", n_distinct(garmin$User_id))   # denominator always 14
   })
   output$kpi_range  <- renderText({
-    paste0(format(MIN_DATE, "%b %Y"), " – ", format(MAX_DATE, "%b %Y"))
+    d <- d_global()
+    paste0(format(min(d$calendar_date, na.rm=TRUE), "%b %Y"),
+           " – ",
+           format(max(d$calendar_date, na.rm=TRUE), "%b %Y"))
   })
 
   # ── Tab 1: Coverage heatmap ───────────────────────────────────────────────
   output$coverage_heatmap <- renderPlotly({
-    mat <- coverage_df %>%
+    # Recompute coverage for the filtered subset
+    d_filt <- d_global()
+    cov_filt <- d_filt %>%
+      group_by(User_id) %>%
+      summarise(across(all_of(COV_VARS), ~round(100 * mean(!is.na(.)), 1)),
+                .groups = "drop") %>%
+      pivot_longer(-User_id, names_to = "Variable", values_to = "Coverage") %>%
+      mutate(Variable = factor(Variable, levels = COV_VARS, labels = COV_LABELS))
+    mat <- cov_filt %>%
       mutate(Variable = as.character(Variable)) %>%
       pivot_wider(names_from = Variable, values_from = Coverage)
     vars <- COV_LABELS
@@ -1046,15 +1179,15 @@ server <- function(input, output, session) {
             zmin = 0, zmax = 100,
             hovertemplate = "%{y} · %{x}<br>Coverage: %{z:.0f}%<extra></extra>",
             colorbar = list(title = "% Available", len = 0.8,
-                            tickfont = list(family = "Lora,serif"))) %>%
+                            tickfont = list(family = "Inter,sans-serif"))) %>%
       add_annotations(x = rep(vars, each = length(uids)),
                       y = rep(uids, times = length(vars)),
                       text = as.vector(z),
                       showarrow = FALSE,
                       font = list(size = 10, color = "#1A1A1A",
-                                  family = "Lora,serif")) %>%
-      layout(font = list(family = "Lora,Georgia,serif", size = 11),
-             paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
+                                  family = "Inter,sans-serif")) %>%
+      layout(font = list(family = "Inter,system-ui,sans-serif", size = 11),
+             paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
              xaxis = list(title = "", tickangle = -35, linecolor = "#CCCCCC"),
              yaxis = list(title = "", autorange = "reversed",
                           linecolor = "#CCCCCC"),
@@ -1064,7 +1197,10 @@ server <- function(input, output, session) {
 
   # ── Tab 1: Cohort table ───────────────────────────────────────────────────
   output$cohort_tbl <- renderDT({
+    # Show only participants present in the filtered data
+    filtered_ids <- unique(d_global()$User_id)
     tbl <- garmin %>%
+      filter(User_id %in% filtered_ids) %>%
       group_by(User_id) %>%
       summarise(
         Sex      = first(Sex),
@@ -1166,8 +1302,8 @@ server <- function(input, output, session) {
       xgap = 1, ygap = 1
     ) %>%
       layout(
-        paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-        font    = list(family = "Lora,Georgia,serif", size = 11),
+        paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+        font    = list(family = "Inter,system-ui,sans-serif", size = 11),
         xaxis   = list(title = "", type = "date",
                        tickformat = "%b %Y", nticks = 12,
                        tickangle = -35, linecolor = "#CCCCCC"),
@@ -1178,19 +1314,19 @@ server <- function(input, output, session) {
           list(x = 0.08, y = 1.13, xref = "paper", yref = "paper",
                text = "<b>■</b> Rest",
                showarrow = FALSE, xanchor = "center",
-               font = list(color = "#888880", size = 12, family = "Lora,serif")),
+               font = list(color = "#888880", size = 12, family = "Inter,sans-serif")),
           list(x = 0.32, y = 1.13, xref = "paper", yref = "paper",
                text = "<b>■</b> Light",
                showarrow = FALSE, xanchor = "center",
-               font = list(color = "#E8A838", size = 12, family = "Lora,serif")),
+               font = list(color = "#E8A838", size = 12, family = "Inter,sans-serif")),
           list(x = 0.58, y = 1.13, xref = "paper", yref = "paper",
                text = "<b>■</b> Moderate",
                showarrow = FALSE, xanchor = "center",
-               font = list(color = "#2DA87A", size = 12, family = "Lora,serif")),
+               font = list(color = "#2DA87A", size = 12, family = "Inter,sans-serif")),
           list(x = 0.84, y = 1.13, xref = "paper", yref = "paper",
                text = "<b>■</b> High",
                showarrow = FALSE, xanchor = "center",
-               font = list(color = "#C0392B", size = 12, family = "Lora,serif"))
+               font = list(color = "#C0392B", size = 12, family = "Inter,sans-serif"))
         )
       ) %>%
       config(displayModeBar = FALSE)
@@ -1224,7 +1360,7 @@ server <- function(input, output, session) {
     p <- ggplot(d, aes(x = TV, fill = SL_Intensity, colour = SL_Intensity)) +
       geom_histogram(aes(y = after_stat(density)), binwidth = 1,
                      alpha = 0.65, position = "identity",
-                     linewidth = 0.2, colour = "#FAFAF8") +
+                     linewidth = 0.2, colour = "#FFFFFF") +
       geom_density(aes(fill = NULL), linewidth = 0.9, alpha = 0) +
       scale_fill_manual(values = cat_cols, name = "Session load") +
       scale_colour_manual(values = cat_cols, name = "Session load") +
@@ -1234,11 +1370,11 @@ server <- function(input, output, session) {
       theme_minimal(base_family = "serif") +
       theme(legend.position  = "right",
             panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     ggplotly(p) %>%
-      layout(paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-             font   = list(family = "Lora,Georgia,serif", size = 11),
+      layout(paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+             font   = list(family = "Inter,system-ui,sans-serif", size = 11),
              legend = list(title = list(text = "Session load"),
                            font = list(size = 10))) %>%
       config(displayModeBar = FALSE)
@@ -1275,11 +1411,11 @@ server <- function(input, output, session) {
       theme_minimal(base_family = "serif") +
       theme(legend.position  = "right",
             panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     ggplotly(p, tooltip = "text") %>%
-      layout(paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-             font   = list(family = "Lora,Georgia,serif", size = 11),
+      layout(paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+             font   = list(family = "Inter,system-ui,sans-serif", size = 11),
              legend = list(title = list(text = "Session load"),
                            x = 1.02, y = 0.5, font = list(size = 10))) %>%
       config(displayModeBar = FALSE)
@@ -1306,7 +1442,7 @@ server <- function(input, output, session) {
       add_bars(x = mids / 1000, y = dens,
                name = "Daily steps",
                marker = list(color = COL_P, opacity = 0.75,
-                             line = list(color = "#FAFAF8", width = 0.4)),
+                             line = list(color = "#FFFFFF", width = 0.4)),
                hovertemplate = "Steps: %{x:.0f}k<br>Density: %{y:.4f}<extra></extra>",
                showlegend = FALSE) %>%
       add_lines(x = kde$x, y = kde$y,
@@ -1324,11 +1460,11 @@ server <- function(input, output, session) {
                 hovertemplate = paste0("<b>Median</b>: ", round(med/1000,1),
                                        "k steps<extra></extra>")) %>%
       layout(
-        paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-        font    = list(family = "Lora,Georgia,serif", size = 11),
-        xaxis   = list(title = "Daily steps (thousands)", gridcolor = "#E8E4DE",
+        paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+        font    = list(family = "Inter,system-ui,sans-serif", size = 11),
+        xaxis   = list(title = "Daily steps (thousands)", gridcolor = "#F1F5F9",
                        tickvals = seq(0, 60, 10), linecolor = "#CCCCCC"),
-        yaxis   = list(title = "Density", gridcolor = "#E8E4DE",
+        yaxis   = list(title = "Density", gridcolor = "#F1F5F9",
                        linecolor = "#CCCCCC"),
         barmode = "overlay",
         bargap  = 0.05,
@@ -1369,11 +1505,11 @@ server <- function(input, output, session) {
       theme_minimal(base_family = "serif") +
       theme(axis.text.x    = element_text(angle = 30, hjust = 1, size = 9),
             panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     ggplotly(p, tooltip = "text") %>%
-      layout(paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-             font = list(family = "Lora,Georgia,serif", size = 11),
+      layout(paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+             font = list(family = "Inter,system-ui,sans-serif", size = 11),
              showlegend = FALSE) %>%
       config(displayModeBar = FALSE)
   })
@@ -1413,11 +1549,11 @@ server <- function(input, output, session) {
       theme_minimal(base_family = "serif") +
       theme(legend.position  = "right",
             panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     ggplotly(p, tooltip = "text") %>%
-      layout(paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-             font   = list(family = "Lora,Georgia,serif", size = 11),
+      layout(paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+             font   = list(family = "Inter,system-ui,sans-serif", size = 11),
              legend = list(title = list(text = "Session load"),
                            x = 1.02, y = 0.5, font = list(size = 10))) %>%
       config(displayModeBar = FALSE)
@@ -1439,7 +1575,7 @@ server <- function(input, output, session) {
       add_bars(data = d, x = ~Weekday, y = ~mean_TSD,
                name = "Mean sleep duration (h)",
                marker = list(color = COL_P, opacity = 0.8,
-                             line = list(color = "#FAFAF8", width = 0.5)),
+                             line = list(color = "#FFFFFF", width = 0.5)),
                hovertemplate = "<b>%{x}</b><br>Mean TSD: %{y:.2f}h<br>n = %{customdata}<extra></extra>",
                customdata = ~n) %>%
       add_lines(data = d, x = ~Weekday, y = ~mean_SE,
@@ -1449,11 +1585,11 @@ server <- function(input, output, session) {
                 marker = list(size = 7, color = COL_S),
                 hovertemplate = "<b>%{x}</b><br>Mean SE: %{y:.1f}%<extra></extra>") %>%
       layout(
-        paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-        font    = list(family = "Lora,Georgia,serif", size = 11),
-        xaxis   = list(title = "", gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+        paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+        font    = list(family = "Inter,system-ui,sans-serif", size = 11),
+        xaxis   = list(title = "", gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
         yaxis   = list(title = "Mean sleep duration (h)",
-                       gridcolor = "#E8E4DE", linecolor = "#CCCCCC",
+                       gridcolor = "#F1F5F9", linecolor = "#CCCCCC",
                        range = c(0, max(d$mean_TSD, na.rm=TRUE) * 1.15)),
         yaxis2  = list(title = "Mean sleep efficiency (%)",
                        overlaying = "y", side = "right", showgrid = FALSE,
@@ -1494,11 +1630,11 @@ server <- function(input, output, session) {
       theme_minimal(base_family = "serif") +
       theme(legend.position = "none",
             panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     ggplotly(p, tooltip = "text") %>%
-      layout(paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-             font = list(family = "Lora,Georgia,serif", size = 11)) %>%
+      layout(paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+             font = list(family = "Inter,system-ui,sans-serif", size = 11)) %>%
       config(displayModeBar = FALSE)
   })
 
@@ -1519,8 +1655,8 @@ server <- function(input, output, session) {
                       x = 0.5, y = 0.5, xref = "paper", yref = "paper",
                       showarrow = FALSE,
                       font = list(size = 12, color = "#6B7280",
-                                  family = "Lora,serif")) %>%
-      layout(paper_bgcolor = "#FAFAF8") %>% config(displayModeBar = FALSE))
+                                  family = "Inter,sans-serif")) %>%
+      layout(paper_bgcolor = "#FFFFFF") %>% config(displayModeBar = FALSE))
 
     # Compute LOESS smooths per stage in R (span = 0.25 for sensitivity)
     loess_fit <- function(dates, vals, span = 0.25) {
@@ -1562,12 +1698,12 @@ server <- function(input, output, session) {
                                          cfg$name, ": %{y:.1%}<extra></extra>"))
     }
     fig %>% layout(
-      paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-      font   = list(family = "Lora,Georgia,serif", size = 11),
-      xaxis  = list(title = "", gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+      paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+      font   = list(family = "Inter,system-ui,sans-serif", size = 11),
+      xaxis  = list(title = "", gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
       yaxis  = list(title = "Cohort-mean proportion",
                     tickformat = ".0%",
-                    gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+                    gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
       legend = list(orientation = "h", y = -0.18,
                     font = list(size = 11)),
       hovermode = "x unified",
@@ -1586,7 +1722,7 @@ server <- function(input, output, session) {
               "Excellent"=COL_G,"Rebound"=COL_P)
     plot_ly(d, x = ~SleepQuality_pct, type = "histogram",
             color = ~SleepQualityLevel, colors = clrs, nbinsx = 30,
-            marker = list(line = list(width = 0.4, color = "#FAFAF8"))) %>%
+            marker = list(line = list(width = 0.4, color = "#FFFFFF"))) %>%
       acad_layout("Restorative sleep % (Deep + REM)", "Count") %>%
       layout(barmode = "stack",
              xaxis  = list(range = c(0, 75)),
@@ -1609,8 +1745,8 @@ server <- function(input, output, session) {
                       x = 0.5, y = 0.5, xref = "paper", yref = "paper",
                       showarrow = FALSE,
                       font = list(size = 12, color = "#6B7280",
-                                  family = "Lora,serif")) %>%
-      layout(paper_bgcolor = "#FAFAF8") %>% config(displayModeBar = FALSE))
+                                  family = "Inter,sans-serif")) %>%
+      layout(paper_bgcolor = "#FFFFFF") %>% config(displayModeBar = FALSE))
     cohort_sd <- round(mean(d$sd_TSD, na.rm = TRUE), 2)
     plot_ly(d,
             x = ~reorder(User_id, -sd_TSD), y = ~sd_TSD,
@@ -1622,11 +1758,11 @@ server <- function(input, output, session) {
               cmax      = max(d$sd_TSD, na.rm = TRUE),
               cauto     = FALSE,
               showscale = FALSE,
-              line = list(color = "#FAFAF8", width = 0.5)
+              line = list(color = "#FFFFFF", width = 0.5)
             ),
             text  = ~paste0(round(sd_TSD, 2), "h"),
             textposition = "outside",
-            textfont = list(size = 9, family = "Lora,serif"),
+            textfont = list(size = 9, family = "Inter,sans-serif"),
             hovertemplate = paste0("<b>%{x}</b><br>",
                                    "SD of TSD: %{y:.2f}h<br>",
                                    "Mean TSD: ",
@@ -1643,7 +1779,7 @@ server <- function(input, output, session) {
           x = nrow(d) - 1, y = cohort_sd + 0.03,
           text = paste0("Cohort mean SD: ", cohort_sd, "h"),
           showarrow = FALSE, xref = "x", yref = "y",
-          font = list(size = 9, color = COL_P, family = "Lora,serif"),
+          font = list(size = 9, color = COL_P, family = "Inter,sans-serif"),
           xanchor = "right"
         ))
       )
@@ -1681,7 +1817,7 @@ server <- function(input, output, session) {
         marker = list(
           color = d_ord$col,          # direct vector, not formula
           size  = 11,
-          line  = list(color = "#FAFAF8", width = 1.5)
+          line  = list(color = "#FFFFFF", width = 1.5)
         ),
         text = ~paste0(
           User_id, "<br>Mean SJ: ", round(mean_sj, 2), "h<br>",
@@ -1691,12 +1827,12 @@ server <- function(input, output, session) {
         showlegend = FALSE
       ) %>%
       layout(
-        paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-        font  = list(family = "Lora,Georgia,serif", size = 11),
+        paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+        font  = list(family = "Inter,system-ui,sans-serif", size = 11),
         xaxis = list(
           title     = "Mean social jetlag (hours)",
           range     = c(0, max(d_ord$mean_sj) * 1.18),
-          gridcolor = "#E8E4DE", linecolor = "#CCCCCC",
+          gridcolor = "#F1F5F9", linecolor = "#CCCCCC",
           zeroline  = FALSE
         ),
         yaxis = list(
@@ -1704,7 +1840,7 @@ server <- function(input, output, session) {
           tickvals  = d_ord$y_pos,
           ticktext  = d_ord$User_id,
           range     = c(0.3, nrow(d_ord) + 0.7),
-          gridcolor = "#E8E4DE", linecolor = "#CCCCCC"
+          gridcolor = "#F1F5F9", linecolor = "#CCCCCC"
         ),
         shapes = list(list(
           type = "line", x0 = 1, x1 = 1,
@@ -1716,7 +1852,7 @@ server <- function(input, output, session) {
           x = 1.03, y = nrow(d_ord) + 0.5,
           xref = "x", yref = "y",
           text = "1h threshold", showarrow = FALSE,
-          font = list(size = 9, color = COL_D, family = "Lora,serif"),
+          font = list(size = 9, color = COL_D, family = "Inter,sans-serif"),
           xanchor = "left", yanchor = "top"
         )),
         margin = list(l = 70, r = 30, t = 20, b = 55)
@@ -1750,11 +1886,11 @@ server <- function(input, output, session) {
       theme_minimal(base_family = "serif") +
       theme(legend.position = "none",
             panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     ggplotly(p, tooltip = "text") %>%
-      layout(paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-             font = list(family = "Lora,Georgia,serif", size = 11)) %>%
+      layout(paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+             font = list(family = "Inter,system-ui,sans-serif", size = 11)) %>%
       config(displayModeBar = FALSE)
   })
 
@@ -1782,13 +1918,13 @@ server <- function(input, output, session) {
             labels = ~band, values = ~n,
             type   = "pie",
             marker = list(colors = pie_cols,
-                          line   = list(color = "#FAFAF8", width = 1.5)),
+                          line   = list(color = "#FFFFFF", width = 1.5)),
             textinfo = "label+percent",
             hovertemplate = "<b>%{label}</b><br>Nights: %{value}<br>Share: %{percent}<extra></extra>",
             sort = FALSE) %>%
       layout(
-        paper_bgcolor = "#FAFAF8",
-        font   = list(family = "Lora,Georgia,serif", size = 11),
+        paper_bgcolor = "#FFFFFF",
+        font   = list(family = "Inter,system-ui,sans-serif", size = 11),
         legend = list(orientation = "v", x = 1.02, y = 0.5,
                       font = list(size = 10)),
         margin = list(l = 10, r = 10, t = 20, b = 10),
@@ -1796,7 +1932,7 @@ server <- function(input, output, session) {
           text = paste0("n = ", nrow(d), " nights"),
           x = 0.5, y = -0.06, xref = "paper", yref = "paper",
           showarrow = FALSE, font = list(size = 10, color = "#6B7280",
-                                         family = "Lora,serif")
+                                         family = "Inter,sans-serif")
         ))
       ) %>% config(displayModeBar = FALSE)
   })
@@ -1818,7 +1954,7 @@ server <- function(input, output, session) {
                x    = ~Weekday, y = ~mean_frag,
                name = "Sleep fragmentation (awake %)",
                marker = list(color = COL_W, opacity = 0.82,
-                             line = list(color = "#FAFAF8", width = 0.5)),
+                             line = list(color = "#FFFFFF", width = 0.5)),
                hovertemplate = "<b>%{x}</b><br>Awake %: %{y:.1f}%<extra></extra>",
                yaxis = "y") %>%
       add_lines(data = d,
@@ -1826,16 +1962,16 @@ server <- function(input, output, session) {
                 name = "Sleep quality (Deep + REM %)",
                 line = list(color = COL_P, width = 2.8),
                 marker = list(size = 8, color = COL_P,
-                              line = list(color = "#FAFAF8", width = 1.5)),
+                              line = list(color = "#FFFFFF", width = 1.5)),
                 hovertemplate = "<b>%{x}</b><br>Sleep quality: %{y:.1f}%<extra></extra>",
                 yaxis = "y2") %>%
       layout(
-        paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-        font    = list(family = "Lora,Georgia,serif", size = 11),
-        xaxis   = list(title = "", gridcolor = "#E8E4DE",
+        paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+        font    = list(family = "Inter,system-ui,sans-serif", size = 11),
+        xaxis   = list(title = "", gridcolor = "#F1F5F9",
                        linecolor = "#CCCCCC", tickangle = -25),
         yaxis   = list(title = "Sleep Fragmentation (%)",
-                       gridcolor = "#E8E4DE", linecolor = "#CCCCCC",
+                       gridcolor = "#F1F5F9", linecolor = "#CCCCCC",
                        rangemode = "tozero"),
         yaxis2  = list(title = "Sleep Quality (%)",
                        overlaying = "y", side = "right",
@@ -1871,18 +2007,18 @@ server <- function(input, output, session) {
       add_bars(data = d, x = ~calendar_date, y = ~RecoveryScore,
                name = "Recovery score",
                marker = list(color = rec_col, opacity = 0.85,
-                             line = list(color = "#FAFAF8", width = 0.3)),
+                             line = list(color = "#FFFFFF", width = 0.3)),
                hovertemplate = "<b>%{x}</b><br>Recovery score: %{y:.2f}<extra></extra>") %>%
       add_lines(data = d, x = ~calendar_date, y = ~rec_roll7,
                 name = "7-day trend",
                 line = list(color = COL_S, width = 2.2, dash = "dot"),
                 hovertemplate = "<b>%{x}</b><br>7-day mean: %{y:.2f}<extra></extra>") %>%
       layout(
-        paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-        font = list(family = "Lora,Georgia,serif", size = 11),
-        xaxis  = list(title = "", gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+        paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+        font = list(family = "Inter,system-ui,sans-serif", size = 11),
+        xaxis  = list(title = "", gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
         yaxis  = list(title = "Recovery score",
-                      gridcolor = "#E8E4DE", linecolor = "#CCCCCC",
+                      gridcolor = "#F1F5F9", linecolor = "#CCCCCC",
                       zeroline = TRUE, zerolinecolor = COL_D, zerolinewidth = 1.5),
         yaxis2 = list(title = "Net BB change",
                       overlaying = "y", side = "right",
@@ -1924,11 +2060,11 @@ server <- function(input, output, session) {
     bar_col <- ifelse(res$r >= 0, COL_G, COL_D)
     plot_ly(res, x = ~factor(Lag), y = ~r, type = "bar",
             marker = list(color = bar_col, opacity = 0.85,
-                          line = list(color = "#FAFAF8", width = 0.5)),
+                          line = list(color = "#FFFFFF", width = 0.5)),
             text  = ~paste0("ρ = ", round(r, 3)),
             hoverinfo = "x+text",
             textposition = "outside",
-            textfont = list(size = 11, family = "Lora,serif")) %>%
+            textfont = list(size = 11, family = "Inter,sans-serif")) %>%
       acad_layout("Lag (days)", "Spearman ρ") %>%
       layout(
         title = list(text = pr$lbl, x = 0, font = list(size = 12)),
@@ -1971,13 +2107,13 @@ server <- function(input, output, session) {
                x = 60000, y = -1.5, xref = "x", yref = "y",
                xanchor = "right", yanchor = "top",
                showarrow = FALSE,
-               font = list(size = 10, color = COL_D, family = "Lora,serif")),
+               font = list(size = 10, color = COL_D, family = "Inter,sans-serif")),
           list(text = "Well-adapted",
                x = 60000, y = max(d_samp$RecoveryScore, na.rm=TRUE) * 0.85,
                xref = "x", yref = "y",
                xanchor = "right", yanchor = "top",
                showarrow = FALSE,
-               font = list(size = 10, color = COL_G, family = "Lora,serif"))
+               font = list(size = 10, color = COL_G, family = "Inter,sans-serif"))
         ),
         shapes = list(
           list(type = "line", x0 = sl_p75, x1 = sl_p75,
@@ -2009,7 +2145,7 @@ server <- function(input, output, session) {
       acad_layout("", "Respiration (breaths/min)") %>%
       layout(
         hovermode = "x unified",
-        yaxis = list(range = c(12, 18), gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+        yaxis = list(range = c(12, 18), gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
         legend = list(orientation = "h", y = 1.06, font = list(size = 10)),
         shapes = list(list(type = "rect", x0 = 0, x1 = 1, xref = "paper",
                            y0 = 16, y1 = 18, yref = "y",
@@ -2033,24 +2169,24 @@ server <- function(input, output, session) {
       add_bars(data = d, x = ~Weekday, y = ~mean_rec,
                name = "Mean recovery score",
                marker = list(color = bar_col, opacity = 0.85,
-                             line = list(color = "#FAFAF8", width = 0.5)),
+                             line = list(color = "#FFFFFF", width = 0.5)),
                hovertemplate = "<b>%{x}</b><br>Recovery score: %{y:.2f}<extra></extra>",
                yaxis = "y") %>%
       add_lines(data = d, x = ~Weekday, y = ~mean_bb,
                 name = "Mean Body Battery recharge",
                 line = list(color = COL_W, width = 2.4),
                 marker = list(size = 8, color = COL_W,
-                              line = list(color = "#FAFAF8", width = 1.5)),
+                              line = list(color = "#FFFFFF", width = 1.5)),
                 hovertemplate = "<b>%{x}</b><br>Body Battery: %{y:.0f}<extra></extra>",
                 yaxis = "y2") %>%
       layout(
-        paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-        font  = list(family = "Lora,Georgia,serif", size = 11),
-        xaxis = list(title = "", gridcolor = "#E8E4DE", linecolor = "#CCCCCC",
+        paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+        font  = list(family = "Inter,system-ui,sans-serif", size = 11),
+        xaxis = list(title = "", gridcolor = "#F1F5F9", linecolor = "#CCCCCC",
                      tickangle = -20),
         yaxis = list(title = "Recovery score",
                      range = c(-0.6, 0.6),
-                     gridcolor = "#E8E4DE", linecolor = "#CCCCCC",
+                     gridcolor = "#F1F5F9", linecolor = "#CCCCCC",
                      zeroline = TRUE, zerolinecolor = "#888", zerolinewidth = 1.2),
         yaxis2 = list(title = "Net BB change",
                       overlaying = "y", side = "right",
@@ -2092,7 +2228,7 @@ server <- function(input, output, session) {
       add_bars(data = hist_d, x = ~bin_mid, y = ~n,
                name = "Recovery Score",
                marker = list(color = bar_col, opacity = 0.82,
-                             line = list(color = "#FAFAF8", width = 0.4)),
+                             line = list(color = "#FFFFFF", width = 0.4)),
                hovertemplate = paste0("Recovery score: %{x:.1f}<br>",
                                       "Days: %{y}<extra></extra>"),
                yaxis = "y") %>%
@@ -2100,17 +2236,17 @@ server <- function(input, output, session) {
                 name = "Net BB change",
                 line = list(color = COL_W, width = 2.5),
                 marker = list(size = 6, color = COL_W,
-                              line = list(color = "#FAFAF8", width = 1)),
+                              line = list(color = "#FFFFFF", width = 1)),
                 hovertemplate = "Recovery score: %{x:.1f}<br>Net BB: %{y:.1f}<extra></extra>",
                 yaxis = "y2") %>%
       layout(
-        paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-        font  = list(family = "Lora,Georgia,serif", size = 11),
-        xaxis = list(title = "Recovery score", gridcolor = "#E8E4DE",
+        paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+        font  = list(family = "Inter,system-ui,sans-serif", size = 11),
+        xaxis = list(title = "Recovery score", gridcolor = "#F1F5F9",
                      linecolor = "#CCCCCC",
                      zeroline = TRUE, zerolinecolor = "#888", zerolinewidth = 1.5),
         yaxis  = list(title = "Days (count)",
-                      gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+                      gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
         yaxis2 = list(title = "Net BB change",
                       overlaying = "y", side = "right",
                       range = c(-20, 20), showgrid = FALSE, linecolor = "#CCCCCC"),
@@ -2119,7 +2255,7 @@ server <- function(input, output, session) {
           text = paste0(pct_positive, "% of days above zero (well-recovered)"),
           x = 0.5, y = 1.06, xref = "paper", yref = "paper",
           showarrow = FALSE, xanchor = "center",
-          font = list(size = 10, color = COL_G, family = "Lora,serif")
+          font = list(size = 10, color = COL_G, family = "Inter,sans-serif")
         )),
         margin = list(l = 60, r = 70, t = 45, b = 90)
       ) %>% config(displayModeBar = FALSE)
@@ -2137,18 +2273,18 @@ server <- function(input, output, session) {
     plot_ly(d, x = ~reorder(User_id, mean_rec), y = ~mean_rec,
             type = "bar",
             marker = list(color = bar_col, opacity = 0.88,
-                          line = list(color = "#FAFAF8", width = 0.5)),
+                          line = list(color = "#FFFFFF", width = 0.5)),
             text  = ~paste0("n = ", n, " days"),
             hovertemplate = paste0("<b>%{x}</b><br>Mean recovery: %{y:.3f}",
                                    "<br>%{text}<extra></extra>")) %>%
       layout(
-        paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-        font  = list(family = "Lora,Georgia,serif", size = 11),
-        xaxis = list(title = "", gridcolor = "#E8E4DE", linecolor = "#CCCCCC",
+        paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+        font  = list(family = "Inter,system-ui,sans-serif", size = 11),
+        xaxis = list(title = "", gridcolor = "#F1F5F9", linecolor = "#CCCCCC",
                      tickangle = -30),
         yaxis = list(title = "Recovery score",
                      range = c(-0.2, 0.6),
-                     gridcolor = "#E8E4DE", linecolor = "#CCCCCC",
+                     gridcolor = "#F1F5F9", linecolor = "#CCCCCC",
                      zeroline = TRUE, zerolinecolor = "#AAAAAA", zerolinewidth = 1.5),
         shapes = list(list(type = "line", x0 = 0, x1 = 1, xref = "paper",
                            y0 = 0, y1 = 0, yref = "y",
@@ -2209,12 +2345,12 @@ server <- function(input, output, session) {
                 hovertemplate = "<b>Cohort mean</b><br>%{x|%b %Y}<br>VO₂max: %{y:.1f}<extra></extra>",
                 showlegend = TRUE) %>%
       layout(
-        paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-        font  = list(family = "Lora,Georgia,serif", size = 11),
-        xaxis = list(title = "", gridcolor = "#E8E4DE", linecolor = "#CCCCCC",
+        paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+        font  = list(family = "Inter,system-ui,sans-serif", size = 11),
+        xaxis = list(title = "", gridcolor = "#F1F5F9", linecolor = "#CCCCCC",
                      tickformat = "%b %Y"),
         yaxis = list(title = "VO₂max (ml/kg/min)",
-                     gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+                     gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
         legend = list(orientation = "h", y = -0.22, font = list(size = 9),
                       title = list(text = "Participant")),
         hovermode = "closest",
@@ -2234,7 +2370,7 @@ server <- function(input, output, session) {
             size  = ~load_mean, sizes = c(10, 60),
             text  = ~User_id,
             textposition = "top center",
-            textfont = list(size = 10, family = "Lora,serif"),
+            textfont = list(size = 10, family = "Inter,sans-serif"),
             marker = list(opacity = 0.82,
                           line = list(color = "white", width = 1)),
             hovertemplate = paste0("<b>%{text}</b><br>",
@@ -2254,11 +2390,11 @@ server <- function(input, output, session) {
           list(x = max(d$vo2_slope, na.rm=TRUE) * 0.8,
                y = min(d$rhr_dev_sd, na.rm=TRUE) + 0.3,
                text = "Resilient", showarrow = FALSE,
-               font = list(size = 10, color = COL_G, family = "Lora,serif")),
+               font = list(size = 10, color = COL_G, family = "Inter,sans-serif")),
           list(x = min(d$vo2_slope, na.rm=TRUE) + 0.1,
                y = max(d$rhr_dev_sd, na.rm=TRUE) - 0.3,
                text = "Struggling", showarrow = FALSE,
-               font = list(size = 10, color = COL_D, family = "Lora,serif"))
+               font = list(size = 10, color = COL_D, family = "Inter,sans-serif"))
         )
       )
   })
@@ -2289,14 +2425,14 @@ server <- function(input, output, session) {
                                   color = COL_P, opacity = 0.85))
     }
     fig %>% layout(
-      paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-      font = list(family = "Lora,Georgia,serif", size = 11),
+      paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+      font = list(family = "Inter,system-ui,sans-serif", size = 11),
       title = list(text = paste0(pid, " — Personal Timeline"), x = 0,
                    font = list(size = 12)),
-      xaxis = list(title = "", gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+      xaxis = list(title = "", gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
       yaxis = list(title = "Recovery score", zeroline = TRUE,
                    zerolinecolor = COL_D, zerolinewidth = 1.5,
-                   gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+                   gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
       yaxis2 = list(title = "Sleep (h)", overlaying = "y", side = "right",
                     showgrid = FALSE),
       hovermode = "x unified",
@@ -2335,12 +2471,12 @@ server <- function(input, output, session) {
                              "  ·  n = ", nrow(d))) +
       theme_minimal(base_family = "serif") +
       theme(panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA),
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA),
             legend.position  = "none")       # suppress ggplot legend; use plotly below
     ggplotly(p, tooltip = "text") %>%
-      layout(paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-             font = list(family = "Lora,Georgia,serif", size = 11),
+      layout(paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+             font = list(family = "Inter,system-ui,sans-serif", size = 11),
              legend = list(orientation = "h", y = 1.12, x = 0,
                            xanchor = "left", font = list(size = 10)),
              margin = list(l = 55, r = 20, t = 55, b = 55)) %>%
@@ -2354,7 +2490,7 @@ server <- function(input, output, session) {
 
     best_wk <- d %>%
       mutate(wk = paste0(year(calendar_date), "-W",
-                         sprintf("%02d", isoweek(calendar_date)))) %>%
+                         sprintf("%02d", lubridate::isoweek(calendar_date)))) %>%
       group_by(wk) %>%
       summarise(mr = mean(RecoveryScore, na.rm=TRUE), .groups="drop") %>%
       drop_na() %>%
@@ -2362,7 +2498,7 @@ server <- function(input, output, session) {
 
     worst_wk <- d %>%
       mutate(wk = paste0(year(calendar_date), "-W",
-                         sprintf("%02d", isoweek(calendar_date)))) %>%
+                         sprintf("%02d", lubridate::isoweek(calendar_date)))) %>%
       group_by(wk) %>%
       summarise(mr = mean(RecoveryScore, na.rm=TRUE), .groups="drop") %>%
       drop_na() %>%
@@ -2421,16 +2557,16 @@ server <- function(input, output, session) {
       add_annotations(text = "Insufficient data for this participant.",
         x = 0.5, y = 0.5, xref = "paper", yref = "paper",
         showarrow = FALSE, font = list(size = 12, color = "#6B7280")) %>%
-      layout(paper_bgcolor = "#FAFAF8") %>% config(displayModeBar = FALSE))
+      layout(paper_bgcolor = "#FFFFFF") %>% config(displayModeBar = FALSE))
     bar_col <- ifelse(res$r >= 0, COL_G, COL_D)
     plot_ly(res, x = ~factor(Lag), y = ~r, color = ~Pair,
             colors = c(COL_P, COL_S),
             type = "bar",
-            marker = list(opacity = 0.85, line = list(color = "#FAFAF8", width = 0.5)),
+            marker = list(opacity = 0.85, line = list(color = "#FFFFFF", width = 0.5)),
             text  = ~paste0("ρ = ", r),
             hoverinfo = "x+text",
             textposition = "outside",
-            textfont = list(size = 10, family = "Lora,serif")) %>%
+            textfont = list(size = 10, family = "Inter,sans-serif")) %>%
       acad_layout("Lag (days)", "Spearman ρ") %>%
       layout(
         barmode = "group",
@@ -2446,7 +2582,7 @@ server <- function(input, output, session) {
           text = paste0("Individual: ", pid),
           x = 0.02, y = 0.97, xref = "paper", yref = "paper",
           showarrow = FALSE, xanchor = "left",
-          font = list(size = 10, color = "#555", family = "Lora,serif")))
+          font = list(size = 10, color = "#555", family = "Inter,sans-serif")))
       )
   })
 
@@ -2456,8 +2592,8 @@ server <- function(input, output, session) {
     d   <- garmin %>%
       filter(User_id == pid, !is.na(TSD), TSD >= 3) %>%
       mutate(
-        iso_week  = paste0(isoyear(calendar_date), "-W",
-                           sprintf("%02d", isoweek(calendar_date))),
+        iso_week  = paste0(lubridate::isoyear(calendar_date), "-W",
+                           sprintf("%02d", lubridate::isoweek(calendar_date))),
         wk_start  = floor_date(calendar_date, "week", week_start = 1),
         deficit   = pmax(0, 7 - TSD)          # hours below 7h per night
       ) %>%
@@ -2475,13 +2611,13 @@ server <- function(input, output, session) {
     if (nrow(d) < 4) return(plotly_empty() %>%
       add_annotations(text = "Insufficient data.", x=0.5, y=0.5,
         xref="paper", yref="paper", showarrow=FALSE) %>%
-      layout(paper_bgcolor="#FAFAF8") %>% config(displayModeBar=FALSE))
+      layout(paper_bgcolor="#FFFFFF") %>% config(displayModeBar=FALSE))
     bar_col <- ifelse(d$sleep_debt >= 0, COL_P, COL_D)
     plot_ly() %>%
       add_bars(data = d, x = ~wk_start, y = ~sleep_debt,
                name = "Weekly sleep debt (h)",
                marker = list(color = bar_col, opacity = 0.75,
-                             line = list(color = "#FAFAF8", width = 0.4)),
+                             line = list(color = "#FFFFFF", width = 0.4)),
                hovertemplate = "<b>%{x|%d %b %Y}</b><br>Sleep debt: %{y:.1f}h<extra></extra>") %>%
       add_lines(data = d, x = ~wk_start, y = ~rec_roll4,
                 name = "4-week rolling recovery",
@@ -2489,11 +2625,11 @@ server <- function(input, output, session) {
                 line = list(color = COL_S, width = 2.2, dash = "dot"),
                 hovertemplate = "<b>%{x|%d %b %Y}</b><br>Recovery (4-wk avg): %{y:.2f}<extra></extra>") %>%
       layout(
-        paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-        font  = list(family = "Lora,Georgia,serif", size = 11),
-        xaxis = list(title = "", gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+        paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+        font  = list(family = "Inter,system-ui,sans-serif", size = 11),
+        xaxis = list(title = "", gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
         yaxis = list(title = "Weekly sleep debt (h)",
-                     gridcolor = "#E8E4DE", linecolor = "#CCCCCC",
+                     gridcolor = "#F1F5F9", linecolor = "#CCCCCC",
                      zeroline = TRUE, zerolinecolor = "#888", zerolinewidth = 1.2),
         yaxis2 = list(title = "Recovery score (4-wk avg)",
                       overlaying = "y", side = "right",
@@ -2517,7 +2653,7 @@ server <- function(input, output, session) {
     if (nrow(d) < 10) return(plotly_empty() %>%
       add_annotations(text = "Insufficient training data.", x=0.5, y=0.5,
         xref="paper", yref="paper", showarrow=FALSE) %>%
-      layout(paper_bgcolor="#FAFAF8") %>% config(displayModeBar=FALSE))
+      layout(paper_bgcolor="#FFFFFF") %>% config(displayModeBar=FALSE))
     sp <- spear(d$SessionLoad, d$Rec_next)
     p <- ggplot(d, aes(x = SessionLoad, y = Rec_next,
                        colour = SL_Intensity,
@@ -2538,12 +2674,12 @@ server <- function(input, output, session) {
                              "  ·  n = ", nrow(d))) +
       theme_minimal(base_family = "serif") +
       theme(panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA),
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA),
             legend.position  = "none")
     ggplotly(p, tooltip = "text") %>%
-      layout(paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-             font = list(family = "Lora,Georgia,serif", size = 11),
+      layout(paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+             font = list(family = "Inter,system-ui,sans-serif", size = 11),
              legend = list(orientation = "h", y = 1.10, x = 0,
                            xanchor = "left", font = list(size = 10)),
              margin = list(l = 55, r = 20, t = 50, b = 55)) %>%
@@ -2564,22 +2700,22 @@ server <- function(input, output, session) {
     if (nrow(d) < 2) return(plotly_empty() %>%
       add_annotations(text = "Insufficient data.", x=0.5, y=0.5,
         xref="paper", yref="paper", showarrow=FALSE) %>%
-      layout(paper_bgcolor="#FAFAF8") %>% config(displayModeBar=FALSE))
+      layout(paper_bgcolor="#FFFFFF") %>% config(displayModeBar=FALSE))
     bar_col <- ifelse(d$mean_rec >= 0, COL_G, COL_D)
     plot_ly(d, x = ~month_lbl, y = ~mean_rec,
             type = "bar",
             marker = list(color = bar_col, opacity = 0.85,
-                          line = list(color = "#FAFAF8", width = 0.5)),
+                          line = list(color = "#FFFFFF", width = 0.5)),
             text  = ~paste0("n = ", n, " days"),
             hovertemplate = paste0("<b>%{x}</b><br>Mean recovery: %{y:.3f}",
                                    "<br>%{text}<extra></extra>")) %>%
       layout(
-        paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-        font  = list(family = "Lora,Georgia,serif", size = 11),
+        paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+        font  = list(family = "Inter,system-ui,sans-serif", size = 11),
         xaxis = list(title = "", tickangle = -35,
-                     gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+                     gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
         yaxis = list(title = "Mean Recovery Score",
-                     gridcolor = "#E8E4DE", linecolor = "#CCCCCC",
+                     gridcolor = "#F1F5F9", linecolor = "#CCCCCC",
                      zeroline = TRUE, zerolinecolor = "#888", zerolinewidth = 1.2),
         shapes = list(list(type = "line", x0 = 0, x1 = 1, xref = "paper",
                            y0 = 0, y1 = 0, yref = "y",
@@ -2644,8 +2780,8 @@ server <- function(input, output, session) {
         theme(legend.position = "none", axis.text.x = element_text(size = 7),
               axis.title.y = element_text(size = 10, face = "bold"),
               panel.grid.major = element_line(colour = "#E8E4DE"),
-              plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-              panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+              plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+              panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     }
     p1 <- mk_box(d, "TSD_next", "Sleep Duration — next (h)")
     p2 <- mk_box(d, "SE_next",  "Sleep Efficiency — next (%)")
@@ -2656,8 +2792,8 @@ server <- function(input, output, session) {
             ggplotly(p3, tooltip="text"),
             ggplotly(p4, tooltip="text"),
             nrows = 1, shareX = FALSE, margin = 0.06) %>%
-      layout(paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-             font = list(family = "Lora,Georgia,serif", size = 10),
+      layout(paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+             font = list(family = "Inter,system-ui,sans-serif", size = 10),
              showlegend = FALSE,
              yaxis  = list(title = list(text="Sleep Duration — next (h)",
                                         font=list(size=11,family="Lora,serif")),
@@ -2715,16 +2851,16 @@ server <- function(input, output, session) {
               axis.title.y = element_text(size = 10, face = "bold"),
               plot.subtitle = element_text(size = 7.5, colour = "#555"),
               panel.grid.major = element_line(colour = "#E8E4DE"),
-              plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-              panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+              plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+              panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     }
     p1 <- mk_ri(d_samp, "SE_next", "Sleep Efficiency — next (%)")
     p2 <- mk_ri(d_samp, "SQ_next", "Sleep Quality — next (%)")
     subplot(ggplotly(p1, tooltip="text"),
             ggplotly(p2, tooltip="text"),
             nrows = 1, shareX = TRUE, margin = 0.10) %>%
-      layout(paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-             font = list(family = "Lora,Georgia,serif", size = 10),
+      layout(paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+             font = list(family = "Inter,system-ui,sans-serif", size = 10),
              showlegend = FALSE,
              xaxis  = list(title = "", tickfont = list(size=9)),
              xaxis2 = list(title = "", tickfont = list(size=9)),
@@ -2776,8 +2912,8 @@ server <- function(input, output, session) {
             axis.title.y = element_text(size = 10, face = "bold"),
             plot.subtitle = element_text(size = 7.5, colour = "#555"),
             panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     p2 <- ggplot(slice_sample(d_sf, n = min(2000L, nrow(d_sf))),
                  aes(x = TV, y = SF_next, colour = SL_Intensity,
                      text = paste0(User_id, "<br>", round(TV,1), " km",
@@ -2797,13 +2933,13 @@ server <- function(input, output, session) {
             legend.title = element_text(size = 8),
             plot.subtitle = element_text(size = 7.5, colour = "#555"),
             panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     subplot(ggplotly(p1, tooltip="text") %>% style(showlegend=FALSE),
             ggplotly(p2, tooltip="text"),
             nrows = 1, shareX = TRUE, margin = 0.10) %>%
-      layout(paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-             font = list(family = "Lora,Georgia,serif", size = 10),
+      layout(paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+             font = list(family = "Inter,system-ui,sans-serif", size = 10),
              xaxis  = list(title = "Distance (km)", tickfont=list(size=9)),
              xaxis2 = list(title = "Distance (km)", tickfont=list(size=9)),
              yaxis  = list(title = list(text="Sleep Quality — next (%)",
@@ -2846,8 +2982,8 @@ server <- function(input, output, session) {
            subtitle = paste0("ρ = ", sp1$r, "  ·  p ", fmt_p(sp1$p))) +
       theme_minimal(base_family = "serif") +
       theme(panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     p2 <- ggplot(d_samp %>% filter(!is.na(SF_next)),
                  aes(x = DailyTotalSteps / 1000, y = SF_next, colour = User_id,
                      text = paste0(User_id, "<br>Steps: ",
@@ -2864,13 +3000,13 @@ server <- function(input, output, session) {
            subtitle = paste0("ρ = ", sp2$r, "  ·  p ", fmt_p(sp2$p))) +
       theme_minimal(base_family = "serif") +
       theme(panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     subplot(ggplotly(p1, tooltip = "text"),
             ggplotly(p2, tooltip = "text"),
             nrows = 1, margin = 0.10) %>%
-      layout(paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-             font = list(family = "Lora,Georgia,serif", size = 11),
+      layout(paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+             font = list(family = "Inter,system-ui,sans-serif", size = 11),
              showlegend = FALSE,
              yaxis  = list(title = list(text="Sleep Duration — next (h)",
                                         font=list(size=11,family="Lora,serif")),
@@ -2917,8 +3053,8 @@ server <- function(input, output, session) {
            subtitle = paste0("ρ = ", sp_se$r, "  ·  p ", fmt_p(sp_se$p))) +
       theme_minimal(base_family = "serif") +
       theme(panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     p2 <- ggplot(d_sq,
                  aes(x = SQ_prev, y = RE, colour = User_id,
                      text = paste0(User_id, "<br>SQ prev night: ",
@@ -2935,13 +3071,13 @@ server <- function(input, output, session) {
                              "  ·  full cohort")) +
       theme_minimal(base_family = "serif") +
       theme(panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     subplot(ggplotly(p1, tooltip = "text"),
             ggplotly(p2, tooltip = "text"),
             nrows = 1, margin = 0.07) %>%
-      layout(paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-             font = list(family = "Lora,Georgia,serif", size = 11),
+      layout(paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+             font = list(family = "Inter,system-ui,sans-serif", size = 11),
              showlegend = FALSE,
              xaxis  = list(title = list(text="Sleep Efficiency (%)",
                                         font=list(size=10)), tickfont=list(size=9)),
@@ -2978,8 +3114,8 @@ server <- function(input, output, session) {
       labs(x = NULL, y = "Recovery Score — next day") +
       theme_minimal(base_family = "serif") +
       theme(panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     gg <- ggplotly(p, tooltip = "text")
     # Add BB mean points as a second trace
     plot_ly() %>%
@@ -3005,12 +3141,12 @@ server <- function(input, output, session) {
                                  round(mean_bb,1)),
                   hoverinfo = "text") %>%
       layout(
-        paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-        font  = list(family = "Lora,Georgia,serif", size = 11),
-        xaxis = list(title = "", gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+        paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+        font  = list(family = "Inter,system-ui,sans-serif", size = 11),
+        xaxis = list(title = "", gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
         yaxis = list(title = "Recovery score (next day)",
                      range = c(-2, 2),
-                     gridcolor = "#E8E4DE", linecolor = "#CCCCCC",
+                     gridcolor = "#F1F5F9", linecolor = "#CCCCCC",
                      zeroline = TRUE, zerolinecolor = "#888"),
         yaxis2 = list(title = "Net BB change",
                       overlaying = "y", side = "right",
@@ -3052,18 +3188,18 @@ server <- function(input, output, session) {
            subtitle = paste0("ρ = ", sp$r, "  ·  p ", fmt_p(sp$p))) +
       theme_minimal(base_family = "serif") +
       theme(panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     ggplotly(p, tooltip = "text") %>%
       add_lines(data = bb_d, x = ~bin_mid / 1000, y = ~mean_bb,
                 name = "Net BB change",
                 yaxis = "y2",
                 line = list(color = COL_W, width = 2.2, dash = "solid"),
                 hovertemplate = "Steps: %{x:.0f}k<br>Net BB: %{y:.1f}<extra></extra>") %>%
-      layout(paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-             font = list(family = "Lora,Georgia,serif", size = 11),
+      layout(paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+             font = list(family = "Inter,system-ui,sans-serif", size = 11),
              yaxis  = list(range = c(-2, 2), zeroline = TRUE, zerolinecolor = "#888",
-                           gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+                           gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
              yaxis2 = list(title = "Net BB change",
                            overlaying = "y", side = "right",
                            range = c(-20, 20), showgrid = FALSE),
@@ -3106,18 +3242,18 @@ server <- function(input, output, session) {
                              "  ·  dashed = 90% RI threshold")) +
       theme_minimal(base_family = "serif") +
       theme(panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     ggplotly(p, tooltip = "text") %>%
       add_lines(data = bb_d, x = ~bin_mid * 100, y = ~mean_bb,
                 name = "Mean Net BB change",
                 yaxis = "y2",
                 line = list(color = COL_W, width = 2.2),
                 hovertemplate = "RI: %{x:.0f}%<br>Net BB: %{y:.1f}<extra></extra>") %>%
-      layout(paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-             font = list(family = "Lora,Georgia,serif", size = 11),
+      layout(paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+             font = list(family = "Inter,system-ui,sans-serif", size = 11),
              yaxis  = list(range = c(-2, 2), zeroline = TRUE, zerolinecolor = "#888",
-                           gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+                           gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
              yaxis2 = list(title = "Net BB change",
                            overlaying = "y", side = "right",
                            range = c(-20, 20), showgrid = FALSE),
@@ -3160,24 +3296,24 @@ server <- function(input, output, session) {
       theme_minimal(base_family = "serif") +
       theme(legend.position  = "right",
             panel.grid.major = element_line(colour = "#E8E4DE"),
-            plot.background  = element_rect(fill = "#FAFAF8", colour = NA),
-            panel.background = element_rect(fill = "#FAFAF8", colour = NA))
+            plot.background  = element_rect(fill = "#FFFFFF", colour = NA),
+            panel.background = element_rect(fill = "#FFFFFF", colour = NA))
     ggplotly(p, tooltip = "text") %>%
       add_lines(data = bb_d, x = ~bin_mid, y = ~mean_bb,
                 name = "Mean Net BB change",
                 yaxis = "y2",
                 line = list(color = COL_W, width = 2.2),
                 hovertemplate = "Distance: %{x:.1f}km<br>Net BB: %{y:.1f}<extra></extra>") %>%
-      layout(paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-             font = list(family = "Lora,Georgia,serif", size = 11),
+      layout(paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+             font = list(family = "Inter,system-ui,sans-serif", size = 11),
              yaxis  = list(range = c(-2, 2), zeroline = TRUE, zerolinecolor = "#888",
-                           gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+                           gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
              yaxis2 = list(title = "Net BB change",
                            overlaying = "y", side = "right",
                            range = c(-20, 20), showgrid = FALSE),
              xaxis = list(title = list(text = "Running distance (km)",
                                         font = list(size = 11)),
-                            gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+                            gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
              legend = list(title = list(text = "Session load"),
                            orientation = "h", y = -0.22, font = list(size = 10)),
              margin = list(b = 80)) %>%
@@ -3234,7 +3370,7 @@ server <- function(input, output, session) {
                 yaxis = "y2", name = "Net BB change (binned)",
                 line = list(color = COL_W, width = 2.2),
                 marker = list(size = 5, color = COL_W,
-                              line = list(color = "#FAFAF8", width = 1)),
+                              line = list(color = "#FFFFFF", width = 1)),
                 hovertemplate = paste0(x_lbl, ": %{x:.1f}<br>",
                                        "Net BB: %{y:.1f}<extra></extra>"))
     if (!is.null(vline)) {
@@ -3246,13 +3382,13 @@ server <- function(input, output, session) {
     }
     p_main %>%
       layout(
-        paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-        font  = list(family = "Lora,Georgia,serif", size = 11),
-        xaxis = list(title = x_lbl, gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+        paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+        font  = list(family = "Inter,system-ui,sans-serif", size = 11),
+        xaxis = list(title = x_lbl, gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
         yaxis = list(title = "Recovery Score",
                      range = c(-1.5, 1.5), fixedrange = TRUE,
                      zeroline = TRUE, zerolinecolor = "#888", zerolinewidth = 1.5,
-                     gridcolor = "#E8E4DE", linecolor = "#CCCCCC"),
+                     gridcolor = "#F1F5F9", linecolor = "#CCCCCC"),
         yaxis2 = list(title = "Net BB change",
                       overlaying = "y", side = "right",
                       range = c(-20, 20), fixedrange = TRUE,
@@ -3262,7 +3398,7 @@ server <- function(input, output, session) {
           text = paste0("ρ = ", sp$r, "  ·  p ", fmt_p(sp$p)),
           x = 0.98, y = -0.14, xref = "paper", yref = "paper",
           showarrow = FALSE, xanchor = "right",
-          font = list(size = 10, family = "Lora,serif", color = "#444")
+          font = list(size = 10, family = "Inter,sans-serif", color = "#444")
         )),
         margin = list(l = 60, r = 70, t = 20, b = 80)
       ) %>% config(displayModeBar = FALSE)
@@ -3311,7 +3447,7 @@ server <- function(input, output, session) {
       add_annotations(text = "Insufficient data for selected filters.",
                       x = 0.5, y = 0.5, xref = "paper", yref = "paper",
                       showarrow = FALSE, font = list(size = 12, color = "#6B7280")) %>%
-      layout(paper_bgcolor = "#FAFAF8") %>% config(displayModeBar = FALSE))
+      layout(paper_bgcolor = "#FFFFFF") %>% config(displayModeBar = FALSE))
     lbl     <- colnames(d_c)
     cor_mat <- cor(d_c, method = "spearman", use = "pairwise.complete.obs")
     cor_rnd <- round(cor_mat, 2)
@@ -3329,7 +3465,7 @@ server <- function(input, output, session) {
         c(1,   "#1A5276")    # deep cobalt    — strong positive
       ),
       colorbar   = list(title = "ρ", len = 0.65,
-                        tickfont = list(family = "Lora,serif", size = 10)),
+                        tickfont = list(family = "Inter,sans-serif", size = 10)),
       hovertemplate = "%{y} ↔ %{x}<br>ρ = %{z:.3f}<extra></extra>"
     ) %>%
       add_annotations(
@@ -3337,11 +3473,11 @@ server <- function(input, output, session) {
         y          = rep(lbl, times = length(lbl)),
         text       = as.vector(cell_txt),
         showarrow  = FALSE,
-        font       = list(size = 9, color = "#1A1A1A", family = "Lora,serif")
+        font       = list(size = 9, color = "#1A1A1A", family = "Inter,sans-serif")
       ) %>%
       layout(
-        paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-        font  = list(family = "Lora,Georgia,serif", size = 11),
+        paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+        font  = list(family = "Inter,system-ui,sans-serif", size = 11),
         xaxis = list(title = "", tickangle = -40, linecolor = "#CCCCCC"),
         yaxis = list(title = "", autorange = "reversed", linecolor = "#CCCCCC"),
         margin = list(l = 140, r = 20, t = 20, b = 130)
@@ -3414,8 +3550,8 @@ server <- function(input, output, session) {
   output$monotony_tbl <- renderDT({
     d <- garmin %>%
       filter(!is.na(SessionLoad)) %>%
-      mutate(iso_week = paste0(isoyear(calendar_date), "-W",
-                               sprintf("%02d", isoweek(calendar_date)))) %>%
+      mutate(iso_week = paste0(lubridate::isoyear(calendar_date), "-W",
+                               sprintf("%02d", lubridate::isoweek(calendar_date)))) %>%
       group_by(User_id, iso_week) %>%
       summarise(
         wk_mean = mean(SessionLoad, na.rm = TRUE),
@@ -3458,7 +3594,7 @@ server <- function(input, output, session) {
       add_annotations(text = "Insufficient data for ACF.",
                       x = 0.5, y = 0.5, xref = "paper", yref = "paper",
                       showarrow = FALSE, font = list(size = 12, color = "#6B7280")) %>%
-      layout(paper_bgcolor = "#FAFAF8") %>% config(displayModeBar = FALSE))
+      layout(paper_bgcolor = "#FFFFFF") %>% config(displayModeBar = FALSE))
     # Interpolate tiny gaps, compute ACF up to lag 21
     ts_vals <- d_ts$rec
     ts_vals[is.na(ts_vals)] <- zoo::na.approx(ts_vals, na.rm = FALSE)
@@ -3472,15 +3608,15 @@ server <- function(input, output, session) {
       add_bars(x = lags, y = acf_vals,
                name = "ACF",
                marker = list(color = bar_col, opacity = 0.85,
-                             line = list(color = "#FAFAF8", width = 0.4)),
+                             line = list(color = "#FFFFFF", width = 0.4)),
                hovertemplate = "Lag %{x} days<br>ACF: %{y:.3f}<extra></extra>") %>%
       layout(
-        paper_bgcolor = "#FAFAF8", plot_bgcolor = "#FAFAF8",
-        font  = list(family = "Lora,Georgia,serif", size = 11),
-        xaxis = list(title = "Lag (days)", gridcolor = "#E8E4DE",
+        paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
+        font  = list(family = "Inter,system-ui,sans-serif", size = 11),
+        xaxis = list(title = "Lag (days)", gridcolor = "#F1F5F9",
                      linecolor = "#CCCCCC", dtick = 1),
         yaxis = list(title = "Autocorrelation",
-                     gridcolor = "#E8E4DE", linecolor = "#CCCCCC",
+                     gridcolor = "#F1F5F9", linecolor = "#CCCCCC",
                      zeroline = TRUE, zerolinecolor = "#888", zerolinewidth = 1.2),
         shapes = list(
           list(type = "line", x0 = -0.5, x1 = 21.5,
@@ -3494,7 +3630,7 @@ server <- function(input, output, session) {
           text = "Bars coloured blue exceed the 95% CI bound (±1.96/√N)",
           x = 0.99, y = 0.02, xref = "paper", yref = "paper",
           showarrow = FALSE, xanchor = "right",
-          font = list(size = 9, color = "#666", family = "Lora,serif")
+          font = list(size = 9, color = "#666", family = "Inter,sans-serif")
         )),
         legend = list(orientation = "h", y = 1.06),
         margin = list(l = 60, r = 20, t = 20, b = 55)
