@@ -205,15 +205,44 @@ in code chunks and will match the dashboard exactly.
 Recorded on the development machine (update this after any package upgrade):
 
 ```
-R version 4.5.0 (2025-04-11)
+R version 4.5.1 (2025-06-13 ucrt)
 Platform: x86_64-w64-mingw32/x64
-Running under: Windows 11 x64
+Running under: Windows 11 x64 (build 26200)
 
-Attached packages:
-shiny_1.8.1        bslib_0.7.0        tidyverse_2.0.0    lubridate_1.9.3
-plotly_4.10.4      DT_0.33            shinycssloaders_1.0.0  zoo_1.8.12
-scales_1.3.0       mgcv_1.9.1         ggcorrplot_0.1.4   lme4_1.1.35
-lmerTest_3.1.3     testthat_3.2.1
+Matrix products: default
+  LAPACK version 3.12.1
+
+locale:
+[1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
+[4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
+
+time zone: Africa/Nairobi
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] testthat_3.3.2        lmerTest_3.2-1        lme4_2.0-1            Matrix_1.7-3          ggcorrplot_0.1.4.1   
+ [6] mgcv_1.9-3            nlme_3.1-168          scales_1.4.0          zoo_1.8-15            shinycssloaders_1.1.0
+[11] DT_0.34.0             plotly_4.12.0         lubridate_1.9.5       forcats_1.0.0         stringr_1.6.0        
+[16] dplyr_1.2.1           purrr_1.1.0           readr_2.1.5           tidyr_1.3.1           tibble_3.3.0         
+[21] ggplot2_4.0.2         tidyverse_2.0.0       bslib_0.9.0           shiny_1.13.0         
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.2.1    viridisLite_0.4.3   farver_2.1.2        S7_0.2.0            fastmap_1.2.0       lazyeval_0.2.2     
+ [7] promises_1.5.0      digest_0.6.39       timechange_0.4.0    mime_0.13           lifecycle_1.0.5     magrittr_2.0.4     
+[13] compiler_4.5.1      rlang_1.2.0         sass_0.4.10         tools_4.5.1         yaml_2.3.10         data.table_1.17.8  
+[19] knitr_1.50          htmlwidgets_1.6.4   bit_4.6.0           RColorBrewer_1.1-3  rsconnect_1.8.0     withr_3.0.2        
+[25] numDeriv_2016.8-1.1 grid_4.5.1          xtable_1.8-4        MASS_7.3-65         cli_3.6.5           crayon_1.5.3       
+[31] reformulas_0.4.3.1  generics_0.1.4      otel_0.2.0          rstudioapi_0.18.0   httr_1.4.7          tzdb_0.5.0         
+[37] minqa_1.2.8         cachem_1.1.0        splines_4.5.1       parallel_4.5.1      vctrs_0.7.3         boot_1.3-31        
+[43] jsonlite_2.0.0      hms_1.1.3           bit64_4.6.0-1       archive_1.1.12.1    crosstalk_1.2.2     jquerylib_0.1.4    
+[49] glue_1.8.0          nloptr_2.2.1        stringi_1.8.7       gtable_0.3.6        later_1.4.4         pillar_1.11.1      
+[55] brio_1.1.5          htmltools_0.5.8.1   R6_2.6.1            Rdpack_2.6.5        vroom_1.6.5         evaluate_1.0.5     
+[61] lattice_0.22-7      rbibutils_2.4.1     memoise_2.0.1       httpuv_1.6.17       Rcpp_1.1.1-1.1      xfun_0.53          
+[67] fs_1.6.6            pkgconfig_2.0.3    
+
 ```
 
 Run `sessionInfo()` in your R console and paste the output here after restoring
