@@ -46,6 +46,8 @@ app/data/garmin_merged_14p.csv
 # renv library (large, machine-specific)
 app/renv/library/
 app/renv/staging/
+app/renv/
+nairobi-runners-project/
 
 # RStudio internals
 .quarto/
