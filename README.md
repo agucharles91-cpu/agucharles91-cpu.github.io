@@ -6,6 +6,12 @@ A Shiny dashboard and Quarto report analysing longitudinal wearable data from
 14 recreational runners in Nairobi, Kenya. Covers training load, sleep architecture,
 recovery physiology, and their temporal relationships.
 
+## Live demo
+
+🔗 **[https://agucharles.shinyapps.io/nairobi-runners/](https://agucharles.shinyapps.io/nairobi-runners/)**
+
+> Hosted on shinyapps.io free tier (25 active hours/month).  
+> If the app shows "not available", the monthly limit has been reached — clone the repo and run locally instead using `shiny::runApp("app/app.R")`.
 ---
 
 ## Quick start
