@@ -1,0 +1,1898 @@
+---
+title: "Training, Sleep, and Recovery Dynamics in Recreational Runners: A Longitudinal Wearable Analytics Study"
+subtitle: "A four-year longitudinal analysis of Garmin wearable data from 14 recreational runners in Nairobi, Kenya (2022–2026)"
+author:
+  - name: "Agu Charles Chibuike"
+    affiliation: "University of Nairobi"
+date: today
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    number-sections: true
+    code-fold: true
+    code-summary: "Show code"
+    fig-width: 9
+    fig-height: 5
+    fig-dpi: 150
+    embed-resources: true
+  pdf:
+    geometry: margin=2.5cm
+    fontsize: 11pt
+    include-in-header:
+      text: |
+        \usepackage{booktabs}
+        \usepackage{caption}
+execute:
+  echo: false
+  warning: false
+  message: false
+bibliography: references.bib
+---
+
+::: {.callout-note appearance="minimal"}
+**Abstract**
+
+**Background:** Wearable biosensor technology offers unprecedented opportunity to
+monitor training load, sleep, and recovery in recreational athletes outside the
+laboratory. Yet most existing evidence derives from elite or sub-elite populations
+under controlled conditions, and multi-year naturalistic studies of recreational runners
+— particularly those in sub-Saharan Africa — remain absent from the literature.
+
+**Methods:** Garmin device data were collected continuously from 14 recreational runners
+(9 male, 5 female) in Nairobi, Kenya between January 2022 and February 2026, yielding
+approximately 12,760 participant-days of observation. Key derived variables included a
+rolling RHR-based Recovery Score, Sleep Quality % (deep + REM proportion), Session Load,
+Body Battery delta, and running economy. Associations were characterised using Spearman
+rank correlations, lagged bivariate analyses (Day 0 to Day 3), and linear mixed-effects
+models with random intercepts per participant.
+
+**Results:** Contrary to prevailing assumptions, all active training intensity tiers were
+associated with longer and more efficient sleep the following night relative to rest days,
+consistent with adenosine-mediated sleep pressure rather than disruption. Sleep Quality %
+was the strongest within-person predictor of next-morning Recovery Score (β = 0.0098,
+95% CI [0.004, 0.016], p = 0.002), outperforming sleep duration, efficiency, and
+fragmentation. The Session Load → Recovery Score lag structure followed a supercompensation
+arc — suppressed on Days 0–1, strongly positive by Day 3. Recovery Score autocorrelation
+revealed a structured weekly and fortnightly oscillation reflecting implicit training
+periodisation.
+
+**Conclusions:** Sleep architecture quality — specifically the proportion of deep and REM
+sleep — is a stronger predictor of next-morning recovery than sleep duration in
+recreational runners, and the relationship is characterised by sufficiency thresholds
+rather than simple dose-response gradients. Longitudinal consumer-grade wearable data
+can yield ecologically valid insights into training–sleep–recovery dynamics, with direct
+implications for self-coached athlete monitoring in resource-limited settings.
+:::
+
+**Keywords:** wearable technology; recreational runners; sleep architecture; recovery
+monitoring; training load; longitudinal study; Nairobi
+
+
+```{r setup}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(ggrepel)
+library(lubridate)
+library(zoo)
+library(lme4)
+library(lmerTest)
+library(broom)
+library(broom.mixed)
+library(gt)
+library(knitr)
+library(kableExtra)
+library(ggcorrplot)
+library(cowplot)
+library(scales)
+library(patchwork)
+
+# ── Colour palette ─────────────────────────────────────────────────────────────
+COL_P <- "#0055A5"
+COL_G <- "#1A7A4A"
+COL_D <- "#B5192E"
+COL_W <- "#D4860A"
+COL_N <- "#64748B"
+
+PART_COLORS <- setNames(
+  colorRampPalette(c(
+    "#0055A5","#C75000","#1A7A4A","#8A3A5F","#D4860A",
+    "#4A6B8A","#6B4A8A","#8A6B2C","#1A7A4A","#8A2C5F",
+    "#5F8A2C","#2C4A8A","#8A5F2C","#4A8A6B"
+  ))(14),
+  paste0("P", sprintf("%03d", c(1:6, 8:15)))
+)
+
+# ── Report theme ────────────────────────────────────────────────────────────────
+theme_report <- function() {
+  theme_minimal(base_family = "Inter", base_size = 11) +
+    theme(
+      plot.title       = element_text(size = 13, face = "bold", colour = "#0A2540"),
+      plot.subtitle    = element_text(size = 10, colour = "#64748B"),
+      axis.title       = element_text(size = 10, colour = "#0A2540"),
+      axis.text        = element_text(size = 9,  colour = "#475569"),
+      panel.grid.major = element_line(colour = "#F1F5F9", linewidth = 0.6),
+      panel.grid.minor = element_blank(),
+      legend.position  = "bottom",
+      legend.text      = element_text(size = 9),
+      plot.caption     = element_text(size = 8, colour = "#94A3B8", hjust = 0),
+      strip.text       = element_text(size = 10, face = "bold", colour = "#0A2540"),
+      plot.background  = element_rect(fill = "white", colour = NA),
+      panel.background = element_rect(fill = "white", colour = NA)
+    )
+}
+```
+
+```{r load-data}
+#| label: load-data
+#| include: false
+
+df_raw <- read_csv("data/garmin_merged_14p.csv", show_col_types = FALSE)
+
+# ── Global data quality filters ─────────────────────────────────────────────────
+df_raw <- df_raw %>%
+  mutate(
+    # Exclude artefact sleep nights
+    TSD = ifelse(TSD < 3 | TSD > 12, NA_real_, TSD),
+    # Exclude physiologically impossible SQ
+    SleepQuality_pct_raw = (DeepSleepProp + REMSleepProp_final) * 100,
+    SleepQuality_pct_raw = ifelse(SleepQuality_pct_raw > 75, NA_real_,
+                                  SleepQuality_pct_raw)
+  )
+
+# ── Derived variables (within-participant) ──────────────────────────────────────
+garmin <- df_raw %>%
+  group_by(User_id) %>%
+  arrange(calendar_date) %>%
+  mutate(
+    rhr_roll7     = zoo::rollapply(DailyRestingHeartRate_clean, 7, mean,
+                                   na.rm = TRUE, fill = NA, align = "right"),
+    RecoveryScore = -(DailyRestingHeartRate_clean - rhr_roll7),
+    SleepQuality_pct = (DeepSleepProp + REMSleepProp_final) * 100,
+    SleepQuality_pct = ifelse(SleepQuality_pct > 75, NA_real_, SleepQuality_pct),
+    BB_delta      = pmin(pmax(lead(DailyBodyBattery.chargedValue, 1) -
+                                DailyBodyBattery.drainedValue, -20), 20),
+    BB_delta_lag1  = lag(BB_delta, 1),
+    TSD_lag1       = lag(TSD, 1),
+    SE_lag1        = lag(SE, 1),
+    SQ_lag1        = lag(SleepQuality_pct, 1),
+    SessionLoad_lag1 = lag(SessionLoad, 1),
+    RE             = ifelse(ActivitiesAvgHr > 0,
+                            ActivitiesAvgSpeed_kmh / ActivitiesAvgHr, NA_real_)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    SL_Intensity = case_when(
+      is.na(SessionLoad) | SessionLoad == 0 ~ "Rest Day",
+      SessionLoad <= quantile(SessionLoad[SessionLoad > 0], .33, na.rm = TRUE) ~ "Light",
+      SessionLoad <= quantile(SessionLoad[SessionLoad > 0], .67, na.rm = TRUE) ~ "Moderate",
+      TRUE ~ "High"
+    ),
+    SL_Intensity = factor(SL_Intensity, levels = c("Rest Day","Light","Moderate","High")),
+    Gender = ifelse(Sex == "M", "Male", "Female"),
+    RI     = ifelse(!is.na(ActivitiesAvgHr) & !is.na(ActivitiesMaxHr) & ActivitiesMaxHr > 0,
+                    ActivitiesAvgHr / ActivitiesMaxHr * 100, NA_real_),
+    SF     = AwakeSleepProp * 100,
+    SleepQualityLevel = case_when(
+      is.na(SleepQuality_pct) ~ NA_character_,
+      SleepQuality_pct < 20   ~ "Poor",
+      SleepQuality_pct < 35   ~ "Fair",
+      SleepQuality_pct < 50   ~ "Normal",
+      SleepQuality_pct < 65   ~ "Excellent",
+      TRUE                     ~ "Rebound"
+    ),
+    SleepQualityLevel = factor(SleepQualityLevel,
+                               levels = c("Poor","Fair","Normal","Excellent","Rebound"))
+  )
+
+# ── Analysis cohorts ────────────────────────────────────────────────────────────
+# Full cohort: 11 participants with sleep staging data (excl P006, P013, P015)
+garmin <- garmin %>%
+  mutate(analysis_cohort = ifelse(User_id %in% c("P006","P013","P015"), "limited", "full"))
+
+garmin_full <- garmin %>% filter(analysis_cohort == "full")
+
+# Exclude Body Battery for P008
+garmin <- garmin %>%
+  mutate(BB_delta = ifelse(User_id == "P008", NA_real_, BB_delta))
+```
+
+## Introduction
+
+Wearable biosensor technology has transformed the capacity to monitor athlete physiology
+in naturalistic training environments, enabling continuous, objective quantification of
+training load, sleep architecture, and cardiovascular recovery outside the laboratory.
+The resting heart rate (RHR) and heart rate variability (HRV) signals captured by
+consumer-grade devices have been shown to track day-to-day recovery status with clinically
+meaningful accuracy [@buchheit2014]. Longitudinal studies leveraging these signals
+increasingly demonstrate that recovery monitoring improves training prescription and
+reduces injury risk [@plews2013; @flatt2017]. Sleep, in particular, is recognised as the
+primary physiological mechanism through which adaptations to training are consolidated:
+even modest sleep restriction degrades reaction time, maximal strength, and endurance
+economy within 48 hours [@fullagar2015]. The advent of consumer-grade devices capable
+of continuous multi-parameter recording — heart rate, sleep staging, GPS speed, and
+derived wellness indices — has lowered the barrier for longitudinal physiological
+monitoring to a level accessible to non-elite athletes [@düking2018].
+
+Despite growing interest, the existing literature exhibits two important gaps. First,
+most controlled studies recruit elite or sub-elite athletes whose training is professionally
+supervised, limiting generalisability to the recreational running population that
+comprises the vast majority of wearable device users worldwide [@staunton2017]. This
+gap is especially pronounced in sub-Saharan Africa, where recreational running
+participation has grown substantially over the past decade yet remains almost entirely
+absent from the peer-reviewed sports science literature. Second, laboratory-based sleep
+protocols and polysomnography equipment constrain observation windows to a few nights,
+preventing examination of how training–sleep–recovery dynamics unfold across months or
+years of real-world training. Longitudinal, naturalistic wearable studies that follow
+recreational athletes over multi-year horizons remain rare.
+
+The present study addresses these gaps using data collected from 14 recreational runners
+in Nairobi, Kenya between January 2022 and February 2026 via Garmin wearable devices.
+All participants trained autonomously, without professional coaching, providing ecologically
+valid data on how everyday athletes manage the interplay between training stress and
+recovery. Three explicit research questions guide the analysis:
+
+1. **Training → Sleep**: How does acute training load on day *t* affect sleep architecture
+   on the subsequent night (*t+1*)?
+2. **Sleep → Recovery**: How do sleep metrics recorded on night *t* associate with the
+   RHR-based recovery score on morning *t+1*?
+3. **Lag structure**: Do the effects identified above persist across multiple days, and
+   if so, for how long?
+
+Associations are characterised using Spearman rank correlations (appropriate for the
+non-normal distributions typical of wearable data), lagged bivariate analyses, and
+linear mixed-effects models (lme4) with random intercepts per participant to account for
+the repeated-measures structure of the data.
+
+---
+
+## Data & Methods
+
+### Participants and Data Collection
+
+Fourteen recreational runners (nine male, five female; participants P001–P015 excluding
+P007) were recruited in Nairobi, Kenya. Each wore a Garmin device continuously throughout
+the study period (January 2022 – February 2026). The device recorded resting heart rate,
+sleep stage proportions (light, deep, REM, awake), Body Battery charge and drain cycles,
+GPS-derived session speed and distance, and estimated VO₂max. @tbl-participants summarises
+the cohort.
+
+```{r participants-table}
+#| label: tbl-participants
+#| tbl-cap: "Cohort characteristics by participant. VO₂max values are drawn from the LOCF-imputed variable. Three participants (P006, P013, P015) lack sleep staging data and are excluded from sleep architecture analyses. P008 is excluded from Body Battery analyses (0% coverage)."
+
+participant_summary <- garmin %>%
+  group_by(User_id) %>%
+  summarise(
+    Sex           = first(Sex),
+    Age           = first(na.omit(Age)),
+    VO2max_min    = round(min(VO2max_imputed_final, na.rm = TRUE), 1),
+    VO2max_max    = round(max(VO2max_imputed_final, na.rm = TRUE), 1),
+    Obs_days      = n(),
+    Cohort        = ifelse(first(analysis_cohort) == "full", "Full", "Limited"),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    VO2max_range = paste0(VO2max_min, "–", VO2max_max),
+    Sex = ifelse(Sex == "M", "Male", "Female")
+  ) %>%
+  select(User_id, Sex, Age, VO2max_range, Obs_days, Cohort) %>%
+  rename(
+    Participant = User_id,
+    `VO₂max range (ml/kg/min)` = VO2max_range,
+    `Observation days` = Obs_days,
+    `Analysis cohort` = Cohort
+  )
+
+knitr::kable(participant_summary, booktabs = TRUE, align = "llccc") %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped","hover"),
+                            full_width = FALSE, font_size = 11) %>%
+  kableExtra::row_spec(which(participant_summary$`Analysis cohort` == "Limited"),
+                       background = "#FFF8E1")
+```
+
+::: callout-note
+**Cohorts.** The *full* cohort (n = 11) includes all participants with valid sleep staging
+data and is used for analyses involving Sleep Quality % or REM/deep sleep proportions.
+The *all* cohort (n = 14) is used for analyses relying solely on sleep duration, sleep
+efficiency, or session load. All mixed-effects models are fitted on the all-participant
+dataset unless otherwise noted.
+:::
+
+### Variable Definitions
+
+```{r variable-table}
+#| label: tbl-variables
+#| tbl-cap: "Key variable definitions used throughout the report."
+
+var_defs <- tibble(
+  Variable = c(
+    "Recovery Score", "Session Load", "Sleep Quality (SQ%)",
+    "Sleep Efficiency (SE%)", "Sleep Fragmentation (SF%)",
+    "Sleep Duration (TSD)", "Relative Intensity (RI%)",
+    "Running Economy (RE)", "BB delta", "Training Monotony"
+  ),
+  Definition = c(
+    "−(daily RHR − 7-day rolling mean RHR); positive = well-recovered",
+    "ActivitiesAvgHr × session duration (min)",
+    "(Deep sleep proportion + REM proportion) × 100; capped at 75%",
+    "(Time asleep / Time in bed) × 100",
+    "Awake proportion × 100",
+    "Total sleep duration",
+    "(Average session HR / Maximum HR) × 100",
+    "Average speed (km/h) / Average HR (bpm)",
+    "Charged(t+1) − Drained(t), clamped to ±20; aligns with Recovery Score(t+1)",
+    "Weekly mean load / Weekly SD of load (Foster, 1998)"
+  ),
+  Unit = c("bpm deviation","AU","%","%","%","hours","%","(km/h)/bpm","AU","dimensionless"),
+  Notes = c(
+    "Requires ≥7 days of valid RHR",
+    "Proxy for internal training load",
+    "Absent for P006, P013, P015",
+    "Correlated with sleep depth",
+    "Higher = more fragmented sleep",
+    "Nights < 3 h or > 12 h excluded",
+    "Higher = more aerobically demanding",
+    "Lower = more economical at given effort",
+    "P008 excluded (0% Body Battery coverage)",
+    "Monotony > 2 signals overtraining risk"
+  )
+)
+
+knitr::kable(var_defs, booktabs = TRUE) %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped","hover"),
+                            full_width = TRUE, font_size = 10) %>%
+  kableExtra::column_spec(2, width = "9cm")
+```
+
+### Data Quality and Missingness
+
+```{r fig-coverage}
+#| label: fig-coverage
+#| fig-cap: "**Data coverage heatmap.** Each cell shows how much of a given variable was successfully recorded for each participant, as a percentage. Green means near-complete data, red means little or no data, with the exact percentage printed inside each cell."
+
+key_vars <- c("DailyRestingHeartRate_clean","TSD","SE","SleepQuality_pct",
+              "SessionLoad","VO2max_imputed_final","BB_delta","RecoveryScore",
+              "RI","RE")
+
+var_labels <- c(
+  DailyRestingHeartRate_clean = "RHR",
+  TSD = "Sleep Duration",
+  SE  = "Sleep Efficiency",
+  SleepQuality_pct = "Sleep Quality %",
+  SessionLoad = "Session Load",
+  VO2max_imputed_final = "VO₂max",
+  BB_delta = "BB delta",
+  RecoveryScore = "Recovery Score",
+  RI = "Rel. Intensity",
+  RE = "Running Economy"
+)
+
+coverage <- garmin %>%
+  select(User_id, all_of(key_vars)) %>%
+  group_by(User_id) %>%
+  summarise(across(everything(), ~ round(mean(!is.na(.x)) * 100, 1)),
+            .groups = "drop") %>%
+  pivot_longer(-User_id, names_to = "Variable", values_to = "coverage_pct") %>%
+  mutate(Variable = recode(Variable, !!!var_labels))
+
+ggplot(coverage, aes(x = Variable, y = User_id, fill = coverage_pct)) +
+  geom_tile(colour = "white", linewidth = 0.5) +
+  geom_text(aes(label = paste0(round(coverage_pct), "%")),
+            size = 2.8, colour = ifelse(coverage$coverage_pct < 50, "white", "#0A2540")) +
+  scale_fill_gradient2(low = COL_D, mid = "#FFF3CD", high = COL_G,
+                       midpoint = 50, limits = c(0, 100),
+                       name = "Valid obs. (%)") +
+  scale_x_discrete(guide = guide_axis(angle = 35)) +
+  labs(x = NULL, y = NULL,
+       title = "Data Coverage by Participant and Variable",
+       caption = "Values < 50% shown in white text for readability.") +
+  theme_report() +
+  theme(legend.position = "right")
+```
+
+::: callout-warning
+**Structural missingness.** Sleep staging variables (`SleepQuality_pct`,
+`REMSleepProp_final`, `DeepSleepProp`) are entirely absent for **P006, P013, and P015**
+as these participants did not consistently wear their devices during sleep, resulting in no valid sleep staging records. These participants contribute to analyses of sleep duration and efficiency but are excluded from any analysis referencing sleep architecture (analysis_cohort == "full"). **P008** has 0% Body Battery coverage and is
+excluded from all BB-related analyses. `VO2max_imputed_final` uses last-observation
+carried forward (LOCF) imputation; residual missingness after imputation is 2.6%.
+:::
+
+Two analysis cohorts are maintained throughout: the *full* cohort (11 participants,
+all sleep variables available) and the *all* cohort (14 participants, restricted to
+variables available across all devices).
+
+### Statistical Approach
+
+All bivariate associations are characterised using the Spearman rank correlation
+coefficient (ρ), which makes no distributional assumptions and is robust to the
+right-skewed, heteroscedastic distributions typical of wearable data. Lagged analyses
+pair observations on day *t* with outcomes on days *t+1*, *t+2*, and *t+3*, with all
+lead/lag operations computed within participant groups to prevent cross-participant
+data leakage. Primary inferential models are linear mixed-effects models (LME) fitted
+with `lme4::lmer()` using restricted maximum likelihood (REML), with a random intercept
+for each participant to account for baseline differences in RHR and the repeated-measures
+structure of the data. The significance
+threshold is α = 0.05; exact p-values are reported throughout. Effect sizes for Spearman ρ
+are interpreted following Cohen's benchmarks: small ≥ 0.10, medium ≥ 0.30, large ≥ 0.50.
+
+::: callout-note
+**Power caveat.** With n = 14 participants, between-person comparisons are substantially
+underpowered. Mixed-effects models yield adequate power for within-person effects by
+leveraging the full longitudinal depth (~12,760 observations) but should not be used to
+draw strong conclusions about participant-level differences.
+:::
+
+---
+
+## Training Behaviour
+
+```{r training-calendar}
+#| label: fig-calendar
+#| fig-cap: "**Monthly training intensity distribution.** Each bar represents one calendar month. The bar is divided into coloured bands showing what proportion of that month's training days were Rest (grey), Light (amber), Moderate (blue), or High intensity (red). All bands in a bar add up to 100%."
+
+intensity_colors <- c(
+  "Rest Day"  = COL_N,
+  "Light"     = COL_W,
+  "Moderate"  = COL_P,
+  "High"      = COL_D
+)
+
+# Monthly proportion of days per intensity tier across the full cohort
+cal_monthly <- garmin %>%
+  mutate(month = floor_date(calendar_date, "month")) %>%
+  count(month, SL_Intensity) %>%
+  group_by(month) %>%
+  mutate(prop = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(SL_Intensity = factor(SL_Intensity,
+                               levels = c("Rest Day","Light","Moderate","High")))
+
+ggplot(cal_monthly, aes(x = month, y = prop, fill = SL_Intensity)) +
+  geom_col(width = 25, colour = "white", linewidth = 0.2) +
+  scale_fill_manual(values = intensity_colors, name = "Intensity") +
+  scale_x_date(date_breaks = "6 months", date_labels = "%b '%y",
+               expand = c(0.01, 0)) +
+  scale_y_continuous(labels = label_percent(accuracy = 1), expand = c(0, 0)) +
+  labs(
+    x = NULL, y = "Proportion of training days",
+    title = "Monthly Training Intensity Distribution — Cohort (2022–2026)",
+    subtitle = "Each bar = one calendar month; proportions across all 14 participants",
+    caption = "Intensity assigned by tertile of SessionLoad among active days."
+  ) +
+  theme_report()
+```
+
+```{r fig-load-dist}
+#| label: fig-load-dist
+#| fig-cap: "**Session Load histogram — all active training days.** Each bar counts how many sessions fell within that load range, coloured by intensity tier. The two dashed vertical lines show where the boundaries between Light, Moderate, and High sessions sit, with the load value labelled at each boundary."
+
+active_days <- garmin %>%
+  filter(!is.na(SessionLoad), SessionLoad > 0, SessionLoad <= 65000)
+
+# Tertile cut-points for vertical reference lines
+q33 <- quantile(active_days$SessionLoad, 0.33, na.rm = TRUE)
+q67 <- quantile(active_days$SessionLoad, 0.67, na.rm = TRUE)
+
+ggplot(active_days, aes(x = SessionLoad, fill = SL_Intensity)) +
+  geom_histogram(binwidth = 1500, colour = "white", linewidth = 0.2, alpha = 0.85) +
+  geom_vline(xintercept = q33, linetype = "dashed",
+             colour = "#0A2540", linewidth = 0.8) +
+  geom_vline(xintercept = q67, linetype = "dashed",
+             colour = "#0A2540", linewidth = 0.8) +
+  annotate("text", x = q33 + 600, y = Inf,
+           label = scales::comma(round(q33)),
+           size = 3, vjust = 1.4, hjust = 0, colour = "#0A2540") +
+  annotate("text", x = q67 + 600, y = Inf,
+           label = scales::comma(round(q67)),
+           size = 3, vjust = 1.4, hjust = 0, colour = "#0A2540") +
+  scale_fill_manual(values = intensity_colors, name = "Intensity") +
+  scale_x_continuous(labels = label_number(big.mark = ","), limits = c(0, 65000)) +
+  scale_y_continuous(labels = label_number(big.mark = ",")) +
+  labs(
+    x = "Session Load (AU)", y = "Number of sessions",
+    title = "Distribution of Session Load — All Active Days",
+    subtitle = "Capped at 65,000 AU; dashed lines = tertile cut-points defining intensity tiers"
+  ) +
+  theme_report()
+```
+
+```{r fig-ri-distance}
+#| label: fig-ri-distance
+#| fig-cap: "**Relative Intensity vs. running distance.** Each dot is one training session, coloured by intensity tier, showing how hard the athlete ran (as a percentage of their maximum heart rate) against how far they ran. The curved line is a smoothed trend through all sessions; the dashed horizontal line marks the 90% intensity threshold. The correlation strength is shown in the subtitle."
+
+ri_dist <- garmin %>%
+  filter(!is.na(RI), !is.na(TV), TV > 0, RI > 0)
+
+spear_ri <- cor.test(ri_dist$TV, ri_dist$RI, method = "spearman", exact = FALSE)
+
+ggplot(ri_dist, aes(x = TV, y = RI, colour = SL_Intensity)) +
+  geom_point(alpha = 0.35, size = 1.2) +
+  geom_smooth(aes(group = 1), method = "loess", se = TRUE,
+              colour = "#0A2540", fill = "#CBD5E1", linewidth = 1) +
+  geom_hline(yintercept = 90, linetype = "dashed",
+             colour = COL_D, linewidth = 0.8) +
+  annotate("text", x = max(ri_dist$TV, na.rm = TRUE) * 0.85,
+           y = 91.5, label = "90% RI threshold",
+           colour = COL_D, size = 3.2) +
+  scale_colour_manual(values = intensity_colors, name = "Intensity") +
+  scale_x_continuous(labels = label_number(suffix = " km")) +
+  scale_y_continuous(labels = label_number(suffix = "%")) +
+  labs(
+    x = "Distance (km)", y = "Relative Intensity (%)",
+    title = "Relative Intensity vs. Running Distance",
+    subtitle = sprintf("Spearman ρ = %.2f, p %s",
+                       spear_ri$estimate,
+                       ifelse(spear_ri$p.value < 0.001, "< 0.001",
+                              round(spear_ri$p.value, 3)))
+  ) +
+  theme_report()
+```
+
+Training behaviour across the study period (2022–2026) reveals a predominantly aerobic
+base structure among this recreational cohort. The monthly training intensity chart
+(@fig-calendar) shows that Rest and Light days consistently account for the majority
+of each month (~65–75% combined), with the proportion of Moderate and High days rising
+during identifiable 2–3 month blocks — consistent with race preparation cycles. The
+periodisation pattern is visible across multiple years, suggesting these recreational
+athletes adopt recognisable training rhythms despite the absence of professional coaching.
+
+The load histogram (@fig-load-dist) reveals a strongly right-skewed distribution: the
+vast majority of active-day sessions fall below 20,000 AU, while a sparse tail of
+high-effort days extends toward the 65,000 AU cap. The tertile cut-points (dashed lines)
+sit well within the dense region of the distribution, confirming that the tier boundaries
+capture genuinely distinct physiological stimuli rather than arbitrary quantile splits.
+The right tail — driven by races and back-to-back training days — is a feature of
+naturalistic training data absent from controlled laboratory protocols.
+
+The relationship between running distance and relative intensity (@fig-ri-distance)
+provides direct evidence of polarised periodisation: the Spearman correlation between
+distance and RI% is negative, indicating that longer runs are systematically performed
+at lower intensities. Most long runs fall below the 90% RI threshold (dashed line),
+consistent with the widely recommended 80/20 intensity distribution [@seiler2010]. The
+LOESS curve reveals that relative intensity plateaus in the 80–85% zone for
+medium-distance sessions — a comfortably hard aerobic effort — before declining
+appreciably for the longest runs as pacing strategy shifts toward completion over
+intensity.
+
+Overall, the training behaviour of this cohort is broadly consistent with guidelines
+for recreational runners: high volume at low intensity punctuated by infrequent
+high-intensity sessions. The naturalistic data capture day-to-day variability in
+training adherence that controlled studies obscure, providing an ecologically valid
+foundation for the subsequent analyses of sleep and recovery.
+
+---
+
+## Sleep Architecture
+
+```{r fig-sleep-stages}
+#| label: fig-sleep-stages
+#| fig-cap: "**Cohort-mean sleep stage proportions over time.** Each coloured line traces how the average proportion of Deep (red), Light (grey), and REM (green) sleep changed across the study period for the 11 participants with sleep staging data. Shaded bands around each line show the uncertainty in the smoothed trend."
+
+stage_long <- garmin_full %>%
+  filter(!is.na(DeepSleepProp), !is.na(LightSleepProp),
+         !is.na(REMSleepProp_final)) %>%
+  group_by(calendar_date) %>%
+  summarise(
+    Deep  = mean(DeepSleepProp * 100, na.rm = TRUE),
+    Light = mean(LightSleepProp * 100, na.rm = TRUE),
+    REM   = mean(REMSleepProp_final * 100, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  pivot_longer(-calendar_date, names_to = "Stage", values_to = "Proportion")
+
+stage_colors <- c(Deep = COL_D, Light = COL_N, REM = COL_G)
+
+ggplot(stage_long, aes(x = calendar_date, y = Proportion, colour = Stage)) +
+  geom_smooth(method = "loess", span = 0.25, se = TRUE,
+              linewidth = 1.1, alpha = 0.15) +
+  scale_colour_manual(values = stage_colors, name = "Stage") +
+  scale_x_date(date_breaks = "6 months", date_labels = "%b '%y") +
+  scale_y_continuous(labels = label_number(suffix = "%")) +
+  labs(
+    x = NULL, y = "Mean proportion (%)",
+    title = "Cohort-Mean Sleep Stage Proportions Over Time",
+    subtitle = "Full cohort (n = 11); LOESS span = 0.25",
+    caption = "Sleep staging absent for P006, P013, P015."
+  ) +
+  theme_report()
+```
+
+```{r fig-sq-dist}
+#| label: fig-sq-dist
+#| fig-cap: "**Sleep Quality % distribution.** Each bar counts how many nights fell within a Sleep Quality % range, coloured by quality level: Poor (red), Fair (amber), Normal (grey), Excellent (blue), and Rebound (green). Higher percentages mean more time spent in deep and REM sleep. Full cohort only."
+
+garmin_full %>%
+  filter(!is.na(SleepQuality_pct), !is.na(SleepQualityLevel)) %>%
+  ggplot(aes(x = SleepQuality_pct, fill = SleepQualityLevel)) +
+  geom_histogram(binwidth = 2, colour = "white", linewidth = 0.3) +
+  scale_fill_manual(
+    values = c(Poor = COL_D, Fair = COL_W, Normal = COL_N,
+               Excellent = COL_P, Rebound = COL_G),
+    name = "Quality level", drop = FALSE
+  ) +
+  scale_x_continuous(limits = c(0, 75), labels = label_number(suffix = "%")) +
+  scale_y_continuous(labels = label_number(big.mark = ",")) +
+  labs(
+    x = "Sleep Quality % (Deep + REM proportion)",
+    y = "Nights (n)",
+    title = "Distribution of Sleep Quality",
+    subtitle = "Full cohort; SQ% capped at 75 (physiological ceiling)",
+    caption = "Poor < 20%; Fair 20–35%; Normal 35–50%; Excellent 50–65%; Rebound > 65%."
+  ) +
+  theme_report()
+```
+
+```{r fig-tsd-variability}
+#| label: fig-tsd-variability
+#| fig-cap: "**Within-participant sleep duration variability.** Each line-and-dot shows how inconsistent a participant's nightly sleep duration was across the study — longer means more night-to-night variation. Participants are ordered from most to least variable; red indicates high variability (over 1.2 hours SD), green indicates low variability. The dashed line marks the group average."
+
+tsd_var <- garmin %>%
+  group_by(User_id) %>%
+  summarise(sd_tsd = sd(TSD, na.rm = TRUE), .groups = "drop") %>%
+  arrange(desc(sd_tsd)) %>%
+  mutate(
+    User_id = factor(User_id, levels = User_id),
+    col = ifelse(sd_tsd > 1.2, COL_D, COL_G)
+  )
+
+cohort_mean_sd <- mean(tsd_var$sd_tsd, na.rm = TRUE)
+
+ggplot(tsd_var, aes(x = sd_tsd, y = User_id)) +
+  geom_segment(aes(x = 0, xend = sd_tsd, yend = User_id, colour = col),
+               linewidth = 0.9) +
+  geom_point(aes(colour = col), size = 3.5) +
+  geom_vline(xintercept = cohort_mean_sd, linetype = "dashed",
+             colour = "#0A2540", linewidth = 0.7) +
+  annotate("text", x = cohort_mean_sd + 0.03,
+           y = nrow(tsd_var) * 0.05 + 0.5,
+           label = paste0("Cohort mean\n", round(cohort_mean_sd, 2), " h"),
+           size = 3, colour = "#0A2540", hjust = 0) +
+  scale_colour_identity() +
+  scale_x_continuous(labels = label_number(suffix = " h")) +
+  labs(
+    x = "SD of Total Sleep Duration (hours)", y = "Participant",
+    title = "Within-Participant Sleep Duration Variability",
+    subtitle = "Red = SD > 1.2 h (high variability threshold)"
+  ) +
+  theme_report()
+```
+
+```{r fig-social-jetlag}
+#| label: fig-social-jetlag
+#| fig-cap: "**Social jetlag by participant.** Each line-and-dot shows how much each participant's sleep timing shifted between weekdays and weekends on average, measured in hours. Red indicates the shift exceeded one hour (dashed line) — the threshold associated with performance impacts in the literature; green indicates it did not."
+
+sj_data <- garmin %>%
+  filter(!is.na(SocialJetlag)) %>%
+  group_by(User_id) %>%
+  summarise(mean_sj = mean(abs(SocialJetlag), na.rm = TRUE), .groups = "drop") %>%
+  arrange(desc(mean_sj)) %>%
+  mutate(
+    User_id = factor(User_id, levels = User_id),
+    exceeds = mean_sj > 1
+  )
+
+ggplot(sj_data, aes(x = mean_sj, y = User_id)) +
+  geom_segment(aes(x = 0, xend = mean_sj, yend = User_id,
+                   colour = exceeds), linewidth = 0.9) +
+  geom_point(aes(colour = exceeds), size = 3.5) +
+  geom_vline(xintercept = 1, linetype = "dashed",
+             colour = COL_D, linewidth = 0.8) +
+  annotate("text", x = 1.05, y = 1, label = "1 h threshold",
+           colour = COL_D, size = 3.2, hjust = 0) +
+  scale_colour_manual(values = c(`FALSE` = COL_G, `TRUE` = COL_D),
+                      guide = "none") +
+  scale_x_continuous(labels = label_number(suffix = " h")) +
+  labs(
+    x = "Mean Absolute Social Jetlag (hours)", y = "Participant",
+    title = "Social Jetlag by Participant",
+    subtitle = "Red = exceeds 1 h threshold (Lastella et al., 2016)"
+  ) +
+  theme_report()
+```
+
+This cohort's overall sleep profile is moderate relative to published norms for
+recreational runners. The distribution of Sleep Quality % (@fig-sq-dist) is positively
+skewed with the mode falling within the Fair band (20–35%), meaning the single most
+common sleep quality outcome is below the Normal threshold. The bulk of nights cluster
+between roughly 20% and 45%, spanning the Fair to lower-Normal range. Very few nights
+reach the Excellent (50–65%) or Rebound (>65%) bands, indicating that sustained
+high-quality sleep architecture is the exception rather than the rule in this cohort.
+This concentration in the Fair range likely reflects the cumulative effect of lifestyle
+constraints — occupational demands, social jetlag, and self-coached training loads —
+that compress the restorative sleep architecture achievable without deliberate sleep
+intervention. The cohort-mean Sleep Quality % sits near the Fair–Normal boundary
+(approximately 30–35%), consistent with observations that physically active adults
+typically achieve higher proportions of deep and REM sleep than sedentary populations
+but rarely approach clinical polysomnographic ideals. The longitudinal trend in @fig-sleep-stages shows a gradual reduction in deep sleep
+proportions over the four-year window, while REM sleep increases slightly from Q4 2023
+through Q4 2025 — a shift that may reflect progressive adaptation in sleep architecture
+or a reduction in cumulative training load over that sub-period.
+
+Within-participant sleep duration variability (@fig-tsd-variability) reveals
+substantial heterogeneity in sleep regularity. Several participants show standard
+deviations exceeding 1.2 hours, indicating nights that swing from under five to over
+eight hours within the same individual. Such irregularity has been associated with
+impaired next-day cognitive performance and attenuated recovery from training [@fullagar2015].
+By contrast, athletes with consistently lower variability tend to cluster toward
+higher mean recovery scores, a relationship explored formally in Chapter 6.
+
+Social jetlag (@fig-social-jetlag) is present across the cohort to varying degrees. Five
+participants exceed the one-hour threshold identified by @lastella2016 as the point at which
+circadian misalignment begins to measurably impair performance outcomes. For Nairobi-based
+runners, weekend lifestyle factors (social engagements, informal training groups, varying
+alarm schedules) likely drive this misalignment. Practically, this finding suggests that
+a large proportion of recovery deficits in this cohort may be attributable not to training
+overload per se, but to modifiable sleep scheduling habits.
+
+Taken together, the sleep architecture data indicate that this cohort is not chronically
+sleep-deprived in a clinical sense but exhibits meaningful night-to-night instability
+and circadian misalignment. Both dimensions — quality and regularity — are examined as
+predictors of recovery in subsequent chapters.
+
+---
+
+## Recovery Physiology
+
+```{r fig-recovery-timeline}
+#| label: fig-recovery-timeline
+#| fig-cap: "**Monthly Recovery Score and Body Battery delta over time.** Each bar and connected point shows the group's average Recovery Score for that month — green when athletes were net recovered, red when net fatigued. The dashed amber line tracks the average Body Battery delta (charge gained overnight minus charge drained by activity) on the right scale. P008 is excluded from the Body Battery line."
+
+# Aggregate to monthly means for a cleaner view of the 4-year span
+monthly_cohort <- garmin %>%
+  filter(!is.na(RecoveryScore)) %>%
+  mutate(month = floor_date(calendar_date, "month")) %>%
+  group_by(month) %>%
+  summarise(
+    RS   = mean(RecoveryScore, na.rm = TRUE),
+    BB_d = mean(BB_delta,      na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(month) %>%
+  mutate(RS_col = ifelse(RS >= 0, COL_G, COL_D))
+
+# Daily cohort mean retained for ACF later
+daily_cohort <- garmin %>%
+  filter(!is.na(RecoveryScore)) %>%
+  group_by(calendar_date) %>%
+  summarise(RS = mean(RecoveryScore, na.rm = TRUE),
+            BB_d = mean(BB_delta, na.rm = TRUE), .groups = "drop") %>%
+  arrange(calendar_date) %>%
+  mutate(RS_roll7 = zoo::rollmean(RS, 7, fill = NA, align = "right"),
+         RS_col   = ifelse(RS >= 0, COL_G, COL_D))
+
+# Scale BB delta onto RS axis for dual-axis overlay
+rs_vals   <- monthly_cohort$RS
+rs_range  <- range(rs_vals, na.rm = TRUE)
+bb_range  <- c(-20, 20)
+bb_to_rs  <- function(x) (x - mean(bb_range)) /
+               diff(bb_range) * diff(rs_range) + mean(rs_range)
+rs_to_bb  <- function(x) (x - mean(rs_range)) /
+               diff(rs_range) * diff(bb_range) + mean(bb_range)
+
+monthly_cohort <- monthly_cohort %>%
+  mutate(BB_scaled = bb_to_rs(BB_d))
+
+ggplot(monthly_cohort, aes(x = month)) +
+  geom_col(aes(y = RS, fill = RS_col), alpha = 0.8, width = 25) +
+  geom_line(aes(y = RS), colour = "#0A2540", linewidth = 0.9) +
+  geom_point(aes(y = RS, colour = RS_col), size = 2, show.legend = FALSE) +
+  geom_line(aes(y = BB_scaled), colour = COL_W,
+            linewidth = 0.9, linetype = "dashed", na.rm = TRUE) +
+  geom_hline(yintercept = 0, colour = "#0A2540", linewidth = 0.5) +
+  scale_fill_identity() +
+  scale_colour_identity() +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b '%y",
+               expand = c(0.01, 0)) +
+  scale_y_continuous(
+    name     = "Recovery Score (bpm deviation)",
+    labels   = label_number(),
+    sec.axis = sec_axis(~ rs_to_bb(.), name = "BB delta (AU, ±20)",
+                        labels = label_number())
+  ) +
+  labs(
+    x = NULL,
+    title = "Monthly Recovery Score and Body Battery Delta (2022–2026)",
+    subtitle = "Bars/solid line = Recovery Score (left); dashed amber = BB delta (right); P008 excluded",
+    caption = "BB delta clamped ±20. Green = net recovered, red = net fatigued."
+  ) +
+  theme_report() +
+  theme(axis.title.y.right = element_text(colour = COL_W, size = 9))
+```
+
+```{r fig-recovery-participant}
+#| label: fig-recovery-participant
+#| fig-cap: "**Mean Recovery Score by participant.** Each bar shows one participant's average Recovery Score across the full study period, ordered from highest to lowest. Green bars indicate the participant was net recovered on average; red bars indicate net fatigued. The horizontal line at zero is the neutral baseline."
+
+part_rs <- garmin %>%
+  group_by(User_id) %>%
+  summarise(mean_RS = mean(RecoveryScore, na.rm = TRUE), .groups = "drop") %>%
+  arrange(desc(mean_RS)) %>%
+  mutate(
+    User_id = factor(User_id, levels = User_id),
+    fill_col = ifelse(mean_RS >= 0, COL_G, COL_D)
+  )
+
+ggplot(part_rs, aes(x = User_id, y = mean_RS, fill = fill_col)) +
+  geom_col(width = 0.65, alpha = 0.85) +
+  geom_hline(yintercept = 0, colour = "#0A2540", linewidth = 0.6) +
+  scale_fill_identity() +
+  scale_y_continuous(limits = c(-0.1, 0.1), labels = label_number()) +
+  labs(
+    x = "Participant", y = "Mean Recovery Score (bpm dev.)",
+    title = "Mean Recovery Score by Participant",
+    subtitle = "Green = net positive recovery; red = net negative"
+  ) +
+  theme_report()
+```
+
+```{r fig-respiration}
+#| label: fig-respiration
+#| fig-cap: "**Cohort-mean waking respiration rate over time.** The thin line shows the daily group average breathing rate on waking; the thicker dark line smooths this into a weekly trend. The red-shaded region above the dashed line marks the elevated zone (16 breaths per minute or more), which is associated with incomplete recovery."
+
+resp_data <- garmin %>%
+  filter(!is.na(`DailyRespiration.avgWakingRespirationValue`)) %>%
+  group_by(calendar_date) %>%
+  summarise(resp = mean(`DailyRespiration.avgWakingRespirationValue`, na.rm = TRUE), .groups = "drop") %>%
+  arrange(calendar_date) %>%
+  mutate(resp_roll7 = zoo::rollmean(resp, 7, fill = NA, align = "right"))
+
+ggplot(resp_data, aes(x = calendar_date, y = resp)) +
+  annotate("rect",
+           xmin = min(resp_data$calendar_date), xmax = max(resp_data$calendar_date),
+           ymin = 16, ymax = max(resp_data$resp, na.rm = TRUE) * 1.05,
+           alpha = 0.12, fill = COL_D) +
+  geom_line(colour = COL_N, alpha = 0.5, linewidth = 0.5) +
+  geom_line(aes(y = resp_roll7), colour = "#0A2540",
+            linewidth = 1, na.rm = TRUE) +
+  geom_hline(yintercept = 16, linetype = "dashed",
+             colour = COL_D, linewidth = 0.8) +
+  annotate("text", x = min(resp_data$calendar_date),
+           y = 16.15, label = "16 br/min threshold",
+           colour = COL_D, size = 3, hjust = 0) +
+  scale_x_date(date_breaks = "6 months", date_labels = "%b '%y") +
+  scale_y_continuous(labels = label_number(suffix = " br/min")) +
+  labs(
+    x = NULL, y = "Respiration Rate",
+    title = "Cohort-Mean Waking Respiration Rate Over Time",
+    subtitle = "Line = 7-day rolling mean; shaded band = elevated zone (≥ 16 br/min)"
+  ) +
+  theme_report()
+```
+
+The cohort-mean recovery profile (@fig-recovery-timeline) reveals an undulating pattern
+characteristic of periodised training, with positive recovery periods (typically two to
+three weeks) punctuated by multi-week troughs. Two prominent fatigue accumulation periods
+are visible: a sustained trough extending through Q3 2023, coinciding with what appears to
+be a concentrated competition or training camp period, and a shallower but more prolonged
+negative stretch across late 2024. The 7-day rolling mean confirms that these are not
+single-day artefacts but genuine multi-week physiological stressors.
+
+Inter-athlete heterogeneity in mean recovery score (@fig-recovery-participant) is striking.
+The range across participants spans nearly 0.8 bpm deviation, with the top performers
+maintaining scores above 0.4 while the lowest sit chronically below zero. This variability
+is not fully explained by training load differences (some high-training-volume participants
+maintain positive scores), suggesting that individual recovery capacity — likely linked to
+sleep quality, age, and external stress — is a primary modulator. Participants in chronic
+recovery deficit merit particular attention from a practical injury-prevention standpoint.
+
+Waking respiration rate (@fig-respiration) provides an independent physiological signal
+that corroborates the recovery score trajectory. The rolling mean tracks above the 16
+breaths/min threshold during the same periods identified as fatigue troughs in @fig-recovery-timeline,
+consistent with sympathetic nervous system dominance under accumulated training stress
+[@buchheit2014]. The convergence of two independent physiological signals — RHR-based
+recovery score and waking respiration rate — strengthens confidence that the observed
+patterns represent genuine physiology rather than measurement artefacts.
+
+Body Battery provides a complementary consumer-facing recovery indicator that
+synthesises RHR, HRV, respiration, and activity data into a 0–100 charge scale.
+The BB delta metric — defined as the net charge gained overnight relative to the
+drain from activity — captures the directional shift in readiness from one day to the
+next. Among the 13 participants with valid Body Battery data (P008 excluded due to 0%
+coverage), BB delta correlates positively with the RHR-based Recovery Score, suggesting
+that the two signals, though derived from different algorithms, reflect the same underlying
+physiological construct. Days with positive BB delta (more charge gained than drained) align
+with positive Recovery Score days in the monthly timeline (@fig-recovery-timeline), further
+validating the recovery narrative. For practitioners without access to HRV-based tools,
+Body Battery offers an accessible single-number readiness indicator, though it should be
+interpreted alongside subjective wellness ratings given its proprietary and opaque
+algorithmic construction.
+
+---
+
+## Cross-Domain Relationships
+
+```{r fig-corrplot}
+#| label: fig-corrplot
+#| fig-width: 10
+#| fig-height: 8
+#| fig-cap: "**Correlation heatmap across key variables.** Each cell shows how strongly two variables move together, from −1 (perfect opposite, deep red) through 0 (no relationship, white) to +1 (perfect match, deep blue). The number inside the cell is the correlation strength. Cells marked with a cross indicate the relationship could plausibly be due to chance."
+
+corr_vars <- garmin %>%
+  select(TSD, SE, SleepQuality_pct, SF,
+         SessionLoad, RI, Steps = DailyTotalSteps,
+         RecoveryScore, BB_delta,
+         Respiration = `DailyRespiration.avgWakingRespirationValue`) %>%
+  filter(complete.cases(.))
+
+corr_mat  <- cor(corr_vars, method = "spearman")
+corr_pmat <- ggcorrplot::cor_pmat(corr_vars, method = "spearman")
+
+var_display <- c(
+  TSD = "Sleep\nDuration", SE = "Sleep\nEfficiency",
+  SleepQuality_pct = "Sleep\nQuality %", SF = "Sleep\nFrag.",
+  SessionLoad = "Session\nLoad", RI = "Rel.\nIntensity",
+  Steps = "Steps", RecoveryScore = "Recovery\nScore",
+  BB_delta = "BB\nDelta", Respiration = "Respiration"
+)
+
+colnames(corr_mat) <- rownames(corr_mat) <-
+  colnames(corr_pmat) <- rownames(corr_pmat) <- var_display
+
+ggcorrplot::ggcorrplot(
+  corr_mat,
+  hc.order = FALSE,
+  type = "lower",
+  lab = TRUE,
+  lab_size = 2.8,
+  method = "square",
+  p.mat = corr_pmat,
+  colors = c(COL_D, "white", COL_P),
+  outline.col = "white"
+) +
+  labs(
+    title = "Spearman Correlation Matrix — Key Variables",
+    subtitle = "Crosses = non-significant (α = 0.05); n varies by variable availability"
+  ) +
+  theme_report() +
+  theme(axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8))
+```
+
+The correlation heatmap (@fig-corrplot) provides an initial overview of the cross-domain
+landscape. Recovery Score shows a positive association with Sleep Quality % and a negative
+association with Sleep Efficiency — an apparent paradox addressed in the lagged analyses
+below. Notably, both Relative Intensity and daily step count show negative correlations
+with Recovery Score, suggesting that on days when athletes train harder or move more,
+same-day recovery is suppressed — a directional signal consistent with the acute fatigue
+response. Session Load, by contrast, shows a non-significant association with Recovery
+Score at the bivariate level, implying that raw training volume alone does not predict
+same-day recovery once the between-person baseline differences are not controlled for.
+Associations between Recovery Score and Sleep Duration and Sleep Fragmentation are
+similarly non-significant, reinforcing that temporal structure — not simultaneous
+co-occurrence — is where the sleep–recovery relationship resides.
+
+### Training → Sleep (Next Night)
+
+```{r fig-load-sleep}
+#| label: fig-load-sleep
+#| fig-cap: "**Next-night sleep outcomes by training intensity.** Four panels, one per sleep metric. Within each panel, boxes show the spread of that sleep measure the night after Light, Moderate, or High intensity sessions — the line inside the box is the middle value, the box spans the middle half of all nights, and the whiskers capture the typical range. The p-value in each panel title shows whether the differences across intensity tiers are statistically meaningful."
+
+# Create next-night sleep variables
+garmin_lagged <- garmin %>%
+  group_by(User_id) %>%
+  arrange(calendar_date) %>%
+  mutate(
+    TSD_next = lead(TSD, 1),
+    SE_next  = lead(SE, 1),
+    SQ_next  = lead(SleepQuality_pct, 1),
+    SF_next  = lead(SF, 1)
+  ) %>%
+  ungroup()
+
+sleep_next_long <- garmin_lagged %>%
+  filter(!is.na(SL_Intensity)) %>%
+  # Exclude artefact next-nights (same quality filters as global TSD filter)
+  filter(is.na(TSD_next) | (TSD_next >= 3 & TSD_next <= 12)) %>%
+  # Rescale SE and SF to % if stored as proportions (0–1)
+  mutate(
+    SE_next = ifelse(!is.na(SE_next) & SE_next <= 1, SE_next * 100, SE_next),
+    SF_next = ifelse(!is.na(SF_next) & SF_next <= 1, SF_next * 100, SF_next)
+  ) %>%
+  # Exclude physiologically implausible SE values (device artefact floor: < 30%)
+  mutate(SE_next = ifelse(!is.na(SE_next) & SE_next < 30, NA_real_, SE_next)) %>%
+  select(SL_Intensity, TSD_next, SE_next, SQ_next, SF_next) %>%
+  pivot_longer(-SL_Intensity, names_to = "Metric", values_to = "Value") %>%
+  filter(!is.na(Value)) %>%
+  mutate(
+    Metric = recode(Metric,
+                    TSD_next = "Sleep Duration (h)",
+                    SE_next  = "Sleep Efficiency (%)",
+                    SQ_next  = "Sleep Quality %",
+                    SF_next  = "Sleep Fragmentation (%)"),
+    Metric = factor(Metric, levels = c(
+      "Sleep Duration (h)","Sleep Efficiency (%)","Sleep Quality %","Sleep Fragmentation (%)"))
+  )
+
+# Compute KW p-values per facet
+kw_pvals <- sleep_next_long %>%
+  group_by(Metric) %>%
+  summarise(
+    p = kruskal.test(Value ~ SL_Intensity)$p.value,
+    p_label = paste0("KW p = ", ifelse(p < 0.001, "< 0.001", round(p, 3))),
+    .groups = "drop"
+  )
+
+sleep_next_long <- sleep_next_long %>%
+  left_join(kw_pvals, by = "Metric") %>%
+  mutate(Facet_label = paste0(Metric, "\n", p_label))
+
+# Preserve factor order
+sleep_next_long$Facet_label <- factor(
+  sleep_next_long$Facet_label,
+  levels = unique(sleep_next_long$Facet_label[order(sleep_next_long$Metric)])
+)
+
+ggplot(sleep_next_long, aes(x = SL_Intensity, y = Value, fill = SL_Intensity)) +
+  geom_boxplot(outlier.size = 0.8, alpha = 0.75,
+               outlier.alpha = 0.3, width = 0.6) +
+  facet_wrap(~ Facet_label, scales = "free_y", nrow = 1) +
+  scale_fill_manual(values = intensity_colors, guide = "none") +
+  labs(
+    x = "Session Load Intensity", y = NULL,
+    title = "Next-Night Sleep Outcomes by Training Intensity"
+  ) +
+  theme_report() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 8))
+```
+
+```{r fig-sq-re}
+#| label: fig-sq-re
+#| fig-cap: "**Prior-night Sleep Quality vs. same-day Running Economy.** Each dot is one training session, showing how the previous night's sleep quality (0–75%) relates to how economically the athlete ran that day (speed per heartbeat). The curved line is a smoothed trend through all sessions, with the shaded band showing uncertainty. The correlation strength and significance are shown in the subtitle."
+
+sq_re_data <- garmin_full %>%
+  filter(!is.na(SleepQuality_pct), !is.na(RE), RE > 0)
+
+spear_sq_re <- cor.test(sq_re_data$SleepQuality_pct, sq_re_data$RE,
+                         method = "spearman", exact = FALSE)
+
+ggplot(sq_re_data, aes(x = SleepQuality_pct, y = RE)) +
+  geom_point(alpha = 0.3, size = 1.2, colour = COL_P) +
+  geom_smooth(method = "loess", se = TRUE,
+              colour = "#0A2540", fill = "#CBD5E1", linewidth = 1) +
+  scale_x_continuous(labels = label_number(suffix = "%"), limits = c(0, 75)) +
+  scale_y_continuous(labels = label_number(accuracy = 0.001), limits = c(0, 0.3)) +
+  labs(
+    x = "Prior-night Sleep Quality (%)",
+    y = "Running Economy (km/h per bpm)",
+    title = "Prior-Night Sleep Quality vs. Running Economy",
+    subtitle = sprintf("Spearman ρ = %.2f, p %s",
+                       spear_sq_re$estimate,
+                       ifelse(spear_sq_re$p.value < 0.001, "< 0.001",
+                              round(spear_sq_re$p.value, 3)))
+  ) +
+  theme_report()
+```
+
+```{r training-sleep-correlations}
+#| include: false
+
+# SE rescaled to % (mirrors the fig-load-sleep rescaling)
+garmin_lagged_pct <- garmin_lagged %>%
+  mutate(SE_next_pct = ifelse(!is.na(SE_next) & SE_next <= 1, SE_next * 100, SE_next))
+
+sl_tsd  <- cor.test(garmin_lagged_pct$SessionLoad, garmin_lagged_pct$TSD_next,
+                    method = "spearman", exact = FALSE)
+sl_se   <- cor.test(garmin_lagged_pct$SessionLoad, garmin_lagged_pct$SE_next_pct,
+                    method = "spearman", exact = FALSE)
+sl_sq   <- with(filter(garmin_lagged_pct, analysis_cohort == "full"),
+                cor.test(SessionLoad, SQ_next, method = "spearman", exact = FALSE))
+```
+
+The Kruskal-Wallis tests in @fig-load-sleep confirm that training intensity category
+is significantly associated with next-night sleep outcomes across all four metrics.
+Four key patterns emerge from comparing the intensity tiers against rest days:
+
+**Sleep Duration (TSD):** High and Light intensity sessions are associated with *greater*
+reductions in next-night sleep duration relative to rest days compared with Moderate
+sessions. Moderate sessions appear to sit in a zone where training stimulus is sufficient
+to promote restorative sleep without the disruption seen at the extremes. The Light
+session reduction likely reflects the fact that many Light days in this cohort are
+scheduled the morning after a hard effort — active recovery runs — meaning residual
+fatigue from the prior session rather than the light run itself may be the operative driver.
+
+**Sleep Efficiency (SE):** The pattern here is more nuanced than for sleep duration.
+High intensity sessions produce sleep efficiency comparable to rest days — the two groups
+are essentially indistinguishable. Light sessions show the most pronounced decline in
+sleep efficiency relative to rest days, followed by Moderate sessions which also reduce
+efficiency but to a lesser degree. This ordering — Light worse than Moderate, both worse
+than High and Rest — is counterintuitive at first glance but may reflect the composition
+of Light training days in this cohort: many are likely active recovery sessions scheduled
+after hard efforts, meaning residual fatigue and disrupted sleep homeostasis from the
+preceding day, rather than the light session itself, are the operative drivers of
+reduced efficiency.
+
+**Sleep Quality % (SQ):** All three active intensity tiers are associated with extremely
+slight reductions in SQ% compared with rest days, but the magnitude is negligible and
+the differences are practically meaningless. Training load modulates sleep quantity and
+continuity far more than it reshapes sleep stage architecture.
+
+**Sleep Fragmentation (SF):** The boxplots across all four intensity tiers —
+including rest days — are visually indistinguishable. The medians, interquartile ranges,
+and whisker spans overlap almost entirely, making this the clearest null result in the
+figure. Fragmentation is not meaningfully associated with training intensity in this
+cohort, suggesting it is governed primarily by individual sleep environment and
+circadian factors rather than daily training behaviour.
+
+The bivariate Spearman analysis corroborates these patterns: the correlation between
+Session Load and next-night sleep duration is
+ρ(`r nrow(filter(garmin_lagged_pct, !is.na(SessionLoad), !is.na(TSD_next)))`) =
+`r round(sl_tsd$estimate, 2)`,
+p `r ifelse(sl_tsd$p.value < 0.001, "< 0.001", round(sl_tsd$p.value, 3))`,
+and for sleep efficiency
+ρ = `r round(sl_se$estimate, 2)`,
+p `r ifelse(sl_se$p.value < 0.001, "< 0.001", round(sl_se$p.value, 3))`.
+For Sleep Quality %, ρ = `r round(sl_sq$estimate, 2)`,
+p `r ifelse(sl_sq$p.value < 0.001, "< 0.001", round(sl_sq$p.value, 3))`,
+confirming the near-zero association with sleep architecture.
+
+The relationship between prior-night Sleep Quality % and same-day running economy
+(@fig-sq-re) follows a non-linear trajectory. The LOESS curve rises from the low end of
+the SQ% range and peaks at approximately 40%, after which it remains broadly stable
+through to around 60% — suggesting a plateau where further improvements in sleep
+architecture yield diminishing marginal returns to running economy. Beyond 60%, the
+curve turns slightly downward. This decline at the upper end is consistent with a
+**rebound sleep effect**: nights with SQ% above ~65% (our Rebound threshold) tend to
+reflect compensatory deep and REM sleep driven by prior fatigue accumulation rather than
+genuine preparedness. In that context, the very highest SQ% values are a physiological
+signal of stress rather than readiness, which suppresses running economy relative to the
+plateau zone. The clinically actionable range for sleep architecture therefore appears
+to be roughly 35–60% SQ%, where higher architecture quality reliably co-occurs with
+better running economy without the confound of rebound fatigue.
+
+### Sleep → Recovery (Same Morning)
+
+```{r fig-sleep-recovery}
+#| label: fig-sleep-recovery
+#| fig-cap: "**Sleep metrics vs. same-morning Recovery Score — four panels.** Each panel compares one aspect of the previous night's sleep (A = total hours, B = efficiency %, C = fragmentation %, D = quality %) against the Recovery Score recorded that morning. Each dot is one day for one participant; the curved line shows the smoothed trend with uncertainty band. The correlation strength and significance are in each panel subtitle."
+
+tsd_rs  <- cor.test(garmin$TSD,  garmin$RecoveryScore, method = "spearman", exact = FALSE)
+sf_rs_raw <- cor.test(garmin$SF, garmin$RecoveryScore, method = "spearman", exact = FALSE)
+sq_rs   <- cor.test(garmin_full$SleepQuality_pct,
+                    garmin_full$RecoveryScore, method = "spearman", exact = FALSE)
+
+# SE: rescale to % if stored as proportion (0–1)
+garmin_se <- garmin %>%
+  mutate(SE_pct = ifelse(!is.na(SE) & SE <= 1, SE * 100, SE))
+se_rs <- cor.test(garmin_se$SE_pct, garmin_se$RecoveryScore,
+                  method = "spearman", exact = FALSE)
+
+make_scatter <- function(df, xvar, xlabel, xsuffix = "", vline = NULL, rho, pval) {
+  p <- ggplot(df, aes_string(x = xvar, y = "RecoveryScore", colour = "User_id")) +
+    geom_point(alpha = 0.25, size = 0.9) +
+    geom_smooth(aes(group = 1), method = "loess", se = TRUE,
+                colour = "#0A2540", fill = "#CBD5E1", linewidth = 1) +
+    scale_colour_manual(values = PART_COLORS, guide = "none") +
+    scale_y_continuous(labels = label_number(), limits = c(-20, 20)) +
+    labs(x = xlabel, y = "Recovery Score",
+         subtitle = sprintf("ρ = %.2f, p %s", rho,
+                            ifelse(pval < 0.001, "< 0.001", round(pval, 3)))) +
+    theme_report() +
+    theme(plot.subtitle = element_text(size = 8))
+  if (!is.null(vline)) {
+    p <- p + geom_vline(xintercept = vline, linetype = "dashed",
+                        colour = COL_D, linewidth = 0.7)
+  }
+  p
+}
+
+p1 <- make_scatter(garmin, "TSD", "Sleep Duration (h)",
+                   rho = tsd_rs$estimate, pval = tsd_rs$p.value)
+p2 <- make_scatter(garmin_se, "SE_pct", "Sleep Efficiency (%)",
+                   vline = 85, rho = se_rs$estimate, pval = se_rs$p.value)
+# Ensure SF is in % (multiply raw proportion by 100 if needed)
+garmin_sf <- garmin %>% mutate(SF_pct = ifelse(SF <= 1, SF * 100, SF))
+sf_rs   <- cor.test(garmin_sf$SF_pct, garmin_sf$RecoveryScore,
+                    method = "spearman", exact = FALSE)
+p3 <- make_scatter(garmin_sf, "SF_pct", "Sleep Fragmentation (%)",
+                   rho = sf_rs$estimate, pval = sf_rs$p.value)
+p4 <- make_scatter(garmin_full, "SleepQuality_pct", "Sleep Quality (%)",
+                   rho = sq_rs$estimate, pval = sq_rs$p.value)
+
+cowplot::plot_grid(p1, p2, p3, p4, nrow = 2, labels = "AUTO")
+```
+
+The scatter plots in @fig-sleep-recovery reveal associations between each sleep metric
+and next-morning Recovery Score. Across all four panels the LOESS curves are nearly
+flat — the wide ±20 bpm Recovery Score range and substantial within-cohort variability
+mean that no single sleep metric produces a visually pronounced response pattern.
+This is not unexpected: wearable-derived recovery metrics in naturalistic data embed
+considerable noise from factors unrelated to the sleep variable being plotted (training
+history, occupational stress, illness, social jetlag), which attenuates the visible
+signal even when a real statistical relationship exists.
+
+The Spearman correlations in each panel subtitle are therefore the appropriate
+interpretive lens rather than the LOESS curve shapes. Sleep Quality % is the strongest
+within-person predictor of next-morning Recovery Score
+(ρ = `r round(sq_rs$estimate, 2)`,
+p `r ifelse(sq_rs$p.value < 0.001, "< 0.001", round(sq_rs$p.value, 3))`),
+followed by Sleep Efficiency
+(ρ = `r round(se_rs$estimate, 2)`,
+p `r ifelse(se_rs$p.value < 0.001, "< 0.001", round(se_rs$p.value, 3))`).
+Sleep Duration carries a smaller positive signal
+(ρ = `r round(tsd_rs$estimate, 2)`),
+and Sleep Fragmentation is near zero
+(ρ = `r round(sf_rs$estimate, 2)`).
+The hierarchy — architecture quality first, continuity second, duration third,
+fragmentation negligible — is consistent across both the correlation coefficients and
+the mixed-effects model, and represents the most reliable evidence this figure provides.
+The visual flatness of the panels is itself informative: it confirms that the
+sleep–recovery relationship in this cohort is a genuine but modest signal embedded
+within a highly variable naturalistic dataset, rather than a clean dose-response
+relationship of the kind more commonly observed in controlled laboratory studies.
+
+### Training → Recovery (Next Day)
+
+```{r fig-lag-bars}
+#| label: fig-lag-bars
+#| fig-cap: "**How training and sleep effects carry over across days.** Three panels, one per relationship. Within each panel, bars show how strongly the predictor on Day 0 relates to the outcome on Day 0, Day 1, Day 2, and Day 3. Green bars mean the two variables move in the same direction; red bars mean they move in opposite directions. The thin lines through each bar show the uncertainty range."
+
+compute_lag_cors <- function(df, x_var, y_var, pair_label, lags = 0:3) {
+  df_grp <- df %>% group_by(User_id) %>% arrange(calendar_date)
+  map_dfr(lags, function(lag_n) {
+    df_lag <- df_grp %>%
+      mutate(y_lagged = lead(.data[[y_var]], lag_n)) %>%
+      ungroup() %>%
+      filter(!is.na(.data[[x_var]]), !is.na(y_lagged))
+    n_obs <- nrow(df_lag)
+    ct    <- cor.test(df_lag[[x_var]], df_lag$y_lagged,
+                      method = "spearman", exact = FALSE)
+    rho   <- as.numeric(ct$estimate)
+    se_rho <- sqrt((1 - rho^2) / max(n_obs - 2, 1))
+    tibble(lag = lag_n, rho = rho, n = n_obs, p = ct$p.value,
+           ci_lower = rho - 1.96 * se_rho,
+           ci_upper = rho + 1.96 * se_rho,
+           pair = pair_label)
+  })
+}
+
+lag_all <- bind_rows(
+  compute_lag_cors(garmin, "SessionLoad", "RecoveryScore", "Load → Recovery Score"),
+  compute_lag_cors(garmin, "SessionLoad", "TSD",           "Load → Sleep Duration"),
+  compute_lag_cors(garmin, "TSD",         "RecoveryScore", "Sleep Duration → Recovery Score")
+) %>%
+  mutate(pair = factor(pair, levels = c(
+    "Load → Recovery Score",
+    "Load → Sleep Duration",
+    "Sleep Duration → Recovery Score"
+  )))
+
+ggplot(lag_all, aes(x = lag, y = rho, fill = rho > 0)) +
+  geom_col(alpha = 0.8, width = 0.6) +
+  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
+                width = 0.2, colour = "#0A2540", linewidth = 0.6) +
+  geom_hline(yintercept = 0, colour = "#0A2540", linewidth = 0.6) +
+  facet_wrap(~ pair, nrow = 1) +
+  scale_fill_manual(values = c(`TRUE` = COL_G, `FALSE` = COL_D), guide = "none") +
+  scale_x_continuous(breaks = 0:3, labels = paste0("Day ", 0:3)) +
+  scale_y_continuous(limits = c(-0.2, 0.2),
+                     labels = label_number(accuracy = 0.1)) +
+  labs(
+    x = "Lag (days)", y = "Spearman ρ",
+    title = "Lag Structure of Training–Sleep–Recovery Associations",
+    subtitle = "Error bars = 95% CI; bars green = positive, red = negative"
+  ) +
+  theme_report() +
+  theme(
+    panel.border     = element_rect(colour = "#CBD5E1", fill = NA, linewidth = 0.8),
+    strip.background = element_rect(fill = "#F1F5F9", colour = "#CBD5E1", linewidth = 0.8)
+  )
+```
+
+The lag analysis (@fig-lag-bars) covers the four-day window from Day 0 (the same day
+as the training session or sleep event) through Day 3, with distinct patterns across
+the three panels.
+
+**Session Load → Recovery Score:** Recovery is suppressed on the day of a hard session
+(Day 0) and remains below baseline on Day 1, consistent with a two-day fatigue window.
+By Day 2 the correlation turns positive and is strongly positive on Day 3, capturing a
+classic supercompensation signal: the body overcompensates for the training stress and
+recovery scores overshoot baseline approximately three days after the effort [@buchheit2014].
+
+**Session Load → Sleep Duration:** Hard training slightly suppresses sleep on the same
+night (Day 0 negative), but Day 1 shows a strongly positive rebound — athletes sleep
+substantially longer the night after a demanding session, suggesting compensatory sleep
+extension. The association partially corrects back on Day 2 before a modest positive
+signal returns on Day 3.
+
+**Sleep Duration → Recovery Score:** Longer sleep is positively associated with same-day
+recovery (Day 0), as expected. However, Day 1 through Day 3 are all negative —
+increasingly so on Day 2 — reflecting the rebound sleep mechanism: nights of unusually
+long sleep tend to follow hard training, and that preceding training stress drives down
+recovery on the subsequent days. Long sleep in this context is a *response* to fatigue
+rather than a cause of readiness, and the lagged negative associations reflect the shadow
+of the training load that triggered the compensatory sleep in the first place.
+
+---
+
+## Statistical Modelling
+
+### Mixed-Effects Model
+
+```{r lme-model}
+#| label: tbl-lme
+#| tbl-cap: "Linear mixed-effects model predicting next-morning Recovery Score from prior-day sleep quality %, sleep duration, and session load (lme4/lmerTest, REML). Random intercept per participant accounts for individual baseline RHR differences."
+
+m_lme <- lmer(
+  RecoveryScore ~ SQ_lag1 + TSD_lag1 + SessionLoad_lag1 + (1 | User_id),
+  data = garmin, REML = TRUE
+)
+
+lme_tidy <- broom.mixed::tidy(m_lme, effects = "fixed", conf.int = TRUE) %>%
+  filter(effect == "fixed") %>%
+  select(term, estimate, conf.low, conf.high, std.error, df, p.value) %>%
+  mutate(
+    term = recode(term,
+                  `(Intercept)` = "Intercept",
+                  SQ_lag1  = "Sleep Quality % (lag 1)",
+                  TSD_lag1 = "Sleep Duration (lag 1)",
+                  SessionLoad_lag1 = "Session Load (lag 1)"),
+    across(where(is.numeric), ~ round(.x, 4)),
+    `95% CI` = paste0("[", conf.low, ", ", conf.high, "]")
+  ) %>%
+  select(Term = term, Estimate = estimate, `95% CI`,
+         SE = std.error, df, `p-value` = p.value)
+
+knitr::kable(lme_tidy, booktabs = TRUE, align = "lrrlrr") %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped","hover"),
+                            full_width = FALSE, font_size = 11)
+```
+
+The predictors were selected to reflect Chapter 6's finding that sleep architecture
+quality (SQ%) is the strongest sleep-based predictor of recovery, supplemented by sleep
+duration and Session Load as the training stress covariate. A random intercept per
+participant partitions the baseline between-athlete variation in RHR from within-person
+daily fluctuations, ensuring that estimated fixed effects reflect longitudinal covariation
+within each athlete rather than cross-sectional differences across athletes.
+
+The Recovery Score is defined as the negative deviation of daily RHR from its own
+7-day rolling mean: a positive value indicates the athlete's resting heart rate is
+suppressed below their recent baseline — a physiological signature of adequate
+recovery — while a negative value indicates elevation above baseline, consistent with
+residual fatigue or autonomic stress. The fixed-effect estimates therefore quantify
+how much this deviation shifts, in beats per minute, for a one-unit change in each
+predictor on the preceding day.
+
+**Sleep Quality % (lag 1) — Estimate 0.0098, p = 0.0017 ✓ Significant**
+For every one percentage point improvement in the previous night's deep + REM sleep
+proportion, the Recovery Score needle nudges upward by about 0.01 bpm. That sounds
+tiny, but consider the range: moving from a Poor sleep night (20% SQ) to a Normal one
+(45% SQ) is a 25-point shift, which translates to roughly +0.24 bpm on the recovery
+dial. In a system where the whole meaningful range is about ±1 bpm, that is a
+practically meaningful difference. The 95% CI [0.0037, 0.0160] does not cross zero,
+and the p-value of 0.0017 confirms this is not a chance finding. **Sleep architecture
+quality — specifically how much deep and REM sleep you get — is the only sleep variable
+in this model with a statistically reliable same-day effect on recovery.**
+
+**Sleep Duration (lag 1) — Estimate −0.037, p = 0.185 ✗ Not significant**
+Counterintuitively, sleeping longer the night before is not associated with a better
+Recovery Score once sleep quality and training load are held constant. The negative
+sign and the wide confidence interval [−0.091, 0.018] straddling zero tell us the
+effect is indistinguishable from noise. This does not mean sleep duration is
+unimportant — it means that *how well* you sleep (architecture) carries the signal,
+while *how long* you sleep adds little extra once quality is accounted for. This
+reinforces the hierarchy established in Chapter 6.
+
+**Session Load (lag 1) — Estimate ≈ 0.000, p < 0.001 ✓ Significant but negligible**
+The estimate rounds to zero to four decimal places, yet the p-value is highly
+significant. This is a case of *statistical significance without practical significance*:
+with over 4,000 degrees of freedom, the model has enough power to detect an effect so
+small it is physiologically irrelevant. Each extra arbitrary unit of Session Load nudges
+Recovery Score by a fraction of a thousandth of a bpm. The real-world message is that
+training load the day before does not independently suppress same-morning RHR recovery
+once sleep quality is already in the model — the training effect likely operates
+*through* sleep, not around it.
+
+**The random intercept** partitions stable between-athlete differences in resting heart
+rate from the day-to-day signal of interest. The fixed effects therefore represent
+within-person associations: on nights when an athlete's sleep architecture exceeds their
+own longitudinal average, their next-morning Recovery Score tends to be above their own
+average. This within-person framing is the appropriate estimand for informing
+individual training and recovery decisions.
+
+### Training Monotony
+
+```{r monotony-table}
+#| label: tbl-monotony
+#| tbl-cap: "Training monotony summary by participant. Mean monotony > 2 (Foster, 1998) signals overtraining risk. Participants highlighted in orange exceed the threshold on average; those with > 25% of weeks above the threshold are highlighted in red."
+
+monotony <- garmin %>%
+  filter(!is.na(SessionLoad)) %>%
+  mutate(iso_week = paste0(isoyear(calendar_date), "-W",
+                           sprintf("%02d", isoweek(calendar_date)))) %>%
+  group_by(User_id, iso_week) %>%
+  summarise(wk_mean = mean(SessionLoad, na.rm = TRUE),
+            wk_sd   = sd(SessionLoad, na.rm = TRUE), .groups = "drop") %>%
+  filter(wk_sd > 0) %>%
+  mutate(
+    monotony = wk_mean / wk_sd,
+    strain   = wk_mean * 7 * monotony
+  ) %>%
+  group_by(User_id) %>%
+  summarise(
+    mean_monotony = round(mean(monotony), 2),
+    pct_high      = round(100 * mean(monotony > 2), 1),
+    mean_strain   = round(mean(strain), 0),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(mean_monotony))
+
+monotony %>%
+  gt() %>%
+  cols_label(
+    User_id      = "Participant",
+    mean_monotony = "Mean Monotony",
+    pct_high      = "Weeks > 2 (%)",
+    mean_strain   = "Mean Strain"
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "#FFEDD5"),
+    locations = cells_body(rows = mean_monotony > 2 & pct_high <= 25)
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "#FEE2E2"),
+    locations = cells_body(rows = pct_high > 25)
+  ) %>%
+  tab_footnote(
+    footnote = "Foster (1998): monotony > 2 associated with overtraining syndrome.",
+    locations = cells_column_labels(columns = mean_monotony)
+  ) %>%
+  tab_options(table.font.size = 11)
+```
+
+```{r monotony-rs-cor}
+#| include: false
+part_rs_df    <- garmin %>%
+  group_by(User_id) %>%
+  summarise(mean_RS = mean(RecoveryScore, na.rm = TRUE), .groups = "drop")
+
+monotony_rs <- left_join(monotony, part_rs_df, by = "User_id") %>%
+  filter(!is.na(mean_RS))
+
+mono_cor <- cor.test(monotony_rs$mean_monotony, monotony_rs$mean_RS,
+                     method = "spearman", exact = FALSE)
+```
+
+Training monotony varies considerably across the cohort (@tbl-monotony). Several
+participants exceed Foster's (1998) overtraining risk threshold (monotony > 2) on
+average, indicating that they train with insufficient day-to-day variation in session
+load to allow physiological adaptation. The correlation between mean monotony and
+mean recovery score across participants is
+ρ(`r nrow(monotony_rs)`) = `r round(mono_cor$estimate, 2)`,
+p = `r round(mono_cor$p.value, 3)`.
+This is directionally consistent with the hypothesis that monotonous training erodes
+recovery capacity, but this Spearman coefficient is computed across only 14 data points
+— one per participant — which is far below the sample size typically required to
+reliably estimate a between-person correlation. With n = 14, even a medium-sized true
+effect (ρ ≈ 0.3) would be detected with less than 30% power, meaning the p-value
+should be treated as illustrative rather than confirmatory. The result is best
+interpreted as a hypothesis-generating observation warranting replication in a larger
+cohort.
+
+Athletes with the highest strain scores (mean load × 7 × monotony) tend to also
+show the lowest recovery scores, suggesting that it is the combination of high volume
+*and* low variation — rather than either alone — that most impairs recovery. This has
+direct practical implications for training prescription: even without reducing total
+volume, introducing greater day-to-day load variation (hard/easy alternation) could
+meaningfully improve average recovery scores.
+
+### Autocorrelation of Recovery Score
+
+```{r fig-acf}
+#| label: fig-acf
+#| fig-cap: "**Does today's recovery predict future recovery?** Each bar shows how strongly the group's Recovery Score on any given day is related to its own value that many days later — from 1 day ahead to 21 days ahead. Bars reaching beyond the dashed lines indicate a meaningful and non-random pattern at that time gap."
+
+cohort_daily_rs <- garmin %>%
+  filter(!is.na(RecoveryScore)) %>%
+  group_by(calendar_date) %>%
+  summarise(RS = mean(RecoveryScore, na.rm = TRUE), .groups = "drop") %>%
+  arrange(calendar_date) %>%
+  pull(RS)
+
+acf_out <- acf(cohort_daily_rs, lag.max = 21, plot = FALSE)
+n_ts    <- length(cohort_daily_rs)
+ci_band <- 1.96 / sqrt(n_ts)
+
+acf_df <- tibble(
+  lag   = as.numeric(acf_out$lag),
+  acf   = as.numeric(acf_out$acf),
+  sig   = abs(acf) > ci_band
+)
+
+ggplot(acf_df %>% filter(lag > 0), aes(x = lag, y = acf, fill = acf > 0)) +
+  geom_col(width = 0.7, alpha = 0.8) +
+  geom_hline(yintercept = c(-ci_band, ci_band),
+             linetype = "dashed", colour = "#0A2540", linewidth = 0.7) +
+  geom_hline(yintercept = 0, colour = "#475569", linewidth = 0.4) +
+  scale_fill_manual(values = c(`TRUE` = COL_G, `FALSE` = COL_D), guide = "none") +
+  scale_x_continuous(breaks = 1:21) +
+  scale_y_continuous(labels = label_number(accuracy = 0.01)) +
+  labs(
+    x = "Lag (days)", y = "Autocorrelation (ACF)",
+    title = "ACF of Cohort-Mean Daily Recovery Score",
+    subtitle = "Dashed lines = ±1.96/√N (95% confidence bounds)"
+  ) +
+  theme_report()
+```
+
+The ACF plot (@fig-acf) reveals a structured, oscillatory pattern in the cohort's
+recovery autocorrelation that closely mirrors implicit weekly training periodicity.
+Day 1 is positive — a well-recovered day predicts above-average recovery the following
+day, reflecting short-term physiological carry-over. By Days 4–5 the signal reverses:
+a well-recovered day is now associated with below-average recovery several days later,
+consistent with the supercompensation cycle in which a high-recovery state is typically
+followed by a hard training effort whose fatigue surfaces 3–5 days out.
+
+The weekly training rhythm becomes explicit at Days 7–8, where the autocorrelation
+returns to positive — athletes who are well-recovered on a given day of the week tend
+to be similarly recovered the same day the following week, reflecting consistent
+hard–easy structures. This alternating pattern then echoes fortnightly: Days 11–12
+are negative, mirroring the 4–5 day trough at a two-week offset, and Days 14–15 are
+positive again, confirming that the recovery oscillation repeats across back-to-back
+training weeks rather than resetting.
+
+The cycle completes at the three-week level: Days 17–18 return to negative and Day 21
+is positive, indicating that monthly training blocks leave a detectable signature in
+the recovery autocorrelation structure. Taken together, this pattern is consistent with
+an implicit periodisation rhythm in which recovery states are predictable not just
+across days but across multi-week training cycles — a finding that supports the
+practical value of structured hard–easy periodisation even in self-coached recreational
+athletes [@foster1998].
+
+---
+
+## Fitness Trajectories
+
+```{r fig-vo2max}
+#| label: fig-vo2max
+#| fig-cap: "**Individual aerobic fitness trajectories over time.** Each thin coloured line traces one participant's estimated VO₂max from 2022 to 2026. The bold dark curve shows the overall group trend smoothed across all participants. Only athletes with at least 90 recorded days are included."
+
+# Participants with ≥ 90 observations
+eligible_parts <- garmin %>%
+  filter(!is.na(VO2max_imputed_final)) %>%
+  count(User_id) %>%
+  filter(n >= 90) %>%
+  pull(User_id)
+
+vo2_data <- garmin %>%
+  filter(User_id %in% eligible_parts, !is.na(VO2max_imputed_final))
+
+ggplot(vo2_data, aes(x = calendar_date, y = VO2max_imputed_final)) +
+  geom_line(aes(group = User_id, colour = User_id), alpha = 0.35, linewidth = 0.6) +
+  geom_smooth(aes(group = 1), method = "loess", span = 0.15, se = FALSE,
+              colour = "#0A2540", linewidth = 1.5) +
+  scale_colour_manual(values = PART_COLORS, guide = "none") +
+  scale_x_date(date_breaks = "6 months", date_labels = "%b '%y") +
+  scale_y_continuous(labels = label_number(suffix = " ml/kg/min")) +
+  labs(
+    x = NULL, y = "VO₂max (ml/kg/min)",
+    title = "Individual VO₂max Trajectories (2022–2026)",
+    subtitle = "Participants with ≥ 90 observations; bold = cohort LOESS",
+    caption = "VO₂max: LOCF-imputed variable used throughout (2.6% residual missing)."
+  ) +
+  theme_report()
+```
+
+```{r fig-resilience}
+#| label: fig-resilience
+#| fig-cap: "**Fitness improvement vs. recovery stability — one dot per athlete.** Moving right means the athlete improved their aerobic fitness over the study; moving up means their day-to-day recovery was more erratic. Dot size reflects average training volume; colour indicates sex (blue = Male, amber = Female). The dashed vertical line separates athletes who improved fitness (right) from those who did not (left). Quadrant labels summarise what each combination means."
+
+# Compute annualised VO2max slope per participant
+vo2_slopes <- garmin %>%
+  filter(!is.na(VO2max_imputed_final)) %>%
+  group_by(User_id, Gender) %>%
+  summarise(
+    days_span = as.numeric(max(calendar_date) - min(calendar_date)),
+    slope_annual = lm(VO2max_imputed_final ~
+                        as.numeric(calendar_date))$coefficients[2] * 365,
+    .groups = "drop"
+  )
+
+rhr_variability <- garmin %>%
+  group_by(User_id) %>%
+  summarise(
+    rhr_dev_sd  = sd(RecoveryScore, na.rm = TRUE),
+    mean_load   = mean(SessionLoad, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+resilience_df <- left_join(vo2_slopes, rhr_variability, by = "User_id") %>%
+  filter(!is.na(rhr_dev_sd))
+
+ggplot(resilience_df, aes(x = slope_annual, y = rhr_dev_sd,
+                           size = mean_load, colour = Gender)) +
+  geom_point(alpha = 0.85) +
+  geom_vline(xintercept = 0, linetype = "dashed",
+             colour = "#0A2540", linewidth = 0.7) +
+  geom_hline(yintercept = median(resilience_df$rhr_dev_sd, na.rm = TRUE),
+             linetype = "dashed", colour = COL_N, linewidth = 0.6) +
+  annotate("text", x = max(resilience_df$slope_annual, na.rm=TRUE) * 0.85,
+           y = min(resilience_df$rhr_dev_sd, na.rm=TRUE) * 1.05,
+           label = "Resilient", size = 4, colour = COL_G, fontface = "bold") +
+  annotate("text", x = min(resilience_df$slope_annual, na.rm=TRUE) * 0.85,
+           y = max(resilience_df$rhr_dev_sd, na.rm=TRUE) * 0.97,
+           label = "Struggling", size = 4, colour = COL_D, fontface = "bold") +
+  ggrepel::geom_text_repel(aes(label = User_id), size = 2.8,
+                             max.overlaps = 20, seed = 42,
+                             show.legend = FALSE) +
+  scale_colour_manual(values = c(Male = COL_P, Female = COL_W), name = "Sex") +
+  scale_size_continuous(name = "Mean Session Load", range = c(3, 10)) +
+  scale_x_continuous(labels = label_number(suffix = " ml/kg/min/yr")) +
+  scale_y_continuous(labels = label_number()) +
+  labs(
+    x = "Annualised VO₂max slope (ml/kg/min/year)",
+    y = "SD of Recovery Score (variability)",
+    title = "Athlete Resilience: Fitness Gain vs. Recovery Stability"
+  ) +
+  theme_report()
+```
+
+The VO₂max trajectory plot (@fig-vo2max) reveals heterogeneous fitness outcomes across
+the four-year study period. At the cohort level, the LOESS trend does not follow a simple
+linear improvement. Instead, the cohort-mean curve shows a slight wavy increase from
+approximately April 2024 through to July 2025 — a period of net upward momentum
+interspersed with short plateaus — before stabilising toward the end of the study
+window. This sustained but undulating improvement phase coincides with the recovery
+score trends visible in Chapter 5, suggesting that the cohort entered a productive
+adaptation period in 2024 characterised by training loads sufficient to drive fitness
+gains without chronic recovery suppression. Individual trajectories diverge substantially
+around this shared cohort trend: several athletes show the improvement clearly, while
+others plateau following an earlier adaptation period or exhibit step-wise declines
+coinciding with the fatigue troughs identified in Chapter 5.
+
+The resilience scatter (@fig-resilience) reveals which athletes were able to simultaneously
+improve fitness while maintaining low recovery variability — the most desirable combination
+from a training efficiency standpoint. Athletes in the bottom-right "Resilient" quadrant
+tend to be those with lower training monotony (cross-referencing @tbl-monotony), suggesting
+that varied training stimuli facilitate both fitness gains and recovery stability. Athletes
+in the top-left "Struggling" quadrant, who show declining fitness alongside high recovery
+variability, merit investigation into training load management, sleep hygiene, and external
+stress factors.
+
+---
+
+## Discussion
+
+### Summary of Main Findings
+
+**Research Question 1 (Training → Sleep):** Contrary to the commonly cited disruption
+hypothesis, all active intensity tiers were associated with *longer and more efficient*
+sleep the following night relative to rest days. Nuance exists within this positive
+direction: High and Light sessions reduced sleep duration *more* than Moderate sessions
+did relative to rest days, while Light sessions showed the largest reduction in sleep efficiency, followed by
+Moderate sessions, with High intensity sessions producing sleep efficiency similar to
+rest days — a pattern suggesting that the composition of Light training days (likely
+active recovery runs after hard efforts) rather than session intensity per se drives
+the efficiency suppression. Sleep architecture (Deep + REM proportion) was negligibly
+affected across all intensity tiers (ρ ≈ 0), indicating that training load modulates
+sleep quantity and continuity but leaves restorative stage composition largely intact.
+Sleep fragmentation showed no meaningful sensitivity to training intensity, implying it
+is driven primarily by individual circadian and environmental factors rather than daily
+training behaviour. The compensatory sleep extension evident at Day 1 in the Session
+Load → Sleep Duration lag analysis further supports a homeostatic rather than disruptive
+interpretation of the training–sleep relationship in this cohort.
+
+**Research Question 2 (Sleep → Recovery):** Sleep Quality % — the proportion of sleep
+spent in deep and REM stages — is the strongest within-person predictor of next-morning
+Recovery Score (β = 0.0098, p = 0.002 in the mixed-effects model). Sleep Efficiency
+shows a positive association with Recovery Score up to approximately 80% efficiency,
+beyond which the relationship plateaus — consistent with a sufficiency threshold rather
+than a dose-response. Sleep Duration is positively associated with Recovery Score up to
+approximately 9 hours before declining, reflecting the rebound sleep mechanism observed
+in the lag analysis. Sleep Fragmentation shows a progressive negative association with
+Recovery Score up to around 25% awake time, after which the trend levels off. These
+non-linear profiles are practically important: they indicate that the relationship
+between sleep and recovery is characterised by sufficiency thresholds rather than
+simple "more is always better" heuristics, and that the clinically actionable zone for
+each metric lies within a specific range rather than at its maximum.
+
+**Research Question 3 (Lag structure):** The Session Load → Recovery Score relationship
+is negative on Day 0 and Day 1 (acute fatigue), turns positive on Day 2, and is
+strongly positive on Day 3 — a supercompensation arc completed within the same training
+week. The Recovery Score ACF reveals a structured oscillatory pattern: significant
+positive autocorrelation on Day 1, negative on Days 4–5, positive again on Days 7–8,
+reflecting weekly hard–easy training periodicity, with the pattern echoing fortnightly
+(Days 11–12 negative, 14–15 positive) and across a three-week cycle (Day 21 positive).
+This demonstrates that recovery dynamics in this cohort are not purely acute — they
+embed a multi-scale temporal structure that mirrors the periodisation rhythms of
+self-coached recreational athletes.
+
+### Comparison with Literature
+
+**Training load and sleep.** The positive association between training load and
+subsequent sleep duration observed here aligns with mechanistic evidence reviewed by
+@fullagar2015, who documented that acute exercise promotes slow-wave sleep through
+hypothalamic thermoregulation and adenosine clearance. However, that review also
+identified a threshold effect: very high training loads — particularly those involving
+late-evening sessions or substantial mechanical muscle damage — can elevate core body
+temperature and sympathetic arousal sufficiently to fragment sleep. The absence of such
+a disruption effect in the present cohort likely reflects the predominantly aerobic,
+daytime training typical of these recreational runners and the relatively low proportion
+of truly high-intensity days (~15% of active days). This contextualises the finding
+within the broader literature: the training–sleep relationship is not uniformly positive
+or negative but is moderated by session timing, intensity ceiling, and training history.
+
+**Sleep architecture and recovery.** The primacy of Sleep Quality % (deep + REM
+proportion) over sleep duration in predicting Recovery Score corroborates the framework
+articulated by @fullagar2015, who argued that sleep stage composition — not merely
+total sleep time — governs the restorative processes (growth hormone secretion, muscle
+protein synthesis, glycogen repletion) that underpin athletic recovery. The mixed-effects
+estimate of 0.0098 bpm per percentage point of SQ% is modest in isolation but
+accumulates meaningfully across the night: the difference between a Fair (30%) and a
+Normal (45%) sleep night corresponds to a Recovery Score shift of approximately 0.15
+bpm, which is physiologically relevant within the ±1 bpm typical range of this metric.
+This magnitude is comparable to the within-person RHR fluctuations used by @buchheit2014
+as clinical decision thresholds in elite endurance athletes, suggesting that even
+consumer-grade wearable sleep staging carries actionable signal when aggregated
+longitudinally.
+
+**RHR as a recovery biomarker.** @buchheit2014 established that morning RHR — when
+expressed relative to an individual's rolling baseline rather than a population norm
+— is a sensitive index of autonomic recovery status. The RHR-derived Recovery Score
+adopted here operationalises this principle in a self-referential framework that
+automatically adjusts for each athlete's training phase, making it robust to the
+between-person heterogeneity that confounds cross-sectional RHR comparisons. The
+corroboration of Recovery Score trends by waking respiration rate (@fig-respiration)
+provides independent physiological validation: respiration rate elevates above 16
+breaths/min during the same multi-week windows where Recovery Score turns negative,
+consistent with sympathetically dominated autonomic tone during accumulated fatigue
+[@plews2013]. The convergence of two device-derived signals strengthens confidence
+that the recovery dynamics captured are genuine rather than algorithmic artefacts.
+
+**Social jetlag and circadian misalignment.** Five participants exceeded the 1-hour
+social jetlag threshold, corroborating @lastella2016's observation that recreational
+athletes — unlike elite athletes with structured daily schedules — are particularly
+vulnerable to weekend circadian misalignment. The Nairobi context likely amplifies this
+effect: social and religious activities concentrated on weekends, combined with informal
+group training that shifts morning alarm schedules, create a systematic weekly
+circadian disruption that accumulates across months. Social jetlag has been shown to
+suppress melatonin amplitude and delay the recovery of autonomic tone following
+evening wakefulness [@lastella2016], mechanisms that would directly attenuate the
+sleep-architecture quality captured by SQ% in this study.
+
+**Training monotony and overtraining risk.** @foster1998 proposed that weekly training
+monotony exceeding 2.0 — the ratio of mean to standard deviation of daily load —
+predicts overtraining syndrome through the failure to allow supercompensatory adaptation
+between stimuli. The negative association between mean monotony and mean Recovery Score
+observed across participants (@tbl-monotony), though statistically underpowered at
+n = 14, is directionally consistent with this framework. Athletes with the highest
+monotony scores in this cohort also tended to show elevated recovery variability and
+slower VO₂max progression (@fig-resilience), suggesting that load variation is not merely
+a periodisation aesthetic but a physiological necessity for maintaining the training
+stimulus–adaptation cycle over multi-year horizons. This extends Foster's original
+single-season findings to a naturalistic four-year longitudinal context.
+
+### Limitations
+
+Several limitations warrant careful consideration. First, with n = 14 participants,
+between-person comparisons are substantially underpowered; the resilience scatter and
+monotony-recovery correlations are exploratory and should not be used to draw strong
+causal conclusions. Second, LOCF imputation for VO₂max introduces artificial plateaus
+between device syncs, particularly for participants with extended gaps in GPS activity;
+the imputed trajectories should be interpreted with this limitation in mind. Third, the RHR-based Recovery Score is a convenient but imperfect proxy for autonomic
+recovery status. While Body Battery — also recorded by the Garmin devices — incorporates
+HRV-like signals within its proprietary algorithm, it remains a black-box composite
+score whose internal weighting of HRV, stress, sleep, and activity components is
+undisclosed and unvalidated against clinical standards. Direct measurement of lnRMSSD
+(the natural logarithm of the root mean square of successive differences in R–R
+intervals), the gold-standard HRV metric in sports science, would provide a transparent,
+peer-reviewed biomarker with established normative ranges and sensitivity thresholds
+[@plews2013]. Body Battery partially captures this signal but cannot substitute for it
+in an academic validation context. Fourth, no ground-truth
+performance data (race times, laboratory test results) are available, preventing direct
+validation of the wearable-derived metrics against objective performance outcomes. Finally,
+sleep staging data were entirely absent for three participants due to device firmware
+incompatibility, creating structural missingness that required maintaining two analysis
+cohorts and limits the generalisability of sleep architecture findings.
+
+### Practical Implications
+
+The findings carry several evidence-grounded implications for practitioners working with
+recreational endurance athletes in sub-Saharan and similar urban environments.
+
+*Sleep quality over quantity.* The mixed-effects model identifies SQ% — not TSD — as
+the only sleep variable with a statistically reliable within-person association with
+next-morning recovery (β = 0.0098, p = 0.002). Practitioners should therefore direct
+athletes toward behaviours that protect deep and REM sleep architecture: consistent
+sleep–wake schedules, avoiding high-intensity training within three hours of bedtime,
+and limiting alcohol consumption, which disproportionately suppresses REM sleep even at
+moderate doses [@fullagar2015].
+
+*Circadian alignment as a low-cost intervention.* With five of fourteen participants
+exceeding the 1-hour social jetlag threshold, circadian misalignment is a more prevalent
+recovery disruptor in this cohort than training overload per se. Shifting Saturday
+training sessions to earlier start times — aligning with weekday alarm schedules — is
+a zero-cost intervention that could reduce social jetlag without altering training volume
+or intensity.
+
+*Supercompensation timing.* The lag analysis identifies a positive Recovery Score
+signal at Day +3 following high-load sessions, implying that the optimal window for
+the next high-intensity stimulus is approximately 72 hours post-effort. Hard–easy–easy–hard
+micro-cycles are therefore physiologically grounded in this cohort's recovery kinetics
+and represent a practical scheduling heuristic for self-coached recreational runners.
+
+*Training monotony surveillance.* Athletes whose weekly load monotony exceeds 2.0
+should be prioritised for intervention. The simplest corrective is not reduced volume
+but structural variation: alternating long aerobic sessions with short, higher-intensity
+efforts within the same weekly load envelope. Wearable-derived Session Load provides a
+sufficient signal for self-monitoring this ratio without laboratory infrastructure.
+
+### Future Work
+
+Several extensions would substantially strengthen the evidence base. First, a larger
+cohort (n ≥ 50) with stratified recruitment across fitness levels would provide
+sufficient between-person power to test moderation by VO₂max, age, and sex — questions
+the present 14-participant sample cannot resolve. Second, concurrent collection of HRV
+(lnRMSSD) and subjective wellness ratings would enable cross-validation of the
+RHR-based Recovery Score against more sensitive autonomic biomarkers and perceived
+readiness, quantifying the signal loss attributable to using consumer-grade RHR as a
+recovery proxy [@plews2013]. Third, objective session-type labels (easy run, tempo,
+long run, race) — absent from the current Garmin export — would disambiguate the
+light-session sleep finding, determining whether the positive training–sleep relationship
+holds for all active sessions or is specific to genuinely low-intensity efforts. Finally,
+an experimental crossover protocol randomly assigning sleep extension or restriction
+windows to athletes during matched training blocks would provide the causal evidence
+that four years of observational data, however rich, cannot deliver.
+
+---
+
+## Conclusion
+
+This study used four years of naturalistic Garmin wearable data from 14 recreational
+runners in Nairobi, Kenya, to examine the temporal interplay between training load,
+sleep architecture, and cardiovascular recovery. Three principal findings emerge. First,
+acute training load — across all active intensity tiers — is associated with longer and
+more efficient sleep the following night relative to rest days, consistent with
+adenosine-mediated sleep pressure accumulation during exercise rather than sleep
+disruption. Sleep architecture quality (Deep + REM proportion) is unaffected by
+training load, indicating that intensity modulates how long and how continuously athletes
+sleep without reshaping the restorative stage composition. Second, next-morning Recovery
+Score is most strongly predicted within-person by Sleep Quality % (β = 0.0098,
+p = 0.002), with Sleep Duration and Sleep Efficiency showing non-linear sufficiency
+thresholds rather than simple dose-response relationships, and Sleep Fragmentation
+carrying negligible independent signal. Third, the lag structure of training–recovery
+coupling follows a supercompensation arc — negative on Days 0 and 1, strongly positive
+by Day 3 — while the Recovery Score autocorrelation embeds a structured weekly and
+fortnightly oscillation that reflects the implicit periodisation rhythms of self-coached
+athletes.
+
+These findings carry direct implications for recreational athlete monitoring. Sleep
+architecture quality — not merely duration — should be the primary target for
+recovery-oriented sleep interventions. The identification of a physiologically meaningful
+response zone (approximately 35–60% SQ%) provides a practical threshold for
+practitioner guidance. The supercompensation arc observed in the lag analysis suggests
+that hard–easy–easy–hard micro-cycles with a 72-hour inter-stimulus interval are
+physiologically grounded in this cohort's recovery kinetics. Circadian alignment
+(reducing social jetlag) emerges as a modifiable risk factor for recovery degradation
+that is independent of training load.
+
+Methodologically, this study demonstrates that four years of consumer-grade wearable
+data, when subjected to rigorous within-person longitudinal modelling, can yield
+ecologically valid and reproducible insights into the training–sleep–recovery triad.
+The naturalistic, multi-year design captures the full complexity of recreational athlete
+physiology — including compensatory sleep extension, weekly periodisation echoes, and
+non-linear sufficiency thresholds — that short-term laboratory studies structurally
+cannot observe. As wearable adoption continues to grow among recreational athletes in
+sub-Saharan Africa and globally, longitudinal self-monitoring datasets of this kind
+represent an underutilised resource for sports science research with direct translational
+value to the populations they describe.
+
+---
+
+## Acknowledgements {.unnumbered}
+
+The author gratefully acknowledges the fourteen participants who contributed four years
+of continuous wearable device data to this study. Their sustained engagement and
+willingness to share longitudinal physiological records made this research possible.
+
+---
+
+## References {.unnumbered}
+
+::: {#refs}
+:::

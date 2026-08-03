@@ -1,10 +1,10 @@
 name: nairobi-runners
-title:
+title: Nairobi Runners — Training, Sleep & Recovery Analytics
 username: agucharles
 account: agucharles
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 17119588
-bundleId: 11843236
+bundleId: 12308347
 url: https://agucharles.shinyapps.io/nairobi-runners/
 version: 1

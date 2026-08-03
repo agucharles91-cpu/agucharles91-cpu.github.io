@@ -6,13 +6,34 @@ project:
     - report.qmd
 
 website:
-  title: "Nairobi Runners Project"
+  title: "Agu Charles Chibuike"
   navbar:
     left:
       - text: "Home"
         href: index.qmd
-      - text: "Full Report"
-        href: report.qmd
-      - text: "Interactive Dashboard"
-        href: https://agucharles.shinyapps.io/nairobi-runners/
-  page-footer: "© 2026 | Built with Quarto"
+      - text: "Nairobi Runners"
+        menu:
+          - text: "Full Report"
+            href: report.qmd
+          - text: "Interactive Dashboard"
+            href: https://agucharles.shinyapps.io/nairobi-runners/
+      - text: "Olist E-Commerce"
+        menu:
+          - text: "Project Overview"
+            href: https://agucharles91-cpu.github.io/
+          - text: "SQL Analysis"
+            href: https://agucharles91-cpu.github.io/
+          - text: "Power BI Dashboard"
+            href: https://agucharles91-cpu.github.io/
+      - text: "Nigerian Finance"
+        menu:
+          - text: "Coming Soon"
+            href: https://agucharles91-cpu.github.io/
+    right:
+      - icon: github
+        href: https://github.com/agucharles91-cpu
+        aria-label: GitHub
+
+  page-footer:
+    left: "© 2026 Agu Charles Chibuike"
+    right: "MSc Data Science · University of Nairobi · Built with Quarto"
