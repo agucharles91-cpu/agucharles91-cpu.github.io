@@ -1,6 +1,6 @@
 # Olist Brazilian E-Commerce Analytics
 
-![Dashboard Preview](docs/olist_page1.png)
+![Dashboard Preview](docs/Olist_page1.png)
 
 ## Overview
 An end-to-end data analytics project built on the [Olist Brazilian E-Commerce dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) — a real-world dataset of 100,000+ orders placed on Brazil's largest department store marketplace between 2016 and 2018.
@@ -43,7 +43,7 @@ Power BI 3-Page Dashboard
 ## Dashboard Pages
 
 ### Page 1 — Revenue & Sales
-![Page 1](docs/olist_page1.png)
+![Page 1](docs/Olist_page1.png)
 - Monthly revenue trend (Oct 2016 – Sep 2018)
 - Orders by Brazilian state (bubble map)
 - Top 10 revenue categories
@@ -56,7 +56,7 @@ Power BI 3-Page Dashboard
 - On-time vs late delivery breakdown by state
 
 ### Page 3 — Customer & Seller Intelligence
-![Page 3](docs/olist_page3.png)
+![Page 3](docs/Olist_page3.png)
 - Customer revenue concentration (Pareto analysis)
 - Customer retention rate
 - Review score distribution
@@ -141,9 +141,9 @@ olist-ecommerce-analytics/
 ├── powerbi/
 │   └── olist_dashboard.pbix    # 3-page Power BI dashboard
 └── docs/
-    ├── olist_page1.png         # Revenue & Sales
+    ├── Olist_page1.png         # Revenue & Sales
     ├── Olist_page2.png         # Operational Performance
-    └── olist_page3.png         # Customer & Seller Intelligence
+    └── Olist_page3.png         # Customer & Seller Intelligence
 ```
 
 ---
