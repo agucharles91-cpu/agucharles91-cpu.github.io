@@ -311,3 +311,93 @@ JOIN marts.dim_products p ON f.product_id = p.product_id
 GROUP BY 1
 ORDER BY total_orders DESC
 LIMIT 15;
+
+
+-- 16. COHORT RETENTION MATRIX
+-- Tracks what percentage of customers from each monthly cohort
+-- returned to purchase in subsequent months
+-- Each row = one acquisition cohort; columns = months after first purchase
+WITH first_purchase AS (
+    SELECT
+        c.customer_unique_id,
+        MIN(DATE_TRUNC('month', f.order_date)) AS cohort_month
+    FROM marts.fact_orders f
+    JOIN marts.dim_customers c ON f.customer_id = c.customer_id
+    WHERE f.order_status = 'delivered'
+    GROUP BY 1
+),
+customer_activity AS (
+    SELECT
+        c.customer_unique_id,
+        DATE_TRUNC('month', f.order_date) AS activity_month
+    FROM marts.fact_orders f
+    JOIN marts.dim_customers c ON f.customer_id = c.customer_id
+    WHERE f.order_status = 'delivered'
+    GROUP BY 1, 2
+),
+cohort_activity AS (
+    SELECT
+        fp.cohort_month,
+        EXTRACT(YEAR FROM AGE(ca.activity_month, fp.cohort_month)) * 12 +
+        EXTRACT(MONTH FROM AGE(ca.activity_month, fp.cohort_month)) AS months_since_first,
+        COUNT(DISTINCT ca.customer_unique_id) AS active_customers
+    FROM first_purchase fp
+    JOIN customer_activity ca ON fp.customer_unique_id = ca.customer_unique_id
+    GROUP BY 1, 2
+),
+cohort_sizes AS (
+    SELECT cohort_month, active_customers AS cohort_size
+    FROM cohort_activity
+    WHERE months_since_first = 0
+)
+SELECT
+    TO_CHAR(ca.cohort_month, 'Mon YYYY') AS cohort,
+    cs.cohort_size AS total_customers,
+    SUM(CASE WHEN ca.months_since_first = 0 THEN active_customers END) AS month_0,
+    ROUND(100.0 * SUM(CASE WHEN ca.months_since_first = 1 THEN active_customers END) / cs.cohort_size, 1) AS month_1_pct,
+    ROUND(100.0 * SUM(CASE WHEN ca.months_since_first = 2 THEN active_customers END) / cs.cohort_size, 1) AS month_2_pct,
+    ROUND(100.0 * SUM(CASE WHEN ca.months_since_first = 3 THEN active_customers END) / cs.cohort_size, 1) AS month_3_pct,
+    ROUND(100.0 * SUM(CASE WHEN ca.months_since_first = 4 THEN active_customers END) / cs.cohort_size, 1) AS month_4_pct,
+    ROUND(100.0 * SUM(CASE WHEN ca.months_since_first = 5 THEN active_customers END) / cs.cohort_size, 1) AS month_5_pct
+FROM cohort_activity ca
+JOIN cohort_sizes cs ON ca.cohort_month = cs.cohort_month
+GROUP BY ca.cohort_month, cs.cohort_size
+ORDER BY ca.cohort_month
+LIMIT 12;
+
+-- 17. QUERY OPTIMIZATION WITH EXPLAIN ANALYZE
+-- Demonstrates query execution analysis and indexing strategy
+-- Shows that PostgreSQL's query planner sometimes prefers
+-- sequential scans over indexes for smaller datasets
+
+-- Step 1: Analyze query before index
+EXPLAIN ANALYZE
+SELECT
+    DATE_TRUNC('month', order_date) AS month,
+    ROUND(SUM(total_value)::numeric, 2) AS revenue
+FROM marts.fact_orders
+WHERE order_status = 'delivered'
+AND order_date < '2018-09-01'
+GROUP BY 1
+ORDER BY 1;
+-- Result: Execution Time ~58ms (Sequential Scan)
+
+-- Step 2: Create index on order_date
+CREATE INDEX IF NOT EXISTS idx_fact_orders_order_date
+ON marts.fact_orders(order_date);
+
+-- Step 3: Re-analyze query after index
+EXPLAIN ANALYZE
+SELECT
+    DATE_TRUNC('month', order_date) AS month,
+    ROUND(SUM(total_value)::numeric, 2) AS revenue
+FROM marts.fact_orders
+WHERE order_status = 'delivered'
+AND order_date < '2018-09-01'
+GROUP BY 1
+ORDER BY 1;
+-- Result: Execution Time ~84ms
+-- PostgreSQL still chose Sequential Scan over the index
+-- because the dataset fits in memory and filters remove <3% of rows
+-- This demonstrates that indexes are most valuable on large tables
+-- with highly selective filters, not small in-memory datasets

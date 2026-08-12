@@ -7,6 +7,12 @@ An end-to-end data analytics project built on the [Olist Brazilian E-Commerce da
 
 This project demonstrates a full analytics engineering workflow: raw data ingestion, relational data modelling, SQL analysis, and multi-page business intelligence reporting across three analytical dimensions — revenue, operations, and customer intelligence.
 
+### Dashboard Preview
+
+![Revenue & Sales](docs/Olist_page1.png)
+![Operational Performance](docs/Olist_page2.png)
+![Customer & Seller Intelligence](docs/Olist_page3.png)
+
 ---
 
 ## Tools & Technologies
@@ -44,7 +50,7 @@ Power BI 3-Page Dashboard
 
 ### Page 1 — Revenue & Sales
 ![Page 1](docs/Olist_page1.png)
-- Monthly revenue trend (Oct 2016 – Sep 2018)
+- Monthly revenue trend (Oct 2016 – Aug 2018)
 - Orders by Brazilian state (bubble map)
 - Top 10 revenue categories
 - Order status breakdown
@@ -92,12 +98,10 @@ Power BI 3-Page Dashboard
 
 ### Customer Intelligence
 - **97% of customers never made a repeat purchase** — indicating a significant retention challenge
+- Cohort retention analysis confirms retention drops below 1% by Month 1 across all cohorts
 - The **top 30% of customers drive 65% of total revenue** (Pareto principle confirmed in real data)
 - Most customers rate Olist positively — the majority of reviews are 5 stars
 - Top rated product categories maintain above 4.2 average review scores
-
----
-
 
 ---
 
@@ -105,7 +109,7 @@ Power BI 3-Page Dashboard
 
 | Technique | Where Used |
 |-----------|-----------|
-| CTEs (Common Table Expressions) | Multi-stage transformations in queries 4–15 |
+| CTEs (Common Table Expressions) | Multi-stage transformations in queries 4–17 |
 | `RANK()` | Seller and state revenue ranking |
 | `DENSE_RANK()` | Product category ranking without gaps |
 | `ROW_NUMBER()` | Unique customer ordering |
@@ -113,21 +117,23 @@ Power BI 3-Page Dashboard
 | `LAG()` | Month-over-month revenue growth |
 | `LEAD()` | Next-month revenue comparison |
 | Rolling averages | 3-month smoothed revenue trend |
-| Cohort analysis | Customer acquisition by first purchase month |
+| Cohort retention matrix | Month-by-month retention by acquisition cohort |
 | Retention analysis | Repeat vs one-time customer rate |
 | Conditional aggregation | Order status pivot by product category |
 | Multi-table joins | Up to 4 tables joined in single queries |
 | Pareto analysis | Cumulative revenue concentration |
+| Query optimization | EXPLAIN ANALYZE + indexing analysis |
 
-All queries are available in [`sql/04_advanced_analysis/advanced_queries.sql`](sql/04_advanced_analysis/advanced_queries.sql)
+All 17 queries are available in [`sql/04_advanced_analysis/advanced_queries.sql`](sql/04_advanced_analysis/advanced_queries.sql)
 
-
+---
 
 ## How to Reproduce
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/agucharles91-cpu/olist-ecommerce-analytics.git
+git clone https://github.com/agucharles91-cpu/agucharles91-cpu.github.io.git
+cd agucharles91-cpu.github.io/Olist-Ecommerce-Analytics
 ```
 
 ### 2. Download the dataset
@@ -144,8 +150,9 @@ python python/load_to_postgres.py
 
 ### 5. Run the SQL scripts
 Run the scripts in the `sql/` folder in order:
-1. `04_marts/` — creates the star schema tables
-2. `05_analysis/` — creates analytical tables for the dashboard
+1. `01_schema/` — creates raw, staging and marts schemas
+2. `03_marts/` — creates the star schema tables
+3. `04_advanced_analysis/` — runs the business analysis queries
 
 ### 6. Open the dashboard
 Open `powerbi/olist_dashboard.pbix` in Power BI Desktop and refresh the data connection pointing to your local PostgreSQL instance.
@@ -154,21 +161,25 @@ Open `powerbi/olist_dashboard.pbix` in Power BI Desktop and refresh the data con
 
 ## Project Structure
 ```
-olist-ecommerce-analytics/
+Olist-Ecommerce-Analytics/
 ├── README.md
 ├── data/
-│   └── raw/                    # CSV files (not tracked in git)
+│   └── raw/                         # CSV files (not tracked in git)
 ├── sql/
-│   ├── 04_marts/               # Star schema creation
-│   └── 05_analysis/            # Analytical tables for dashboard
+│   ├── 01_schema/
+│   │   └── create_schemas.sql       # Raw, staging and marts schemas
+│   ├── 03_marts/
+│   │   └── star_schema.sql          # Dimension and fact tables
+│   └── 04_advanced_analysis/
+│       └── advanced_queries.sql     # 17 analytical SQL queries
 ├── python/
-│   └── load_to_postgres.py     # Data ingestion script
+│   └── load_to_postgres.py          # Data ingestion script
 ├── powerbi/
-│   └── olist_dashboard.pbix    # 3-page Power BI dashboard
+│   └── olist_dashboard.pbix         # 3-page Power BI dashboard
 └── docs/
-    ├── Olist_page1.png         # Revenue & Sales
-    ├── Olist_page2.png         # Operational Performance
-    └── Olist_page3.png         # Customer & Seller Intelligence
+    ├── Olist_page1.png              # Revenue & Sales
+    ├── Olist_page2.png              # Operational Performance
+    └── Olist_page3.png              # Customer & Seller Intelligence
 ```
 
 ---
