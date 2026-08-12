@@ -3,14 +3,21 @@ import pandas as pd
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine.url import URL
 
+# Store your credentials in environment variables, not in code
+# Set them in your terminal before running:
+# Windows: set POSTGRES_PASSWORD=yourpassword
+# Windows: set OLIST_DATA_DIR=C:\Users\arnel\Documents\olist_data
+
 engine = create_engine(URL.create(
     drivername="postgresql+psycopg2",
     username="postgres",
-    password="REMOVED",
+    password=os.getenv("POSTGRES_PASSWORD"),
     host="localhost",
     port=5432,
     database="olist_ecommerce"
 ))
+
+data_dir = os.getenv("OLIST_DATA_DIR", r"C:\Users\arnel\Documents\olist_data")
 
 # Create schemas if they don't exist
 with engine.connect() as conn:
@@ -19,8 +26,6 @@ with engine.connect() as conn:
     conn.execute(text("CREATE SCHEMA IF NOT EXISTS marts"))
     conn.commit()
     print("✅ Schemas ready")
-
-data_dir = r"C:\Users\arnel\Documents\olist_data"
 
 csv_table_map = {
     "olist_orders_dataset.csv": "orders",
