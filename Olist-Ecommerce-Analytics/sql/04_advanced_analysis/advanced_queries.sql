@@ -380,7 +380,9 @@ WHERE order_status = 'delivered'
 AND order_date < '2018-09-01'
 GROUP BY 1
 ORDER BY 1;
--- Result: Execution Time ~58ms (Sequential Scan)
+-- Observed on local environment: ~58ms (Sequential Scan)
+-- Note: index was not used because the dataset fits in memory
+-- and the filter removes less than 3% of rows
 
 -- Step 2: Create index on order_date
 CREATE INDEX IF NOT EXISTS idx_fact_orders_order_date
