@@ -1,17 +1,9 @@
 # Olist Brazilian E-Commerce Analytics
 
-![Dashboard Preview](docs/Olist_page1.png)
-
 ## Overview
 An end-to-end data analytics project built on the [Olist Brazilian E-Commerce dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) — a real-world dataset of 100,000+ orders placed on Brazil's largest department store marketplace between 2016 and 2018.
 
 This project demonstrates a full analytics engineering workflow: raw data ingestion, relational data modelling, SQL analysis, and multi-page business intelligence reporting across three analytical dimensions — revenue, operations, and customer intelligence.
-
-### Dashboard Preview
-
-![Revenue & Sales](docs/Olist_page1.png)
-![Operational Performance](docs/Olist_page2.png)
-![Customer & Seller Intelligence](docs/Olist_page3.png)
 
 ---
 
