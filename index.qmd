@@ -536,7 +536,27 @@ format:
         <span class="project-link">View project</span>
       </a>
 
-      <!-- Project 4 -->
+
+<!-- Project 4 -->
+      <div class="project-card upcoming">
+        <div class="project-number">03 / ANALYTICS ENGINEERING</div>
+        <div class="project-title">Parking Enforcement Analytics</div>
+        <div class="project-desc">
+          End-to-end analytics engineering on real Dubai parking enforcement 
+          operational data. Python ingestion, dbt transformations, 
+          time-series EDA, and operational BI dashboard.
+        </div>
+        <div class="project-tags">
+          <span class="tag">Python</span>
+          <span class="tag">dbt</span>
+          <span class="tag">SQL</span>
+          <span class="tag tag-gold">Power BI</span>
+        </div>
+        <span class="upcoming-label">In progress</span>
+      </div>
+
+
+      <!-- Project 5 -->
       <div class="project-card upcoming">
         <div class="project-number">03 / FINANCIAL ANALYTICS</div>
         <div class="project-title">Nigerian Financial Dataset</div>
