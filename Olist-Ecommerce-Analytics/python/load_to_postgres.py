@@ -17,7 +17,9 @@ engine = create_engine(URL.create(
     database="olist_ecommerce"
 ))
 
-data_dir = os.getenv("OLIST_DATA_DIR", r"C:\Users\arnel\Documents\olist_data")
+data_dir = os.getenv("OLIST_DATA_DIR")
+if not data_dir:
+    raise ValueError("Please set the OLIST_DATA_DIR environment variable.")
 
 # Create schemas if they don't exist
 with engine.connect() as conn:
