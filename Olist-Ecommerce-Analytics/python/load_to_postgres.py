@@ -3,10 +3,10 @@ import pandas as pd
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine.url import URL
 
-# Store your credentials in environment variables, not in code
-# Set them in your terminal before running:
+# Credentials are read from environment variables
+# Before running, set these in your terminal:
 # Windows: set POSTGRES_PASSWORD=yourpassword
-# Windows: set OLIST_DATA_DIR=C:\Users\arnel\Documents\olist_data
+# Windows: set OLIST_DATA_DIR=C:\path\to\your\olist\data
 
 engine = create_engine(URL.create(
     drivername="postgresql+psycopg2",
