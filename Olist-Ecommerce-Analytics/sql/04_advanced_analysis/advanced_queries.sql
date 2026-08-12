@@ -210,3 +210,104 @@ SELECT
           / NULLIF(LAG(revenue) OVER (ORDER BY month), 0), 2) AS mom_growth_pct
 FROM monthly
 ORDER BY month;
+
+
+-- 11. ROW_NUMBER - UNIQUE CUSTOMER RANKING
+-- Assigns a unique rank to each customer by revenue
+-- Unlike RANK(), ROW_NUMBER() never produces ties
+WITH customer_totals AS (
+    SELECT
+        c.customer_unique_id,
+        ROUND(SUM(f.total_value)::numeric, 2) AS total_revenue
+    FROM marts.fact_orders f
+    JOIN marts.dim_customers c ON f.customer_id = c.customer_id
+    WHERE f.order_status = 'delivered'
+    GROUP BY 1
+)
+SELECT
+    ROW_NUMBER() OVER (ORDER BY total_revenue DESC) AS row_num,
+    customer_unique_id,
+    total_revenue
+FROM customer_totals;
+
+
+-- 12. DENSE_RANK - PRODUCT CATEGORY REVENUE RANKING
+-- DENSE_RANK() doesn't skip numbers after ties
+-- e.g. if two categories tie for 1st, next is 2nd not 3rd
+WITH category_revenue AS (
+    SELECT
+        p.product_category,
+        ROUND(SUM(f.total_value)::numeric, 2) AS revenue
+    FROM marts.fact_orders f
+    JOIN marts.dim_products p ON f.product_id = p.product_id
+    WHERE f.order_status = 'delivered'
+    GROUP BY 1
+)
+SELECT
+    DENSE_RANK() OVER (ORDER BY revenue DESC) AS dense_rank,
+    product_category,
+    revenue
+FROM category_revenue;
+
+
+-- 13. LEAD() - NEXT MONTH REVENUE COMPARISON
+-- LEAD() looks forward to the next row
+-- Here it compares each month's revenue to the next month
+WITH monthly AS (
+    SELECT
+        DATE_TRUNC('month', order_date) AS month,
+        ROUND(SUM(total_value)::numeric, 2) AS revenue
+    FROM marts.fact_orders
+    WHERE order_status = 'delivered'
+    AND order_date < '2018-09-01'
+    GROUP BY 1
+)
+SELECT
+    month,
+    revenue,
+    LEAD(revenue) OVER (ORDER BY month) AS next_month_revenue,
+    ROUND(100.0 * (LEAD(revenue) OVER (ORDER BY month) - revenue)
+          / NULLIF(revenue, 0), 2) AS growth_pct
+FROM monthly
+ORDER BY month;
+
+
+-- 14. RETENTION ANALYSIS
+-- Identifies customers who made more than one purchase
+-- Calculates repeat purchase rate across the entire dataset
+WITH customer_orders AS (
+    SELECT
+        c.customer_unique_id,
+        COUNT(DISTINCT f.order_id) AS total_orders,
+        MIN(f.order_date) AS first_order,
+        MAX(f.order_date) AS last_order
+    FROM marts.fact_orders f
+    JOIN marts.dim_customers c ON f.customer_id = c.customer_id
+    WHERE f.order_status = 'delivered'
+    GROUP BY 1
+)
+SELECT
+    SUM(CASE WHEN total_orders > 1 THEN 1 ELSE 0 END) AS repeat_customers,
+    COUNT(*) AS total_customers,
+    ROUND(100.0 * SUM(CASE WHEN total_orders > 1 THEN 1 ELSE 0 END) 
+          / COUNT(*), 2) AS repeat_rate_pct,
+    ROUND(AVG(total_orders), 2) AS avg_orders_per_customer
+FROM customer_orders;
+
+
+-- 15. CONDITIONAL AGGREGATION - ORDER STATUS BY CATEGORY
+-- Pivots order status counts into columns using CASE
+-- Shows delivered, cancelled and other counts per category
+SELECT
+    p.product_category,
+    COUNT(DISTINCT f.order_id) AS total_orders,
+    SUM(CASE WHEN f.order_status = 'delivered' THEN 1 ELSE 0 END) AS delivered,
+    SUM(CASE WHEN f.order_status = 'canceled' THEN 1 ELSE 0 END) AS cancelled,
+    SUM(CASE WHEN f.order_status NOT IN ('delivered','canceled') THEN 1 ELSE 0 END) AS other,
+    ROUND(100.0 * SUM(CASE WHEN f.order_status = 'canceled' THEN 1 ELSE 0 END)
+          / COUNT(DISTINCT f.order_id), 2) AS cancel_rate_pct
+FROM marts.fact_orders f
+JOIN marts.dim_products p ON f.product_id = p.product_id
+GROUP BY 1
+ORDER BY total_orders DESC
+LIMIT 15;

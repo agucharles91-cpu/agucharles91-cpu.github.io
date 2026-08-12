@@ -98,6 +98,31 @@ Power BI 3-Page Dashboard
 
 ---
 
+
+---
+
+## Advanced SQL Techniques Demonstrated
+
+| Technique | Where Used |
+|-----------|-----------|
+| CTEs (Common Table Expressions) | Multi-stage transformations in queries 4–15 |
+| `RANK()` | Seller and state revenue ranking |
+| `DENSE_RANK()` | Product category ranking without gaps |
+| `ROW_NUMBER()` | Unique customer ordering |
+| `NTILE()` | Customer segmentation into revenue deciles |
+| `LAG()` | Month-over-month revenue growth |
+| `LEAD()` | Next-month revenue comparison |
+| Rolling averages | 3-month smoothed revenue trend |
+| Cohort analysis | Customer acquisition by first purchase month |
+| Retention analysis | Repeat vs one-time customer rate |
+| Conditional aggregation | Order status pivot by product category |
+| Multi-table joins | Up to 4 tables joined in single queries |
+| Pareto analysis | Cumulative revenue concentration |
+
+All queries are available in [`sql/04_advanced_analysis/advanced_queries.sql`](sql/04_advanced_analysis/advanced_queries.sql)
+
+
+
 ## How to Reproduce
 
 ### 1. Clone the repo
