@@ -11,1871 +11,653 @@ format:
 
 ```{=html}
 <style>
-
-/* =========================================================
-   RESET
-   ========================================================= */
-
-body {
-  margin: 0;
-  padding: 0;
-  background: #F7F6F2;
-}
-
-#quarto-content,
-.page-layout-full {
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-.quarto-title-block {
-  display: none;
-}
-
-main.content {
-  padding: 0 !important;
-}
-
-
-/* =========================================================
-   DESIGN TOKENS
-   ========================================================= */
-
-:root {
-  --navy:   #0D1B2A;
-  --teal:   #00A878;
-  --gold:   #E8C547;
-  --ink:    #1A1A2E;
-  --mist:   #F7F6F2;
-  --slate:  #4A5568;
-  --muted:  #718096;
-  --border: #E2E0DA;
-  --card:   #FFFFFF;
-
-  --display: 'Space Grotesk', sans-serif;
-  --serif:   'Source Serif 4', Georgia, serif;
-  --mono:    'JetBrains Mono', monospace;
-}
-
-
-/* =========================================================
-   GLOBAL
-   ========================================================= */
-
-a {
-  text-decoration: none;
-}
-
-.section {
-  max-width: 920px;
-  margin: 0 auto;
-  padding: 78px 48px;
-}
-
-.section-label {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  color: var(--teal);
-  text-transform: uppercase;
-  margin-bottom: 10px;
-}
-
-.section-title {
-  font-family: var(--display);
-  font-size: clamp(25px, 3.5vw, 36px);
-  font-weight: 600;
-  color: var(--ink);
-  margin: 0 0 14px;
-  letter-spacing: -0.025em;
-}
-
-.section-divider {
-  width: 40px;
-  height: 3px;
-  background: var(--teal);
-  border-radius: 2px;
-  margin-bottom: 38px;
-}
-
-
-/* =========================================================
-   HERO
-   ========================================================= */
-
-.hero {
-  background: var(--navy);
-  padding: 100px 48px 88px;
-  position: relative;
-  overflow: hidden;
-}
-
-.hero::before {
-  content: '';
-  position: absolute;
-  top: -100px;
-  right: -80px;
-  width: 520px;
-  height: 520px;
-  border-radius: 50%;
-  background:
-    radial-gradient(
-      circle,
-      rgba(0,168,120,0.14) 0%,
-      rgba(0,168,120,0.04) 40%,
-      transparent 72%
-    );
-  pointer-events: none;
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  bottom: -180px;
-  left: 45%;
-  width: 420px;
-  height: 420px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.04);
-  pointer-events: none;
-}
-
-.hero-inner {
-  max-width: 920px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 1;
-}
-
-.hero-eyebrow {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.18em;
-  color: var(--teal);
-  text-transform: uppercase;
-  margin-bottom: 20px;
-}
-
-.hero-name {
-  font-family: var(--display);
-  font-size: clamp(42px, 7vw, 76px);
-  font-weight: 700;
-  color: #F7F6F2;
-  line-height: 1.02;
-  margin: 0 0 18px;
-  letter-spacing: -0.035em;
-}
-
-.hero-name span {
-  color: var(--teal);
-}
-
-.hero-role {
-  font-family: var(--display);
-  font-size: clamp(18px, 2.5vw, 25px);
-  font-weight: 500;
-  color: #CBD5E0;
-  margin-bottom: 18px;
-  letter-spacing: -0.01em;
-}
-
-.hero-title {
-  font-family: var(--serif);
-  font-size: clamp(16px, 2vw, 19px);
-  font-weight: 300;
-  color: #A0AEC0;
-  margin: 0 0 34px;
-  line-height: 1.7;
-  max-width: 680px;
-}
-
-.hero-title strong {
-  color: #CBD5E0;
-  font-weight: 400;
-}
-
-.hero-badges {
-  display: flex;
-  gap: 9px;
-  flex-wrap: wrap;
-  margin-bottom: 36px;
-}
-
-.badge {
-  font-family: var(--mono);
-  font-size: 10px;
-  padding: 6px 11px;
-  border-radius: 3px;
-  letter-spacing: 0.05em;
-}
-
-.badge-outline {
-  border: 1px solid rgba(255,255,255,0.18);
-  color: #A0AEC0;
-  background: transparent;
-}
-
-.badge-teal {
-  background: rgba(0,168,120,0.13);
-  color: var(--teal);
-  border: 1px solid rgba(0,168,120,0.28);
-}
-
-.hero-links {
-  display: flex;
-  gap: 22px;
-  flex-wrap: wrap;
-}
-
-.hero-link {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--teal);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.hero-link::after {
-  content: ' ↗';
-}
-
-.hero-link.secondary {
-  color: #718096;
-}
-
-
-/* =========================================================
-   ABOUT
-   ========================================================= */
-
-.about-grid {
-  display: grid;
-  grid-template-columns: 0.95fr 1.35fr;
-  gap: 58px;
-  align-items: start;
-}
-
-.profile-photo-wrap {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  margin-bottom: 30px;
-}
-
-.profile-photo {
-  width: 125px;
-  height: 125px;
-  object-fit: cover;
-  object-position: center top;
-  border-radius: 6px;
-  border: 3px solid var(--teal);
-  box-shadow: 6px 6px 0 var(--teal);
-  flex-shrink: 0;
-}
-
-.profile-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.profile-name {
-  font-family: var(--display);
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--ink);
-  line-height: 1.2;
-}
-
-.profile-role {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--teal);
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  line-height: 1.5;
-}
-
-.profile-uni {
-  font-family: var(--serif);
-  font-size: 13px;
-  color: var(--slate);
-  font-style: italic;
-  line-height: 1.4;
-}
-
-.about-text {
-  font-family: var(--serif);
-  font-size: 17px;
-  line-height: 1.82;
-  color: var(--slate);
-}
-
-.about-text p {
-  margin: 0 0 17px;
-}
-
-.about-text p:last-child {
-  margin-bottom: 0;
-}
-
-.focus-list {
-  margin-top: 28px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.focus-item {
-  border-top: 1px solid var(--border);
-  padding-top: 12px;
-}
-
-.focus-item-title {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--teal);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-.focus-item-text {
-  font-family: var(--display);
-  font-size: 13px;
-  color: var(--ink);
-}
-
-
-/* =========================================================
-   EXPERIENCE
-   ========================================================= */
-
-.experience-bg {
-  background: #FFFFFF;
-}
-
-.experience-item {
-  display: grid;
-  grid-template-columns: 180px 1fr;
-  gap: 42px;
-  padding: 30px 0;
-  border-top: 1px solid var(--border);
-}
-
-.experience-item:last-child {
-  border-bottom: 1px solid var(--border);
-}
-
-.experience-date {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--muted);
-  letter-spacing: 0.08em;
-  line-height: 1.7;
-  text-transform: uppercase;
-}
-
-.experience-role {
-  font-family: var(--display);
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--ink);
-  margin-bottom: 3px;
-}
-
-.experience-company {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--teal);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 15px;
-}
-
-.experience-description {
-  font-family: var(--serif);
-  font-size: 15px;
-  color: var(--slate);
-  line-height: 1.7;
-  margin-bottom: 13px;
-}
-
-.experience-points {
-  margin: 0;
-  padding-left: 18px;
-  font-family: var(--serif);
-  font-size: 14px;
-  color: var(--slate);
-  line-height: 1.75;
-}
-
-.experience-points li {
-  margin-bottom: 4px;
-}
-
-
-/* =========================================================
-   WORKFLOW
-   ========================================================= */
-
-.workflow-bg {
-  background: var(--mist);
-}
-
-.workflow {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0;
-  position: relative;
-}
-
-.workflow::before {
-  content: '';
-  position: absolute;
-  top: 24px;
-  left: 8%;
-  right: 8%;
-  height: 1px;
-  background: var(--border);
-  z-index: 0;
-}
-
-.workflow-step {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  padding: 0 10px;
-}
-
-.workflow-number {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 17px;
-  border-radius: 50%;
-  background: var(--mist);
-  border: 1px solid var(--teal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--teal);
-}
-
-.workflow-title {
-  font-family: var(--display);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ink);
-  margin-bottom: 7px;
-}
-
-.workflow-text {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-
-/* =========================================================
-   PROJECTS
-   ========================================================= */
-
-.projects-bg {
-  background: var(--navy);
-}
-
-.projects-bg .section-title {
-  color: #F7F6F2;
-}
-
-.projects-bg .section-label {
-  color: var(--teal);
-}
-
-.project-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
-
-.project-card {
-  background: rgba(255,255,255,0.045);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 6px;
-  padding: 28px 26px 25px;
-  transition:
-    border-color 0.2s,
-    transform 0.2s,
-    background 0.2s;
-  text-decoration: none;
-  display: block;
-  position: relative;
-  overflow: hidden;
-}
-
-.project-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--teal);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.3s ease;
-}
-
-.project-card:hover {
-  border-color: rgba(0,168,120,0.45);
-  background: rgba(255,255,255,0.065);
-  transform: translateY(-3px);
-}
-
-.project-card:hover::before {
-  transform: scaleX(1);
-}
-
-.project-card.upcoming {
-  border-style: dashed;
-  opacity: 0.65;
-}
-
-.project-card.upcoming:hover {
-  transform: none;
-  border-color: rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.045);
-}
-
-.project-card.upcoming::before {
-  display: none;
-}
-
-.project-number {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--teal);
-  letter-spacing: 0.12em;
-  margin-bottom: 14px;
-}
-
-.project-title {
-  font-family: var(--display);
-  font-size: 19px;
-  font-weight: 600;
-  color: #F7F6F2;
-  margin: 0 0 11px;
-  line-height: 1.3;
-}
-
-.project-desc {
-  font-family: var(--serif);
-  font-size: 14px;
-  color: #A0AEC0;
-  line-height: 1.65;
-  margin: 0 0 18px;
-}
-
-.project-result {
-  font-family: var(--serif);
-  font-size: 13px;
-  color: #CBD5E0;
-  line-height: 1.6;
-  margin-bottom: 18px;
-  padding-left: 12px;
-  border-left: 2px solid rgba(0,168,120,0.45);
-}
-
-.project-result strong {
-  color: var(--teal);
-  font-weight: 500;
-}
-
-.project-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 20px;
-}
-
-.tag {
-  font-family: var(--mono);
-  font-size: 9px;
-  padding: 4px 8px;
-  background: rgba(0,168,120,0.12);
-  color: var(--teal);
-  border-radius: 2px;
-  letter-spacing: 0.05em;
-}
-
-.tag-gold {
-  background: rgba(232,197,71,0.12);
-  color: var(--gold);
-}
-
-.project-links {
-  display: flex;
-  gap: 18px;
-  flex-wrap: wrap;
-}
-
-.project-link {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--teal);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.project-link::after {
-  content: ' ↗';
-}
-
-.upcoming-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--gold);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-
-/* =========================================================
-   TECHNICAL STACK
-   ========================================================= */
-
-.skills-bg {
-  background: #FFFFFF;
-}
-
-.stack-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.stack-card {
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  padding: 25px;
-  background: #FFFFFF;
-}
-
-.stack-card:hover {
-  border-color: rgba(0,168,120,0.45);
-}
-
-.stack-title {
-  font-family: var(--display);
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--ink);
-  margin-bottom: 13px;
-}
-
-.stack-description {
-  font-family: var(--serif);
-  font-size: 13px;
-  color: var(--slate);
-  line-height: 1.65;
-  margin-bottom: 15px;
-}
-
-.stack-tools {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.stack-tool {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--slate);
-  border: 1px solid var(--border);
-  padding: 4px 7px;
-  border-radius: 2px;
-}
-
-
-/* =========================================================
-   EDUCATION
-   ========================================================= */
-
-.education-item {
-  display: grid;
-  grid-template-columns: 180px 1fr;
-  gap: 42px;
-  padding: 26px 0;
-  border-top: 1px solid var(--border);
-}
-
-.education-item:last-child {
-  border-bottom: 1px solid var(--border);
-}
-
-.education-type {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--teal);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.education-degree {
-  font-family: var(--display);
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--ink);
-  margin-bottom: 4px;
-}
-
-.education-school {
-  font-family: var(--serif);
-  font-size: 15px;
-  color: var(--slate);
-  margin-bottom: 5px;
-}
-
-.education-detail {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--muted);
-  letter-spacing: 0.05em;
-}
-
-
-/* =========================================================
-   CTA
-   ========================================================= */
-
-.cta {
-  background: var(--navy);
-  padding: 82px 48px 70px;
-  text-align: center;
-}
-
-.cta-inner {
-  max-width: 720px;
-  margin: 0 auto;
-}
-
-.cta-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--teal);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  margin-bottom: 13px;
-}
-
-.cta-title {
-  font-family: var(--display);
-  font-size: clamp(28px, 4vw, 42px);
-  color: #F7F6F2;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  margin: 0 0 15px;
-}
-
-.cta-text {
-  font-family: var(--serif);
-  font-size: 16px;
-  color: #A0AEC0;
-  line-height: 1.7;
-  margin: 0 auto 30px;
-  max-width: 570px;
-}
-
-.cta-links {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.cta-link {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.07em;
-  color: var(--teal);
-  border: 1px solid rgba(0,168,120,0.35);
-  padding: 9px 14px;
-  border-radius: 3px;
-  text-transform: uppercase;
-  transition: background 0.2s;
-}
-
-.cta-link:hover {
-  background: rgba(0,168,120,0.10);
-}
-
-
-/* =========================================================
-   FOOTER
-   ========================================================= */
-
-.footer {
-  background: var(--navy);
-  padding: 25px 48px 35px;
-  text-align: center;
-  border-top: 1px solid rgba(255,255,255,0.05);
-}
-
-.footer-text {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: #4A5568;
-  letter-spacing: 0.06em;
-}
-
-.footer-text a {
-  color: var(--teal);
-}
-
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (max-width: 760px) {
-
+  /* ── Reset Quarto defaults ────────────────────────────── */
+  body { margin: 0; padding: 0; background: #F7F6F2; }
+  #quarto-content, .page-layout-full { padding: 0 !important; margin: 0 !important; }
+  .quarto-title-block { display: none; }
+  main.content { padding: 0 !important; }
+
+  /* ── Token system ─────────────────────────────────────── */
+  :root {
+    --navy:   #0D1B2A;
+    --teal:   #00A878;
+    --gold:   #E8C547;
+    --ink:    #1A1A2E;
+    --mist:   #F7F6F2;
+    --slate:  #4A5568;
+    --border: #E2E0DA;
+    --card:   #FFFFFF;
+
+    --display: 'Space Grotesk', sans-serif;
+    --serif:   'Source Serif 4', Georgia, serif;
+    --mono:    'JetBrains Mono', monospace;
+  }
+
+  /* ── Hero ─────────────────────────────────────────────── */
   .hero {
-    padding: 70px 24px 65px;
+    background: var(--navy);
+    padding: 90px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 420px; height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,168,120,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .hero-name {
+    font-family: var(--display);
+    font-size: clamp(38px, 6vw, 68px);
+    font-weight: 700;
+    color: #F7F6F2;
+    line-height: 1.05;
+    margin: 0 0 18px;
+    letter-spacing: -0.02em;
+  }
+  .hero-name span {
+    color: var(--teal);
+  }
+  .hero-title {
+    font-family: var(--serif);
+    font-size: clamp(16px, 2.2vw, 20px);
+    font-weight: 300;
+    color: #A0AEC0;
+    margin: 0 0 36px;
+    line-height: 1.6;
+    max-width: 560px;
+  }
+  .hero-title strong {
+    color: #CBD5E0;
+    font-weight: 400;
+  }
+  .hero-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 3px;
+    letter-spacing: 0.06em;
+  }
+  .badge-outline {
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #A0AEC0;
+    background: transparent;
+  }
+  .badge-teal {
+    background: rgba(0,168,120,0.15);
+    color: var(--teal);
+    border: 1px solid rgba(0,168,120,0.3);
   }
 
+  /* ── Section wrapper ──────────────────────────────────── */
   .section {
-    padding: 60px 24px;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 72px 48px;
+  }
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .section-title {
+    font-family: var(--display);
+    font-size: clamp(24px, 3.5vw, 34px);
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 14px;
+    letter-spacing: -0.02em;
+  }
+  .section-divider {
+    width: 40px;
+    height: 3px;
+    background: var(--teal);
+    border-radius: 2px;
+    margin-bottom: 36px;
   }
 
+  /* ── About ────────────────────────────────────────────── */
   .about-grid {
-    grid-template-columns: 1fr;
-    gap: 38px;
-  }
-
-  .project-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .stack-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .workflow {
-    grid-template-columns: 1fr;
-    gap: 26px;
-  }
-
-  .workflow::before {
-    display: none;
-  }
-
-  .workflow-step {
-    text-align: left;
     display: grid;
-    grid-template-columns: 48px 1fr;
-    column-gap: 15px;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  .about-left {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  .profile-photo-wrap {
+    display: flex;
     align-items: center;
+    gap: 24px;
   }
-
-  .workflow-number {
-    grid-row: span 2;
-    margin: 0;
-  }
-
-  .experience-item,
-  .education-item {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .focus-list {
-    grid-template-columns: 1fr;
-  }
-
   .profile-photo {
-    width: 100px;
-    height: 100px;
+    width: 130px;
+    height: 130px;
+    object-fit: cover;
+    object-position: center top;
+    border-radius: 6px;
+    border: 3px solid var(--teal);
+    box-shadow: 6px 6px 0px var(--teal);
+    flex-shrink: 0;
+  }
+  .profile-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .profile-name {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .profile-role {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .profile-uni {
+    font-family: var(--serif);
+    font-size: 13px;
+    color: var(--slate);
+    font-style: italic;
+  }
+  .about-text {
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.8;
+    color: var(--slate);
+  }
+  .about-text p { margin: 0 0 16px; }
+  .about-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  .stat-item {}
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--slate);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .stat-label span { color: var(--teal); font-weight: 500; }
+  .stat-bar-bg {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .stat-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal), #00C896);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .cta {
-    padding: 65px 24px 55px;
+  /* ── Projects ─────────────────────────────────────────── */
+  .projects-bg { background: var(--navy); }
+  .projects-bg .section-title { color: #F7F6F2; }
+  .projects-bg .section-label { color: var(--teal); }
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+  .project-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 6px;
+    padding: 28px 26px 24px;
+    transition: border-color 0.2s, transform 0.2s;
+    text-decoration: none;
+    display: block;
+    position: relative;
+    overflow: hidden;
+  }
+  .project-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--teal);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  .project-card:hover { border-color: rgba(0,168,120,0.4); transform: translateY(-3px); }
+  .project-card:hover::before { transform: scaleX(1); }
+  .project-card.upcoming {
+    border-style: dashed;
+    opacity: 0.65;
+    cursor: default;
+  }
+  .project-card.upcoming:hover { transform: none; border-color: rgba(255,255,255,0.10); }
+  .project-card.upcoming::before { display: none; }
+  .project-number {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 0.12em;
+    margin-bottom: 14px;
+  }
+  .project-title {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 600;
+    color: #F7F6F2;
+    margin: 0 0 10px;
+    line-height: 1.3;
+  }
+  .project-desc {
+    font-family: var(--serif);
+    font-size: 14px;
+    color: #A0AEC0;
+    line-height: 1.6;
+    margin: 0 0 20px;
+  }
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    background: rgba(0,168,120,0.12);
+    color: var(--teal);
+    border-radius: 2px;
+    letter-spacing: 0.06em;
+  }
+  .tag-gold {
+    background: rgba(232,197,71,0.12);
+    color: var(--gold);
+  }
+  .project-link {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 0.08em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .project-link::after { content: '→'; }
+  .upcoming-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
+  /* ── Skills ───────────────────────────────────────────── */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+  }
+  .skill-group-title {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+    margin: 0 0 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .skill-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ── Footer ───────────────────────────────────────────── */
   .footer {
-    padding: 24px;
+    background: var(--navy);
+    padding: 36px 48px;
+    text-align: center;
   }
-}
+  .footer-text {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #4A5568;
+    letter-spacing: 0.08em;
+  }
+  .footer-text a {
+    color: var(--teal);
+    text-decoration: none;
+  }
 
+  /* ── Responsive ───────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .hero { padding: 60px 24px 56px; }
+    .section { padding: 56px 24px; }
+    .about-grid, .skills-grid { grid-template-columns: 1fr; gap: 32px; }
+    .profile-photo { width: 100px; height: 100px; }
+    .footer { padding: 28px 24px; }
+  }
 </style>
 
-
-<!-- =======================================================
+<!-- ═══════════════════════════════════════════════════════
      HERO
-======================================================= -->
-
+════════════════════════════════════════════════════════ -->
 <section class="hero">
-
   <div class="hero-inner">
-
-    <div class="hero-eyebrow">
-      Data Analytics · Analytics Engineering
-    </div>
-
-    <h1 class="hero-name">
-      Agu Charles<br>
-      <span>Chibuike</span>
-    </h1>
-
-    <div class="hero-role">
-      Data Analyst &amp; Analytics Engineer
-    </div>
-
+    <div class="hero-eyebrow">Data Science Portfolio</div>
+    <h1 class="hero-name">Agu Charles<br><span>Chibuike</span></h1>
     <p class="hero-title">
-      I build reliable analytical workflows that move from
-      <strong>raw data to decision-ready models, dashboards,
-      and statistical insights</strong> — using SQL, PostgreSQL,
-      Python, R, dbt and Power BI.
+      MSc Data Science candidate at the <strong>University of Nairobi</strong> — 
+      building rigorous, reproducible analytics at the intersection of 
+      health, commerce, and finance.
     </p>
-
     <div class="hero-badges">
-      <span class="badge badge-teal">SQL / PostgreSQL</span>
-      <span class="badge badge-teal">Power BI / DAX</span>
-      <span class="badge badge-teal">R / Shiny</span>
-      <span class="badge badge-outline">Python</span>
-      <span class="badge badge-outline">dbt</span>
+      <span class="badge badge-teal">R &amp; Shiny</span>
+      <span class="badge badge-teal">SQL &amp; PostgreSQL</span>
+      <span class="badge badge-teal">Power BI</span>
+      <span class="badge badge-outline">Longitudinal Analysis</span>
       <span class="badge badge-outline">Analytics Engineering</span>
     </div>
-
-    <div class="hero-links">
-
-      <a
-        class="hero-link"
-        href="https://github.com/agucharles91-cpu"
-        target="_blank"
-      >
-        GitHub
-      </a>
-
-      <a
-        class="hero-link"
-        href="https://agucharles.shinyapps.io/nairobi-runners/"
-        target="_blank"
-      >
-        Live Dashboard
-      </a>
-
-      <a
-        class="hero-link secondary"
-        href="#projects"
-      >
-        View selected work
-      </a>
-
-    </div>
-
   </div>
-
 </section>
 
-
-<!-- =======================================================
+<!-- ═══════════════════════════════════════════════════════
      ABOUT
-======================================================= -->
-
-<div style="background:#F7F6F2;">
-
+════════════════════════════════════════════════════════ -->
+<div style="background: #F7F6F2;">
   <div class="section">
-
-    <div class="section-label">
-      About
-    </div>
-
-    <h2 class="section-title">
-      What I do
-    </h2>
-
+    <div class="section-label">About</div>
+    <h2 class="section-title">Turning complex data into clear decisions</h2>
     <div class="section-divider"></div>
-
     <div class="about-grid">
-
-      <div>
-
+      <div class="about-left">
         <div class="profile-photo-wrap">
-
-          <img
-            src="images/profile.jpg"
-            alt="Agu Charles Chibuike"
+          <img 
+            src="images/profile.jpg" 
+            alt="Agu Charles Chibuike" 
             class="profile-photo"
           />
-
           <div class="profile-meta">
-
-            <div class="profile-name">
-              Agu Charles<br>Chibuike
-            </div>
-
-            <div class="profile-role">
-              Data Analyst<br>
-              Analytics Engineer
-            </div>
-
-            <div class="profile-uni">
-              MSc Data Science<br>
-              University of Nairobi
-            </div>
-
+            <div class="profile-name">Agu Charles<br>Chibuike</div>
+            <div class="profile-role">Data Scientist</div>
+            <div class="profile-uni">MSc Data Science<br>University of Nairobi</div>
           </div>
-
         </div>
-
-        <div class="focus-list">
-
-          <div class="focus-item">
-            <div class="focus-item-title">
-              Analytics
-            </div>
-            <div class="focus-item-text">
-              Business intelligence
-            </div>
-          </div>
-
-          <div class="focus-item">
-            <div class="focus-item-title">
-              Engineering
-            </div>
-            <div class="focus-item-text">
-              SQL &amp; data modelling
-            </div>
-          </div>
-
-          <div class="focus-item">
-            <div class="focus-item-title">
-              Statistics
-            </div>
-            <div class="focus-item-text">
-              Longitudinal analysis
-            </div>
-          </div>
-
-          <div class="focus-item">
-            <div class="focus-item-title">
-              Communication
-            </div>
-            <div class="focus-item-text">
-              BI &amp; data visualisation
-            </div>
-          </div>
-
+        <div class="about-text">
+          <p>
+            I am a data scientist and analytics engineer with a focus on 
+            longitudinal health data, business intelligence, and financial analytics. 
+            My work spans the full pipeline — from raw sensor data and relational 
+            databases to interactive dashboards and statistical modelling.
+          </p>
+          <p>
+            My MSc capstone investigates how training behaviour, sleep architecture, 
+            and recovery physiology interact across a cohort of 14 runners over four 
+            years — combining Garmin wearable data with mixed-effects modelling in R.
+          </p>
+          <p>
+            Outside academia I build portfolio-grade analytics engineering projects 
+            using SQL, PostgreSQL, and Power BI, targeting roles in data analytics 
+            and analytics engineering.
+          </p>
         </div>
-
       </div>
-
-
-      <div class="about-text">
-
-        <p>
-          I am a data analyst and analytics engineer focused on
-          turning raw, messy data into structured analytical
-          systems and decision-ready outputs.
-        </p>
-
-        <p>
-          My work spans the analytical pipeline — from data
-          ingestion and SQL transformation through relational
-          modelling, statistical analysis and interactive
-          business intelligence.
-        </p>
-
-        <p>
-          I am currently completing an MSc in Data Science at
-          the University of Nairobi. My academic work focuses
-          on longitudinal wearable data, combining Garmin
-          measurements with statistical modelling in R.
-        </p>
-
-        <p>
-          Alongside my academic work, I build portfolio-grade
-          analytics engineering projects using PostgreSQL,
-          SQL, Python, dbt and Power BI, with a particular
-          interest in operational and business analytics.
-        </p>
-
+      <div class="about-stats">
+        <div class="stat-item">
+          <div class="stat-label">R / Shiny <span>Advanced</span></div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="88"></div></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">SQL / PostgreSQL <span>Advanced</span></div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="85"></div></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Power BI / DAX <span>Proficient</span></div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="78"></div></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Statistical Modelling <span>Advanced</span></div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="82"></div></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Python / Pandas <span>Proficient</span></div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="72"></div></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Data Visualisation <span>Advanced</span></div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="90"></div></div>
+        </div>
       </div>
-
     </div>
-
   </div>
-
 </div>
 
-
-<!-- =======================================================
-     EXPERIENCE
-======================================================= -->
-
-<div class="experience-bg">
-
-  <div class="section">
-
-    <div class="section-label">
-      Experience
-    </div>
-
-    <h2 class="section-title">
-      Professional experience
-    </h2>
-
-    <div class="section-divider"></div>
-
-
-    <div class="experience-item">
-
-      <div class="experience-date">
-        2022 — 2025
-      </div>
-
-      <div>
-
-        <div class="experience-role">
-          Technical Systems Analyst
-        </div>
-
-        <div class="experience-company">
-          AMPR · Intelligence &amp; Surveillance Systems
-        </div>
-
-        <div class="experience-description">
-          Technical analysis and systems support within an
-          operational environment, working across technology,
-          troubleshooting, documentation and process improvement.
-        </div>
-
-        <ul class="experience-points">
-          <li>
-            Analysed and supported operational systems and
-            technical workflows.
-          </li>
-          <li>
-            Investigated complex technical issues and translated
-            them into actionable solutions.
-          </li>
-          <li>
-            Contributed to documentation, process improvement
-            and reliable day-to-day system operations.
-          </li>
-        </ul>
-
-      </div>
-
-    </div>
-
-
-    <div class="experience-item">
-
-      <div class="experience-date">
-        Previous
-      </div>
-
-      <div>
-
-        <div class="experience-role">
-          Founder &amp; Director
-        </div>
-
-        <div class="experience-company">
-          Trust for Vista Academy
-        </div>
-
-        <div class="experience-description">
-          Built and managed an education-focused organisation,
-          combining operational management, planning, administration
-          and business decision-making.
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <div class="experience-item">
-
-      <div class="experience-date">
-        Previous
-      </div>
-
-      <div>
-
-        <div class="experience-role">
-          Coffee Shop Manager &amp; Senior Barista
-        </div>
-
-        <div class="experience-company">
-          Dubai
-        </div>
-
-        <div class="experience-description">
-          Operational and customer-facing management experience
-          in a high-volume service environment, including staff
-          coordination, inventory, quality control and daily
-          business operations.
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- =======================================================
-     WORKFLOW
-======================================================= -->
-
-<div class="workflow-bg">
-
-  <div class="section">
-
-    <div class="section-label">
-      Method
-    </div>
-
-    <h2 class="section-title">
-      From raw data to decision
-    </h2>
-
-    <div class="section-divider"></div>
-
-    <div class="workflow">
-
-      <div class="workflow-step">
-
-        <div class="workflow-number">01</div>
-
-        <div class="workflow-title">
-          Acquire
-        </div>
-
-        <div class="workflow-text">
-          CSV · JSON · APIs<br>
-          Relational data
-        </div>
-
-      </div>
-
-
-      <div class="workflow-step">
-
-        <div class="workflow-number">02</div>
-
-        <div class="workflow-title">
-          Transform
-        </div>
-
-        <div class="workflow-text">
-          Python · SQL<br>
-          dbt · PostgreSQL
-        </div>
-
-      </div>
-
-
-      <div class="workflow-step">
-
-        <div class="workflow-number">03</div>
-
-        <div class="workflow-title">
-          Model
-        </div>
-
-        <div class="workflow-text">
-          Star schemas<br>
-          Analytical datasets
-        </div>
-
-      </div>
-
-
-      <div class="workflow-step">
-
-        <div class="workflow-number">04</div>
-
-        <div class="workflow-title">
-          Analyse
-        </div>
-
-        <div class="workflow-text">
-          Statistics · cohorts<br>
-          Time series
-        </div>
-
-      </div>
-
-
-      <div class="workflow-step">
-
-        <div class="workflow-number">05</div>
-
-        <div class="workflow-title">
-          Communicate
-        </div>
-
-        <div class="workflow-text">
-          Power BI · Shiny<br>
-          Quarto · Plotly
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- =======================================================
+<!-- ═══════════════════════════════════════════════════════
      PROJECTS
-======================================================= -->
-
-<div class="projects-bg" id="projects">
-
+════════════════════════════════════════════════════════ -->
+<div class="projects-bg">
   <div class="section">
-
-    <div class="section-label">
-      Projects
-    </div>
-
-    <h2 class="section-title">
-      Selected work
-    </h2>
-
+    <div class="section-label">Projects</div>
+    <h2 class="section-title" style="color:#F7F6F2;">Selected work</h2>
     <div class="section-divider"></div>
-
-
     <div class="project-grid">
 
-
-      <!-- PROJECT 01 -->
-
-      <div class="project-card">
-
-        <div class="project-number">
-          01 / MSc CAPSTONE
-        </div>
-
-        <div class="project-title">
-          Nairobi Runners — Training, Sleep &amp; Recovery
-        </div>
-
+      <!-- Project 1 -->
+      <a class="project-card" href="nairobi_runners_report.html">
+        <div class="project-number">01 / MSc CAPSTONE</div>
+        <div class="project-title">Nairobi Runners — Training, Sleep &amp; Recovery</div>
         <div class="project-desc">
-          Longitudinal analysis of 14 runners across four years,
-          combining Garmin wearable data with sleep, training,
-          recovery and performance variables.
+          Longitudinal analysis of 14 runners across 4 years. 
+          Mixed-effects modelling, sleep staging, VO₂max trajectories, 
+          and overtraining detection using Garmin wearable data.
         </div>
-
-        <div class="project-result">
-          <strong>Methods:</strong>
-          Mixed-effects modelling, sleep staging,
-          VO₂max trajectories, longitudinal analysis
-          and training-load metrics.
-        </div>
-
         <div class="project-tags">
           <span class="tag">R</span>
-          <span class="tag">lme4</span>
           <span class="tag">Shiny</span>
+          <span class="tag">lme4</span>
           <span class="tag">Plotly</span>
           <span class="tag">Quarto</span>
         </div>
+        <span class="project-link">View report</span>
+      </a>
 
-        <div class="project-links">
-
-          <a
-            class="project-link"
-            href="nairobi_runners_report.html"
-          >
-            Case study
-          </a>
-
-          <a
-            class="project-link"
-            href="https://agucharles.shinyapps.io/nairobi-runners/"
-            target="_blank"
-          >
-            Dashboard
-          </a>
-
-        </div>
-
-      </div>
-
-
-      <!-- PROJECT 02 -->
-
-      <div class="project-card">
-
-        <div class="project-number">
-          02 / INTERACTIVE APPLICATION
-        </div>
-
-        <div class="project-title">
-          Nairobi Runners — Interactive Dashboard
-        </div>
-
+      <!-- Project 2 -->
+      <a class="project-card" href="https://agucharles.shinyapps.io/nairobi-runners/" target="_blank">
+        <div class="project-number">01 / INTERACTIVE</div>
+        <div class="project-title">Live Dashboard — Nairobi Runners</div>
         <div class="project-desc">
-          Interactive exploration of longitudinal athlete data
-          with global filters, individual athlete deep-dives,
-          correlation analysis and training-load metrics.
+          47-figure interactive dashboard with global filters, 
+          individual athlete deep-dives, correlation matrices, 
+          lag analysis, and training monotony tracking.
         </div>
-
-        <div class="project-result">
-          <strong>Application:</strong>
-          47 analytical figures with athlete-level exploration,
-          lag analysis and training monotony tracking.
-        </div>
-
         <div class="project-tags">
           <span class="tag">Shiny</span>
           <span class="tag">bslib</span>
           <span class="tag">DT</span>
-          <span class="tag">Plotly</span>
+          <span class="tag">shinyapps.io</span>
         </div>
+        <span class="project-link">Open dashboard</span>
+      </a>
 
-        <div class="project-links">
-
-          <a
-            class="project-link"
-            href="https://agucharles.shinyapps.io/nairobi-runners/"
-            target="_blank"
-          >
-            Open dashboard
-          </a>
-
-          <a
-            class="project-link"
-            href="https://github.com/agucharles91-cpu"
-            target="_blank"
-          >
-            GitHub
-          </a>
-
-        </div>
-
-      </div>
-
-
-      <!-- PROJECT 03 -->
-
-      <div class="project-card">
-
-        <div class="project-number">
-          03 / ANALYTICS ENGINEERING
-        </div>
-
-        <div class="project-title">
-          Olist E-Commerce Analytics
-        </div>
-
+<!-- Project 3 -->
+      <a class="project-card" href="https://github.com/agucharles91-cpu/agucharles91-cpu.github.io/tree/main/Olist-Ecommerce-Analytics" target="_blank">
+        <div class="project-number">02 / ANALYTICS ENGINEERING</div>
+        <div class="project-title">Olist E-Commerce Analytics</div>
         <div class="project-desc">
-          End-to-end analytics engineering on more than 100k
-          Brazilian orders, moving from raw relational data
-          through modelling and business intelligence.
+          End-to-end analytics engineering on 100k+ Brazilian orders. 
+          Star schema design, advanced SQL, cohort analysis, 
+          and executive Power BI dashboard.
         </div>
-
-        <div class="project-result">
-          <strong>Built:</strong>
-          PostgreSQL star schema, advanced SQL transformations,
-          cohort analysis and an executive Power BI dashboard.
-        </div>
-
         <div class="project-tags">
           <span class="tag">PostgreSQL</span>
           <span class="tag">SQL</span>
           <span class="tag">Power BI</span>
           <span class="tag">Python</span>
         </div>
-
-        <div class="project-links">
-
-          <a
-            class="project-link"
-            href="https://github.com/agucharles91-cpu/agucharles91-cpu.github.io/tree/main/Olist-Ecommerce-Analytics"
-            target="_blank"
-          >
-            GitHub
-          </a>
-
-        </div>
-
-      </div>
+        <span class="project-link">View project</span>
+      </a>
 
 
-      <!-- PROJECT 04 -->
-
+<!-- Project 4 -->
       <div class="project-card upcoming">
-
-        <div class="project-number">
-          04 / ANALYTICS ENGINEERING
-        </div>
-
-        <div class="project-title">
-          Parking Enforcement Analytics
-        </div>
-
+        <div class="project-number">03 / ANALYTICS ENGINEERING</div>
+        <div class="project-title">Parking Enforcement Analytics</div>
         <div class="project-desc">
-          Operational analytics engineering project covering
-          data ingestion, transformation, time-series analysis
-          and business intelligence.
+          End-to-end analytics engineering on real Dubai parking enforcement 
+          operational data. Python ingestion, dbt transformations, 
+          time-series EDA, and operational BI dashboard.
         </div>
-
-        <div class="project-result">
-          <strong>Pipeline:</strong>
-          Python ingestion → dbt transformations →
-          SQL analysis → operational Power BI dashboard.
-        </div>
-
         <div class="project-tags">
           <span class="tag">Python</span>
           <span class="tag">dbt</span>
           <span class="tag">SQL</span>
           <span class="tag tag-gold">Power BI</span>
         </div>
-
-        <span class="upcoming-label">
-          In progress
-        </span>
-
+        <span class="upcoming-label">In progress</span>
       </div>
 
 
-      <!-- PROJECT 05 -->
-
+      <!-- Project 5 -->
       <div class="project-card upcoming">
-
-        <div class="project-number">
-          05 / FINANCIAL ANALYTICS
-        </div>
-
-        <div class="project-title">
-          Nigerian Financial Analytics
-        </div>
-
+        <div class="project-number">03 / FINANCIAL ANALYTICS</div>
+        <div class="project-title">Nigerian Financial Dataset</div>
         <div class="project-desc">
-          Financial analytics project focused on performance,
-          sector-level trends, risk metrics and business
-          intelligence for the Nigerian market.
+          Financial data analysis targeting the Nigerian market — 
+          sector performance, risk metrics, and business intelligence 
+          for investment and operations decisions.
         </div>
-
-        <div class="project-result">
-          <strong>Planned stack:</strong>
-          SQL transformations, Python analysis and
-          Power BI financial reporting.
-        </div>
-
         <div class="project-tags">
           <span class="tag">SQL</span>
-          <span class="tag">Python</span>
           <span class="tag tag-gold">Power BI</span>
+          <span class="tag">Python</span>
         </div>
-
-        <span class="upcoming-label">
-          Coming soon
-        </span>
-
+        <span class="upcoming-label">Coming soon</span>
       </div>
 
-
     </div>
-
   </div>
-
 </div>
 
-
-<!-- =======================================================
-     TECHNICAL STACK
-======================================================= -->
-
-<div class="skills-bg">
-
+<!-- ═══════════════════════════════════════════════════════
+     SKILLS
+════════════════════════════════════════════════════════ -->
+<div style="background: #F7F6F2;">
   <div class="section">
-
-    <div class="section-label">
-      Technical Stack
-    </div>
-
-    <h2 class="section-title">
-      Tools I work with
-    </h2>
-
+    <div class="section-label">Skills &amp; Tools</div>
+    <h2 class="section-title">Technical toolkit</h2>
     <div class="section-divider"></div>
-
-
-    <div class="stack-grid">
-
-
-      <div class="stack-card">
-
-        <div class="stack-title">
-          Analytics Engineering
+    <div class="skills-grid">
+      <div>
+        <div class="skill-group-title">Analytics &amp; Statistics</div>
+        <div class="skill-list">
+          <div class="stat-item">
+            <div class="stat-label">Mixed-effects modelling (lme4) <span>Advanced</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="84"></div></div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Time series &amp; longitudinal analysis <span>Advanced</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="82"></div></div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Cohort &amp; customer segmentation <span>Proficient</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="76"></div></div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Window functions &amp; CTEs <span>Advanced</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="86"></div></div>
+          </div>
         </div>
-
-        <div class="stack-description">
-          Building structured analytical datasets from
-          relational and operational data.
-        </div>
-
-        <div class="stack-tools">
-          <span class="stack-tool">SQL</span>
-          <span class="stack-tool">PostgreSQL</span>
-          <span class="stack-tool">dbt</span>
-          <span class="stack-tool">CTEs</span>
-          <span class="stack-tool">Window Functions</span>
-          <span class="stack-tool">Star Schema</span>
-          <span class="stack-tool">Data Modelling</span>
-        </div>
-
       </div>
-
-
-      <div class="stack-card">
-
-        <div class="stack-title">
-          Business Intelligence
+      <div>
+        <div class="skill-group-title">Engineering &amp; Visualisation</div>
+        <div class="skill-list">
+          <div class="stat-item">
+            <div class="stat-label">Star schema &amp; data modelling <span>Proficient</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="78"></div></div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Plotly &amp; ggplot2 <span>Advanced</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="90"></div></div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Quarto &amp; reproducible reporting <span>Advanced</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="88"></div></div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">DAX &amp; Power BI data models <span>Proficient</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="75"></div></div>
+          </div>
         </div>
-
-        <div class="stack-description">
-          Translating analytical models into interactive,
-          decision-oriented reporting.
-        </div>
-
-        <div class="stack-tools">
-          <span class="stack-tool">Power BI</span>
-          <span class="stack-tool">DAX</span>
-          <span class="stack-tool">Power Query</span>
-          <span class="stack-tool">Shiny</span>
-          <span class="stack-tool">Plotly</span>
-          <span class="stack-tool">Dashboard Design</span>
-        </div>
-
       </div>
-
-
-      <div class="stack-card">
-
-        <div class="stack-title">
-          Data Science &amp; Statistics
-        </div>
-
-        <div class="stack-description">
-          Statistical analysis of longitudinal, time-series
-          and structured observational data.
-        </div>
-
-        <div class="stack-tools">
-          <span class="stack-tool">R</span>
-          <span class="stack-tool">lme4</span>
-          <span class="stack-tool">Longitudinal Analysis</span>
-          <span class="stack-tool">Time Series</span>
-          <span class="stack-tool">Cohort Analysis</span>
-          <span class="stack-tool">Statistical Modelling</span>
-        </div>
-
-      </div>
-
-
-      <div class="stack-card">
-
-        <div class="stack-title">
-          Programming &amp; Reproducibility
-        </div>
-
-        <div class="stack-description">
-          Reproducible analytical workflows and programmatic
-          data processing.
-        </div>
-
-        <div class="stack-tools">
-          <span class="stack-tool">Python</span>
-          <span class="stack-tool">Pandas</span>
-          <span class="stack-tool">Git</span>
-          <span class="stack-tool">GitHub</span>
-          <span class="stack-tool">Quarto</span>
-          <span class="stack-tool">Reproducible Reporting</span>
-        </div>
-
-      </div>
-
-
     </div>
-
   </div>
-
 </div>
 
-
-<!-- =======================================================
-     EDUCATION
-======================================================= -->
-
-<div style="background:#F7F6F2;">
-
-  <div class="section">
-
-    <div class="section-label">
-      Education
-    </div>
-
-    <h2 class="section-title">
-      Academic background
-    </h2>
-
-    <div class="section-divider"></div>
-
-
-    <div class="education-item">
-
-      <div class="education-type">
-        Current
-      </div>
-
-      <div>
-
-        <div class="education-degree">
-          MSc Data Science
-        </div>
-
-        <div class="education-school">
-          University of Nairobi
-        </div>
-
-        <div class="education-detail">
-          Longitudinal data · Statistical modelling · Data science
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <div class="education-item">
-
-      <div class="education-type">
-        Degree
-      </div>
-
-      <div>
-
-        <div class="education-degree">
-          BSc Chemistry
-        </div>
-
-        <div class="education-school">
-          Scientific &amp; quantitative foundation
-        </div>
-
-        <div class="education-detail">
-          Chemistry · Quantitative analysis · Scientific methodology
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- =======================================================
-     CTA
-======================================================= -->
-
-<section class="cta">
-
-  <div class="cta-inner">
-
-    <div class="cta-label">
-      Get in touch
-    </div>
-
-    <h2 class="cta-title">
-      Let's work with the data.
-    </h2>
-
-    <p class="cta-text">
-      I am interested in data analyst and analytics engineering
-      opportunities where strong SQL, analytical thinking,
-      business intelligence and reproducible workflows can
-      create measurable value.
-    </p>
-
-    <div class="cta-links">
-
-      <a
-        class="cta-link"
-        href="https://github.com/agucharles91-cpu"
-        target="_blank"
-      >
-        GitHub
-      </a>
-
-      <a
-        class="cta-link"
-        href="https://www.linkedin.com/"
-        target="_blank"
-      >
-        LinkedIn
-      </a>
-
-      <a
-        class="cta-link"
-        href="https://agucharles91-cpu.github.io/"
-      >
-        Portfolio
-      </a>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
+<!-- ═══════════════════════════════════════════════════════
      FOOTER
-======================================================= -->
-
+════════════════════════════════════════════════════════ -->
 <footer class="footer">
-
   <div class="footer-text">
-
-    Agu Charles Chibuike
+    Agu Charles Chibuike &nbsp;·&nbsp; 
+    MSc Data Science, University of Nairobi &nbsp;·&nbsp;
+    <a href="https://github.com/agucharles91-cpu" target="_blank">GitHub</a>
     &nbsp;·&nbsp;
-    MSc Data Science, University of Nairobi
-    &nbsp;·&nbsp;
-
-    <a
-      href="https://github.com/agucharles91-cpu"
-      target="_blank"
-    >
-      GitHub
-    </a>
-
-    &nbsp;·&nbsp;
-
-    <a
-      href="https://agucharles.shinyapps.io/nairobi-runners/"
-      target="_blank"
-    >
-      Live Dashboard
-    </a>
-
+    <a href="https://agucharles.shinyapps.io/nairobi-runners/" target="_blank">Live Dashboard</a>
   </div>
-
 </footer>
+
+<script>
+  // Animate skill bars on scroll into view
+  const bars = document.querySelectorAll('.stat-bar-fill');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const bar = entry.target;
+        const width = bar.getAttribute('data-width');
+        setTimeout(() => { bar.style.width = width + '%'; }, 120);
+        observer.unobserve(bar);
+      }
+    });
+  }, { threshold: 0.3 });
+  bars.forEach(bar => observer.observe(bar));
+</script>
+```
