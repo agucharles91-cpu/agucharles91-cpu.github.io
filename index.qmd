@@ -519,7 +519,7 @@ format:
       </a>
 
 <!-- Project 3 -->
-      <a class="project-card" href="https://github.com/agucharles91-cpu/agucharles91-cpu.github.io/tree/main/Olist-Ecommerce-Analytics" target="_blank">
+      <a class="project-card" href="https://github.com/agucharles91-cpu/Olist-Ecommerce-Analytics" target="_blank">
         <div class="project-number">02 / ANALYTICS ENGINEERING</div>
         <div class="project-title">Olist E-Commerce Analytics</div>
         <div class="project-desc">
