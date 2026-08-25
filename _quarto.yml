@@ -3,32 +3,29 @@ project:
   output-dir: docs
   render:
     - index.qmd
-    - report.qmd
 
 website:
   title: "Agu Charles Chibuike"
+
   navbar:
     left:
       - text: "Home"
         href: index.qmd
-      - text: "Nairobi Runners"
+
+      - text: "Projects"
         menu:
-          - text: "Full Report"
-            href: report.qmd
-          - text: "Interactive Dashboard"
-            href: https://agucharles.shinyapps.io/nairobi-runners/
-      - text: "Olist E-Commerce"
-        menu:
-          - text: "Project Overview"
-            href: https://agucharles91-cpu.github.io/
-          - text: "SQL Analysis"
-            href: https://agucharles91-cpu.github.io/
-          - text: "Power BI Dashboard"
-            href: https://agucharles91-cpu.github.io/
-      - text: "Nigerian Finance"
-        menu:
-          - text: "Coming Soon"
-            href: https://agucharles91-cpu.github.io/
+          - text: "Nairobi Runners"
+            href: https://github.com/agucharles91-cpu/Nairobi-Runners
+
+          - text: "Olist E-Commerce Analytics"
+            href: https://github.com/agucharles91-cpu/Olist-Ecommerce-Analytics
+
+          - text: "Parking Enforcement Analytics"
+            href: https://github.com/agucharles91-cpu/Parking-Enforcement-Analytics
+
+      - text: "Nairobi Runners Dashboard"
+        href: https://agucharles.shinyapps.io/nairobi-runners/
+
     right:
       - icon: github
         href: https://github.com/agucharles91-cpu
