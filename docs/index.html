@@ -484,6 +484,12 @@ ul.task-list li input[type="checkbox"] {
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
+  
+  .project-links {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
 
   /* ── Skills ───────────────────────────────────────────── */
   .skills-grid {
@@ -634,23 +640,37 @@ ul.task-list li input[type="checkbox"] {
     <div class="project-grid">
 
       <!-- Project 1 -->
-      <a class="project-card" href="nairobi_runners_report.html">
-        <div class="project-number">01 / MSc CAPSTONE</div>
-        <div class="project-title">Nairobi Runners — Training, Sleep &amp; Recovery</div>
-        <div class="project-desc">
-          Longitudinal analysis of 14 runners across 4 years. 
-          Mixed-effects modelling, sleep staging, VO₂max trajectories, 
-          and overtraining detection using Garmin wearable data.
-        </div>
-        <div class="project-tags">
-          <span class="tag">R</span>
-          <span class="tag">Shiny</span>
-          <span class="tag">lme4</span>
-          <span class="tag">Plotly</span>
-          <span class="tag">Quarto</span>
-        </div>
-        <span class="project-link">View report</span>
-      </a>
+<div class="project-card">
+  <div class="project-number">01 / MSc CAPSTONE</div>
+
+  <div class="project-title">
+    Nairobi Runners — Training, Sleep &amp; Recovery
+  </div>
+
+  <div class="project-desc">
+    Longitudinal analysis of 14 runners across 4 years.
+    Mixed-effects modelling, sleep staging, VO₂max trajectories,
+    and overtraining detection using Garmin wearable data.
+  </div>
+
+  <div class="project-tags">
+    <span class="tag">R</span>
+    <span class="tag">Shiny</span>
+    <span class="tag">lme4</span>
+    <span class="tag">Plotly</span>
+    <span class="tag">Quarto</span>
+  </div>
+
+  <div class="project-links">
+    <a class="project-link" href="nairobi_runners_report.html">
+      View report
+    </a>
+
+    <a class="project-link" href="https://github.com/agucharles91-cpu/Nairobi-Runners" target="_blank" rel="noopener noreferrer">
+      GitHub
+    </a>
+  </div>
+</div>
 
       <!-- Project 2 -->
       <a class="project-card" href="https://agucharles.shinyapps.io/nairobi-runners/" target="_blank">
