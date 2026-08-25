@@ -1,54 +1,111 @@
-# Ignore log and tex files
+# ============================================================
+# R / RStudio
+# ============================================================
+
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+*.Rproj
+
+# Quarto
+.quarto/
+**/*.quarto_ipynb
+
+
+# ============================================================
+# R / Quarto build artefacts
+# ============================================================
+
 *.log
 *.tex
 *_files/
 
-# Ignore old version files
-nairobi_runners_report_*.html
-nairobi_runners_report_*.qmd
+# Temporary/test renders
+test.html
+test.qmd
+report.qmd
+report.tex
+report.log
+
+
+# ============================================================
+# Old / obsolete project versions
+# ============================================================
+
 app_*.R
-
-# Ignore R session files
-.Rhistory
-.RData
-.Ruserdata
-/.quarto/
-**/*.quarto_ipynb
-
-# Old app versions
-app_1.R
-app_16.R
-app_17.R
 Mini_New_App.R
 
-# Report render artefacts
+nairobi_runners_report_*.html
+nairobi_runners_report_*.qmd
+nairobi_runners_report_*.log
+nairobi_runners_report_*.tex
+
 nairobi_runners_report_4_files/
 nairobi_runners_report_6_files/
 nairobi_runners_report_files/
 report_files/
 test_files/
-nairobi_runners_report_6.log
-nairobi_runners_report_6.tex
-nairobi_runners_report_6.qmd
-report.log
-report.qmd
-report.tex
-nairobi_runners_report_19.html
 
-# Scratch files
-test.html
-test.qmd
-.Rhistory
-
-# Private data
-app/data/garmin_merged_14p.csv
-
-# renv library (large, machine-specific)
-app/renv/library/
-app/renv/staging/
-app/renv/
 nairobi-runners-project/
 
-# RStudio internals
-.quarto/
-.Rproj.user/
+
+# ============================================================
+# R package environments
+# ============================================================
+
+# renv package library and local environment
+app/renv/
+
+# Keep app/renv.lock tracked for reproducibility
+
+# ============================================================
+# Data
+# ============================================================
+
+# The anonymized Garmin dataset is intentionally PUBLIC
+# and is therefore tracked by Git.
+#
+# Do NOT add these files to .gitignore:
+# app/data/garmin_merged_14p.csv
+# data/garmin_merged_14p.csv
+
+# If original/private/raw datasets are added later, ignore them:
+data/raw/
+data/private/
+data/originals/
+
+# Common local database files
+*.duckdb
+*.sqlite
+*.sqlite3
+
+
+# ============================================================
+# Python
+# ============================================================
+
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+
+# ============================================================
+# Operating system
+# ============================================================
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+
+# ============================================================
+# Temporary / scratch files
+# ============================================================
+
+*.tmp
+*.temp
+*.bak
