@@ -1,5 +1,9 @@
 ---
 title: ""
+
+resources:
+  - cv.pdf
+  
 format:
   html:
     page-layout: full
@@ -144,6 +148,56 @@ main.content {
   .btn-primary:hover { background: #00C896; }
   .btn-outline { border: 1px solid rgba(255,255,255,0.25); color: #E2E8F0; }
   .btn-outline:hover { border-color: var(--teal); color: var(--teal); }
+  
+  .hero-role {
+  font-family: var(--display);
+  font-size: clamp(18px, 2.5vw, 24px);
+  font-weight: 500;
+  color: #CBD5E0;
+  margin: 0 0 18px;
+}
+
+.hero-context {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #718096;
+  letter-spacing: 0.06em;
+  margin: -18px 0 28px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.hero-btn {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  padding: 9px 16px;
+  border-radius: 3px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.hero-btn-primary {
+  background: var(--teal);
+  color: var(--navy);
+  border: 1px solid var(--teal);
+}
+
+.hero-btn-secondary {
+  background: transparent;
+  color: #A0AEC0;
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+.hero-btn-secondary:hover {
+  color: var(--teal);
+  border-color: rgba(0,168,120,0.5);
+}
 
   /* ── Section wrapper ──────────────────────────────────── */
   .section { max-width: 860px; margin: 0 auto; padding: 76px 48px; }
@@ -324,25 +378,60 @@ main.content {
 ════════════════════════════════════════════════════════ -->
 <section class="hero">
   <div class="hero-inner">
-    <div class="hero-eyebrow">Analytics Engineer &amp; Data Scientist · Nairobi, Kenya</div>
-    <h1 class="hero-name">Agu Charles<br><span>Chibuike</span></h1>
+
+    <div class="hero-eyebrow">
+      Analytics Engineering · Data Analytics
+    </div>
+
+    <h1 class="hero-name">
+      Agu Charles<br>
+      <span>Chibuike</span>
+    </h1>
+
+    <div class="hero-role">
+      Analytics Engineer · Data Analyst
+    </div>
+
     <p class="hero-title">
-      I design ETL pipelines, warehousing solutions, and BI dashboards across
-      IoT, EV infrastructure, and hospitality — with <strong>5+ years</strong>
-      raising data accuracy from 78% to 94%+ and cutting reporting cycle
-      times by over 60% through SQL and Python automation.
+      I build reliable analytical workflows that turn
+      <strong>raw operational data into validated models,
+      decision-ready dashboards, and actionable insights</strong> —
+      using SQL, PostgreSQL, Python, R, dbt and Power BI.
     </p>
+
+    <p class="hero-context">
+      MSc Data Science candidate · University of Nairobi
+    </p>
+
+    <div class="hero-actions">
+      <a href="cv.pdf" class="hero-btn hero-btn-primary">
+        View CV
+      </a>
+
+      <a href="#projects" class="hero-btn hero-btn-secondary">
+        View Projects
+      </a>
+
+      <a href="https://github.com/agucharles91-cpu"
+         target="_blank"
+         class="hero-btn hero-btn-secondary">
+        GitHub
+      </a>
+
+      <a href="#contact" class="hero-btn hero-btn-secondary">
+        Contact
+      </a>
+    </div>
+
     <div class="hero-badges">
-      <span class="badge badge-teal">SQL &amp; PostgreSQL</span>
-      <span class="badge badge-teal">Snowflake / dbt</span>
-      <span class="badge badge-teal">Power BI</span>
-      <span class="badge badge-outline">R &amp; Shiny</span>
-      <span class="badge badge-outline">Time Series &amp; ML</span>
+      <span class="badge badge-teal">SQL / PostgreSQL</span>
+      <span class="badge badge-teal">Python / R</span>
+      <span class="badge badge-teal">Power BI / DAX</span>
+      <span class="badge badge-outline">dbt</span>
+      <span class="badge badge-outline">Statistical Modelling</span>
+      <span class="badge badge-outline">Data Engineering</span>
     </div>
-    <div class="hero-ctas">
-      <a class="btn btn-primary" href="#projects">View Projects</a>
-      <a class="btn btn-outline" href="#contact">Get in Touch</a>
-    </div>
+
   </div>
 </section>
 
