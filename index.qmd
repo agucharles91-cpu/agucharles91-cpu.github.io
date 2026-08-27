@@ -314,6 +314,14 @@ main.content {
   .project-link { font-family: var(--mono); font-size: 11px; color: var(--teal); letter-spacing: 0.08em; display: inline-flex; align-items: center; gap: 6px; }
   .project-link::after { content: '→'; }
   .upcoming-label { font-family: var(--mono); font-size: 10px; color: var(--gold); letter-spacing: 0.12em; text-transform: uppercase; }
+  .project-thumb {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 18px;
+    border: 1px solid rgba(255,255,255,0.10);
+  }
 
   /* ── Skills ───────────────────────────────────────────── */
   .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
@@ -393,14 +401,8 @@ main.content {
     </div>
 
     <p class="hero-title">
-      I build reliable analytical workflows that turn
-      <strong>raw operational data into validated models,
-      decision-ready dashboards, and actionable insights</strong> —
-      using SQL, PostgreSQL, Python, R, dbt and Power BI.
-    </p>
-
-    <p class="hero-context">
-      MSc Data Science candidate · University of Nairobi
+      I build reliable analytical workflows from raw operational data
+      to analytical models, dashboards, and decision-ready insights.
     </p>
 
     <div class="hero-actions">
@@ -408,14 +410,16 @@ main.content {
         View CV
       </a>
 
-      <a href="#projects" class="hero-btn hero-btn-secondary">
-        View Projects
-      </a>
-
       <a href="https://github.com/agucharles91-cpu"
          target="_blank"
          class="hero-btn hero-btn-secondary">
         GitHub
+      </a>
+
+      <a href="https://www.linkedin.com/in/agu-charles-3b8140128"
+         target="_blank"
+         class="hero-btn hero-btn-secondary">
+        LinkedIn
       </a>
 
       <a href="#contact" class="hero-btn hero-btn-secondary">
@@ -641,6 +645,7 @@ main.content {
     <div class="project-grid">
 
       <div class="project-card">
+        <img src="images/nairobi-runners.png" alt="Nairobi Runners research report" class="project-thumb">
         <div class="project-number">01 / MSc CAPSTONE</div>
         <div class="project-title">Training, Sleep &amp; Recovery Dynamics in Recreational Runners</div>
         <div class="project-desc">
@@ -660,7 +665,8 @@ main.content {
       </div>
 
       <a class="project-card" href="https://agucharles.shinyapps.io/nairobi-runners/" target="_blank" rel="noopener noreferrer">
-        <div class="project-number">02 / INTERACTIVE</div>
+        <img src="images/nairobi-dashboard.png" alt="Nairobi Runners live Shiny dashboard" class="project-thumb">
+        <div class="project-number">01 / INTERACTIVE</div>
         <div class="project-title">Live Dashboard — Nairobi Runners</div>
         <div class="project-desc">
           47-figure interactive Shiny dashboard with global filters, individual athlete
@@ -673,11 +679,14 @@ main.content {
       </a>
 
       <a class="project-card" href="https://github.com/agucharles91-cpu/Olist-Ecommerce-Analytics" target="_blank" rel="noopener noreferrer">
-        <div class="project-number">03 / ANALYTICS ENGINEERING</div>
+        <img src="images/olist-dashboard.png" alt="Olist Power BI dashboard" class="project-thumb">
+        <div class="project-number">02 / ANALYTICS ENGINEERING</div>
         <div class="project-title">Olist E-Commerce Analytics</div>
         <div class="project-desc">
           End-to-end analytics engineering on 100k+ Brazilian orders. Star schema design,
-          advanced SQL, cohort analysis, and an executive Power BI dashboard.
+          17 advanced SQL queries, cohort/Pareto analysis, and a 3-page Power BI dashboard.
+          Surfaced R$15.42M total revenue, 92% on-time delivery, and a 97% one-time-purchase
+          retention gap.
         </div>
         <div class="project-tags">
           <span class="tag">PostgreSQL</span><span class="tag">SQL</span><span class="tag">Power BI</span><span class="tag">Python</span>
@@ -686,12 +695,14 @@ main.content {
       </a>
 
       <a class="project-card" href="https://github.com/agucharles91-cpu/Parking-Enforcement-Analytics" target="_blank" rel="noopener noreferrer">
-        <div class="project-number">04 / ANALYTICS ENGINEERING</div>
+        <img src="images/parking-dashboard.png" alt="Parking Enforcement Power BI dashboard" class="project-thumb">
+        <div class="project-number">03 / ANALYTICS ENGINEERING</div>
         <div class="project-title">Parking Enforcement Analytics</div>
         <div class="project-desc">
-          End-to-end analytics engineering on operational parking enforcement data.
-          Python ingestion, anonymisation, Parquet data engineering, DuckDB, dbt
-          transformations, time-series analysis, and Power BI reporting.
+          End-to-end pipeline on ~458K vehicle-scan enforcement events. Python ingestion,
+          multi-layer anonymization, DuckDB + dbt (15 passing tests), and a Power BI
+          dashboard. Found a fleet-wide map-coverage gap (5–11% of scans) and workload
+          concentration in the review pipeline.
         </div>
         <div class="project-tags">
           <span class="tag">Python</span><span class="tag">DuckDB</span><span class="tag">dbt</span>
@@ -711,6 +722,21 @@ main.content {
           <span class="tag">SQL</span><span class="tag tag-gold">Power BI</span><span class="tag">Python</span>
         </div>
         <span class="upcoming-label">Coming soon</span>
+      </div>
+
+      <div class="project-card upcoming">
+        <div class="project-number">06 / CHEMISTRY × DATA</div>
+        <div class="project-title">Aqueous Solubility Prediction (AqSolDB)</div>
+        <div class="project-desc">
+          Predicting aqueous chemical solubility (LogS) using the AqSolDB dataset —
+          combining a Chemistry background with a Python → PostgreSQL → dbt pipeline
+          and RDKit molecular descriptors.
+        </div>
+        <div class="project-tags">
+          <span class="tag">Python</span><span class="tag">RDKit</span><span class="tag">PostgreSQL</span>
+          <span class="tag">dbt</span>
+        </div>
+        <span class="upcoming-label">In progress</span>
       </div>
 
     </div>
@@ -785,7 +811,7 @@ main.content {
     <div class="contact-links contact-links-full">
       <div class="contact-link-row"><span class="contact-icon">✉</span> <a href="mailto:agucharles91@yahoo.com">agucharles91@yahoo.com</a></div>
       <div class="contact-link-row"><span class="contact-icon">☎</span> <a href="tel:+254743010351">+254 743 010 351</a></div>
-      <div class="contact-link-row"><span class="contact-icon">◈</span> <a href="https://linkedin.com/in/agucharles" target="_blank" rel="noopener noreferrer">linkedin.com/in/agucharles</a></div>
+      <div class="contact-link-row"><span class="contact-icon">◈</span> <a href="https://www.linkedin.com/in/agu-charles-3b8140128" target="_blank" rel="noopener noreferrer">linkedin.com/in/agu-charles-3b8140128</a></div>
       <div class="contact-link-row"><span class="contact-icon">◇</span> <a href="https://github.com/agucharles91-cpu" target="_blank" rel="noopener noreferrer">github.com/agucharles91-cpu</a></div>
     </div>
   </div>
@@ -797,7 +823,6 @@ main.content {
 <footer class="footer">
   <div class="footer-text">
     Agu Charles Chibuike &nbsp;·&nbsp;
-    MSc Data Science, University of Nairobi &nbsp;·&nbsp;
     <a href="https://github.com/agucharles91-cpu" target="_blank">GitHub</a>
     &nbsp;·&nbsp;
     <a href="https://agucharles.shinyapps.io/nairobi-runners/" target="_blank">Live Dashboard</a>

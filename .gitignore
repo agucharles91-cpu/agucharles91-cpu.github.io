@@ -109,3 +109,4 @@ desktop.ini
 *.tmp
 *.temp
 *.bak
+/.quarto/
