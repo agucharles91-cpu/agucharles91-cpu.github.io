@@ -212,8 +212,7 @@ main.content {
   .section-divider { width: 40px; height: 3px; background: var(--teal); border-radius: 2px; margin-bottom: 40px; }
 
   /* ── About ────────────────────────────────────────────── */
-  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
-  .about-left { display: flex; flex-direction: column; gap: 28px; }
+  .about-grid { display: flex; flex-direction: column; gap: 28px; max-width: 680px; }
   .profile-photo-wrap { display: flex; align-items: center; gap: 24px; }
   .profile-photo {
     width: 130px; height: 130px; object-fit: cover; object-position: center top;
@@ -225,7 +224,6 @@ main.content {
   .profile-uni { font-family: var(--serif); font-size: 13px; color: var(--slate); font-style: italic; }
   .about-text { font-family: var(--serif); font-size: 17px; line-height: 1.8; color: var(--slate); }
   .about-text p { margin: 0 0 16px; }
-  .about-stats { display: flex; flex-direction: column; gap: 26px; }
   .stat-label {
     font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--slate);
     text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between;
@@ -289,39 +287,42 @@ main.content {
   .projects-bg { background: var(--navy); }
   .projects-bg .section-title { color: #F7F6F2; }
   .projects-bg .section-label { color: var(--teal); }
-  .project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  .project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 28px; }
   .project-card {
     background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
-    border-radius: 6px; padding: 28px 26px 24px; transition: border-color 0.2s, transform 0.2s;
-    text-decoration: none; display: block; position: relative; overflow: hidden;
+    border-radius: 8px; overflow: hidden; transition: border-color 0.2s, transform 0.2s;
+    text-decoration: none; display: flex; flex-direction: column; height: 100%; position: relative;
   }
   .project-card::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: var(--teal); transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease;
+    background: var(--teal); transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease; z-index: 2;
   }
   .project-card:hover { border-color: rgba(0,168,120,0.4); transform: translateY(-3px); }
   .project-card:hover::before { transform: scaleX(1); }
   .project-card.upcoming { border-style: dashed; opacity: 0.65; cursor: default; }
   .project-card.upcoming:hover { transform: none; border-color: rgba(255,255,255,0.10); }
   .project-card.upcoming::before { display: none; }
-  .project-number { font-family: var(--mono); font-size: 11px; color: var(--teal); letter-spacing: 0.12em; margin-bottom: 14px; }
-  .project-title { font-family: var(--display); font-size: 18px; font-weight: 600; color: #F7F6F2; margin: 0 0 10px; line-height: 1.3; }
-  .project-desc { font-family: var(--serif); font-size: 14px; color: #A0AEC0; line-height: 1.6; margin: 0 0 20px; }
-  .project-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+  .project-body { padding: 26px 30px 28px; display: flex; flex-direction: column; flex: 1; }
+  .project-number { font-family: var(--mono); font-size: 11px; color: var(--teal); letter-spacing: 0.12em; margin-bottom: 12px; }
+  .project-title { font-family: var(--display); font-size: 21px; font-weight: 600; color: #F7F6F2; margin: 0 0 14px; line-height: 1.3; }
+  .project-insight {
+    font-family: var(--serif); font-size: 17px; font-style: italic; color: #E2E8F0;
+    line-height: 1.6; margin: 0 0 22px; padding-left: 16px; border-left: 3px solid var(--teal);
+  }
+  .project-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; margin-top: auto; }
   .tag { font-family: var(--mono); font-size: 10px; padding: 3px 8px; background: rgba(0,168,120,0.12); color: var(--teal); border-radius: 2px; letter-spacing: 0.06em; }
   .tag-gold { background: rgba(232,197,71,0.12); color: var(--gold); }
   .project-links { display: flex; gap: 20px; flex-wrap: wrap; }
   .project-link { font-family: var(--mono); font-size: 11px; color: var(--teal); letter-spacing: 0.08em; display: inline-flex; align-items: center; gap: 6px; }
   .project-link::after { content: '→'; }
   .upcoming-label { font-family: var(--mono); font-size: 10px; color: var(--gold); letter-spacing: 0.12em; text-transform: uppercase; }
-  .project-thumb {
+  .project-thumb-large {
     width: 100%;
-    aspect-ratio: 16 / 10;
-    object-fit: cover;
-    border-radius: 4px;
-    margin-bottom: 18px;
-    border: 1px solid rgba(255,255,255,0.10);
+    height: auto;
+    display: block;
+    background: rgba(0,0,0,0.15);
   }
+  .project-card.upcoming .project-body { padding: 24px 26px; }
 
   /* ── Skills ───────────────────────────────────────────── */
   .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
@@ -336,15 +337,15 @@ main.content {
   .contact-bg .section-label { color: var(--teal); }
   .contact-title { font-family: var(--display); font-size: clamp(24px, 3.5vw, 34px); font-weight: 600; color: #F7F6F2; margin: 0 0 14px; letter-spacing: -0.02em; }
   .contact-text { font-family: var(--serif); font-size: 16px; color: #A0AEC0; line-height: 1.7; max-width: 560px; margin-bottom: 40px; }
-  .contact-links { display: flex; flex-direction: column; gap: 14px; }
-  .contact-links-full { max-width: 480px; }
-  .contact-link-row {
-    display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 13px;
-    color: #E2E8F0; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08);
+  .contact-links { display: flex; gap: 20px; flex-wrap: wrap; }
+  .contact-card {
+    display: flex; align-items: center; justify-content: center;
+    width: 64px; height: 64px; border-radius: 50%;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+    color: var(--teal); text-decoration: none; transition: border-color 0.2s, background 0.2s, transform 0.2s;
   }
-  .contact-link-row a { color: var(--teal); }
-  .contact-link-row a:hover { color: #00C896; }
-  .contact-icon { color: var(--teal); font-size: 14px; width: 18px; }
+  .contact-card:hover { border-color: rgba(0,168,120,0.5); background: rgba(0,168,120,0.12); transform: translateY(-3px); }
+  .contact-card svg { width: 26px; height: 26px; }
 
   /* ── Footer ───────────────────────────────────────────── */
   .footer { background: #091520; padding: 32px 48px; text-align: center; }
@@ -355,7 +356,7 @@ main.content {
   @media (max-width: 700px) {
     .hero { padding: 60px 24px 56px; }
     .section { padding: 56px 24px; }
-    .about-grid, .skills-grid { grid-template-columns: 1fr; gap: 32px; }
+    .skills-grid { grid-template-columns: 1fr; gap: 32px; }
     .impact-grid { grid-template-columns: 1fr 1fr; }
     .profile-photo { width: 100px; height: 100px; }
     .footer { padding: 26px 24px; }
@@ -431,6 +432,7 @@ main.content {
       <span class="badge badge-teal">SQL / PostgreSQL</span>
       <span class="badge badge-teal">Python / R</span>
       <span class="badge badge-teal">Power BI / DAX</span>
+      <span class="badge badge-teal">Machine Learning</span>
       <span class="badge badge-outline">dbt</span>
       <span class="badge badge-outline">Statistical Modelling</span>
       <span class="badge badge-outline">Data Engineering</span>
@@ -448,61 +450,33 @@ main.content {
     <h2 class="section-title">Turning complex data into clear decisions</h2>
     <div class="section-divider"></div>
     <div class="about-grid">
-      <div class="about-left">
-        <div class="profile-photo-wrap">
-          <img src="images/profile.jpg" alt="Agu Charles Chibuike" class="profile-photo" />
-          <div class="profile-meta">
-            <div class="profile-name">Agu Charles<br>Chibuike</div>
-            <div class="profile-role">Analytics Engineer</div>
-            <div class="profile-uni">MSc Data Science<br>University of Nairobi</div>
-          </div>
-        </div>
-        <div class="about-text">
-          <p>
-            I'm an analytics engineer with 5+ years of end-to-end experience
-            designing data pipelines, warehousing solutions, and BI dashboards
-            across IoT, EV infrastructure, technology, hospitality, and fitness
-            sectors — spanning Dubai, Abu Dhabi, and Nairobi.
-          </p>
-          <p>
-            My MSc capstone at the University of Nairobi investigates how
-            training behaviour, sleep architecture, and recovery physiology
-            interact across a cohort of 14 runners over four years — combining
-            Garmin wearable data with mixed-effects modelling in R.
-          </p>
-          <p>
-            Before analytics, I taught Chemistry and Physics — a background
-            that still shapes how I work with data: define the measurement
-            carefully, understand the underlying process, validate the result,
-            and only then draw conclusions.
-          </p>
+      <div class="profile-photo-wrap">
+        <img src="images/profile.jpg" alt="Agu Charles Chibuike" class="profile-photo" />
+        <div class="profile-meta">
+          <div class="profile-name">Agu Charles<br>Chibuike</div>
+          <div class="profile-role">Analytics Engineer</div>
+          <div class="profile-uni">MSc Data Science<br>University of Nairobi</div>
         </div>
       </div>
-      <div class="about-stats">
-        <div class="stat-item">
-          <div class="stat-label">SQL / PostgreSQL <span>Advanced</span></div>
-          <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="90"></div></div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">ETL / ELT &amp; dbt <span>Advanced</span></div>
-          <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="86"></div></div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">Power BI / DAX <span>Advanced</span></div>
-          <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="84"></div></div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">R / Shiny &amp; Statistical Modelling <span>Advanced</span></div>
-          <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="88"></div></div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">Python / Pandas <span>Proficient</span></div>
-          <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="76"></div></div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">Time Series &amp; Longitudinal Analysis <span>Advanced</span></div>
-          <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="85"></div></div>
-        </div>
+      <div class="about-text">
+        <p>
+          I'm an analytics engineer with 5+ years of end-to-end experience
+          designing data pipelines, warehousing solutions, and BI dashboards
+          across IoT, EV infrastructure, technology, hospitality, and fitness
+          sectors — spanning Dubai, Abu Dhabi, and Nairobi.
+        </p>
+        <p>
+          My MSc capstone at the University of Nairobi investigates how
+          training behaviour, sleep architecture, and recovery physiology
+          interact across a cohort of 14 runners over four years — combining
+          Garmin wearable data with mixed-effects modelling in R.
+        </p>
+        <p>
+          Before analytics, I taught Chemistry and Physics — a background
+          that still shapes how I work with data: define the measurement
+          carefully, understand the underlying process, validate the result,
+          and only then draw conclusions.
+        </p>
       </div>
     </div>
   </div>
@@ -645,98 +619,95 @@ main.content {
     <div class="project-grid">
 
       <div class="project-card">
-        <img src="images/nairobi-runners.png" alt="Nairobi Runners research report" class="project-thumb">
-        <div class="project-number">01 / MSc CAPSTONE</div>
-        <div class="project-title">Training, Sleep &amp; Recovery Dynamics in Recreational Runners</div>
-        <div class="project-desc">
-          Longitudinal analysis of ~12,760 Garmin wearable observations from 14 runners
-          over four years. Mixed-effects modelling identified sleep architecture (Deep+REM%)
-          as the strongest predictor of next-morning recovery, with lag-structure analysis
-          revealing a Day+3 supercompensation arc.
-        </div>
-        <div class="project-tags">
-          <span class="tag">R</span><span class="tag">lme4</span><span class="tag">Longitudinal</span>
-          <span class="tag">Plotly</span><span class="tag">Quarto</span>
-        </div>
-        <div class="project-links">
-          <a class="project-link" href="nairobi_runners_report.html">View report</a>
-          <a class="project-link" href="https://github.com/agucharles91-cpu/Nairobi-Runners" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <img src="images/nairobi-runners.png" alt="Nairobi Runners research report" class="project-thumb-large">
+        <div class="project-body">
+          <div class="project-number">01 / MSc CAPSTONE</div>
+          <div class="project-title">Training, Sleep &amp; Recovery Dynamics in Recreational Runners</div>
+          <p class="project-insight">
+            Mixed-effects modelling identified sleep architecture (Deep+REM%) as the
+            strongest predictor of next-morning recovery.
+          </p>
+          <div class="project-tags">
+            <span class="tag">R</span><span class="tag">lme4</span><span class="tag">Longitudinal</span>
+            <span class="tag">Plotly</span><span class="tag">Quarto</span>
+          </div>
+          <div class="project-links">
+            <a class="project-link" href="nairobi_runners_report.html">View report</a>
+            <a class="project-link" href="https://github.com/agucharles91-cpu/Nairobi-Runners" target="_blank" rel="noopener noreferrer">GitHub</a>
+          </div>
         </div>
       </div>
 
       <a class="project-card" href="https://agucharles.shinyapps.io/nairobi-runners/" target="_blank" rel="noopener noreferrer">
-        <img src="images/nairobi-dashboard.png" alt="Nairobi Runners live Shiny dashboard" class="project-thumb">
-        <div class="project-number">01 / INTERACTIVE</div>
-        <div class="project-title">Live Dashboard — Nairobi Runners</div>
-        <div class="project-desc">
-          47-figure interactive Shiny dashboard with global filters, individual athlete
-          deep-dives, correlation matrices, lag analysis, and training monotony tracking.
+        <img src="images/nairobi-dashboard.png" alt="Nairobi Runners live Shiny dashboard" class="project-thumb-large">
+        <div class="project-body">
+          <div class="project-number">01 / INTERACTIVE</div>
+          <div class="project-title">Live Dashboard — Nairobi Runners</div>
+          <p class="project-insight">
+            47 figures, one dashboard — explore training, sleep, and recovery
+            patterns athlete by athlete, in real time.
+          </p>
+          <div class="project-tags">
+            <span class="tag">Shiny</span><span class="tag">bslib</span><span class="tag">DT</span><span class="tag">shinyapps.io</span>
+          </div>
+          <span class="project-link">Open dashboard</span>
         </div>
-        <div class="project-tags">
-          <span class="tag">Shiny</span><span class="tag">bslib</span><span class="tag">DT</span><span class="tag">shinyapps.io</span>
-        </div>
-        <span class="project-link">Open dashboard</span>
       </a>
 
       <a class="project-card" href="https://github.com/agucharles91-cpu/Olist-Ecommerce-Analytics" target="_blank" rel="noopener noreferrer">
-        <img src="images/olist-dashboard.png" alt="Olist Power BI dashboard" class="project-thumb">
-        <div class="project-number">02 / ANALYTICS ENGINEERING</div>
-        <div class="project-title">Olist E-Commerce Analytics</div>
-        <div class="project-desc">
-          End-to-end analytics engineering on 100k+ Brazilian orders. Star schema design,
-          17 advanced SQL queries, cohort/Pareto analysis, and a 3-page Power BI dashboard.
-          Surfaced R$15.42M total revenue, 92% on-time delivery, and a 97% one-time-purchase
-          retention gap.
+        <img src="images/olist-dashboard.png" alt="Olist Power BI dashboard" class="project-thumb-large">
+        <div class="project-body">
+          <div class="project-number">02 / ANALYTICS ENGINEERING</div>
+          <div class="project-title">Olist E-Commerce Analytics</div>
+          <p class="project-insight">
+            Analysis surfaced R$15.42M in total revenue with 92% on-time delivery,
+            and a 97% one-time-purchase retention gap.
+          </p>
+          <div class="project-tags">
+            <span class="tag">PostgreSQL</span><span class="tag">SQL</span><span class="tag">Power BI</span><span class="tag">Python</span>
+          </div>
+          <span class="project-link">View project</span>
         </div>
-        <div class="project-tags">
-          <span class="tag">PostgreSQL</span><span class="tag">SQL</span><span class="tag">Power BI</span><span class="tag">Python</span>
-        </div>
-        <span class="project-link">View project</span>
       </a>
 
       <a class="project-card" href="https://github.com/agucharles91-cpu/Parking-Enforcement-Analytics" target="_blank" rel="noopener noreferrer">
-        <img src="images/parking-dashboard.png" alt="Parking Enforcement Power BI dashboard" class="project-thumb">
-        <div class="project-number">03 / ANALYTICS ENGINEERING</div>
-        <div class="project-title">Parking Enforcement Analytics</div>
-        <div class="project-desc">
-          End-to-end pipeline on ~458K vehicle-scan enforcement events. Python ingestion,
-          multi-layer anonymization, DuckDB + dbt (15 passing tests), and a Power BI
-          dashboard. Found a fleet-wide map-coverage gap (5–11% of scans) and workload
-          concentration in the review pipeline.
+        <img src="images/parking-dashboard.png" alt="Parking Enforcement Power BI dashboard" class="project-thumb-large">
+        <div class="project-body">
+          <div class="project-number">03 / ANALYTICS ENGINEERING</div>
+          <div class="project-title">Parking Enforcement Analytics</div>
+          <p class="project-insight">
+            Found a fleet-wide map-coverage gap affecting 5–11% of enforcement scans,
+            plus workload concentration in the review pipeline.
+          </p>
+          <div class="project-tags">
+            <span class="tag">Python</span><span class="tag">DuckDB</span><span class="tag">dbt</span>
+            <span class="tag">SQL</span><span class="tag tag-gold">Power BI</span>
+          </div>
+          <span class="project-link">View project</span>
         </div>
-        <div class="project-tags">
-          <span class="tag">Python</span><span class="tag">DuckDB</span><span class="tag">dbt</span>
-          <span class="tag">SQL</span><span class="tag tag-gold">Power BI</span>
-        </div>
-        <span class="project-link">View project</span>
       </a>
 
       <div class="project-card upcoming">
-        <div class="project-number">05 / FINANCIAL ANALYTICS</div>
-        <div class="project-title">Nigerian Financial Dataset</div>
-        <div class="project-desc">
-          Financial data analysis targeting the Nigerian market — sector performance,
-          risk metrics, and business intelligence for investment and operations decisions.
+        <div class="project-body">
+          <div class="project-number">05 / FINANCIAL ANALYTICS</div>
+          <div class="project-title">Nigerian Financial Dataset</div>
+          <div class="project-tags">
+            <span class="tag">SQL</span><span class="tag tag-gold">Power BI</span><span class="tag">Python</span>
+          </div>
+          <span class="upcoming-label">Coming soon</span>
         </div>
-        <div class="project-tags">
-          <span class="tag">SQL</span><span class="tag tag-gold">Power BI</span><span class="tag">Python</span>
-        </div>
-        <span class="upcoming-label">Coming soon</span>
       </div>
 
       <div class="project-card upcoming">
-        <div class="project-number">06 / CHEMISTRY × DATA</div>
-        <div class="project-title">Aqueous Solubility Prediction (AqSolDB)</div>
-        <div class="project-desc">
-          Predicting aqueous chemical solubility (LogS) using the AqSolDB dataset —
-          combining a Chemistry background with a Python → PostgreSQL → dbt pipeline
-          and RDKit molecular descriptors.
+        <div class="project-body">
+          <div class="project-number">06 / CHEMISTRY × DATA</div>
+          <div class="project-title">Aqueous Solubility Prediction (AqSolDB)</div>
+          <div class="project-tags">
+            <span class="tag">Python</span><span class="tag">RDKit</span><span class="tag">Machine Learning</span>
+            <span class="tag">PostgreSQL</span><span class="tag">dbt</span>
+          </div>
+          <span class="upcoming-label">In progress</span>
         </div>
-        <div class="project-tags">
-          <span class="tag">Python</span><span class="tag">RDKit</span><span class="tag">PostgreSQL</span>
-          <span class="tag">dbt</span>
-        </div>
-        <span class="upcoming-label">In progress</span>
       </div>
 
     </div>
@@ -770,6 +741,10 @@ main.content {
           <div class="stat-item">
             <div class="stat-label">Window functions &amp; CTEs <span>Advanced</span></div>
             <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="86"></div></div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Machine Learning (regression, forecasting) <span>Advanced</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="88"></div></div>
           </div>
         </div>
       </div>
@@ -808,11 +783,22 @@ main.content {
     <p class="contact-text">
       Open to analytics engineering and data science roles. Reach out directly
     </p>
-    <div class="contact-links contact-links-full">
-      <div class="contact-link-row"><span class="contact-icon">✉</span> <a href="mailto:agucharles91@yahoo.com">agucharles91@yahoo.com</a></div>
-      <div class="contact-link-row"><span class="contact-icon">☎</span> <a href="tel:+254743010351">+254 743 010 351</a></div>
-      <div class="contact-link-row"><span class="contact-icon">◈</span> <a href="https://www.linkedin.com/in/agu-charles-3b8140128" target="_blank" rel="noopener noreferrer">linkedin.com/in/agu-charles-3b8140128</a></div>
-      <div class="contact-link-row"><span class="contact-icon">◇</span> <a href="https://github.com/agucharles91-cpu" target="_blank" rel="noopener noreferrer">github.com/agucharles91-cpu</a></div>
+    <div class="contact-links">
+      <a class="contact-card" href="mailto:agucharles91@yahoo.com" aria-label="Email" title="Email">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 6L12 13 2 6"/><path d="M2 6h20v12H2z"/></svg>
+      </a>
+
+      <a class="contact-card" href="tel:+254743010351" aria-label="Phone" title="Phone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </a>
+
+      <a class="contact-card" href="https://www.linkedin.com/in/agu-charles-3b8140128" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.03-1.85-3.03-1.86 0-2.14 1.45-2.14 2.94v5.66H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
+      </a>
+
+      <a class="contact-card" href="https://github.com/agucharles91-cpu" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.87-.01-1.7-2.78.62-3.37-1.37-3.37-1.37-.46-1.2-1.11-1.52-1.11-1.52-.91-.64.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.73 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 2.5-.35c.85 0 1.7.12 2.5.35 1.91-1.33 2.75-1.05 2.75-1.05.55 1.42.2 2.47.1 2.73.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
+      </a>
     </div>
   </div>
 </div>
