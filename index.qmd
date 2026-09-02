@@ -700,17 +700,22 @@ main.content {
         </div>
       </div>
 
-      <div class="project-card upcoming">
+      <a class="project-card" href="https://github.com/agucharles91-cpu/Chemistry-Property-Analytics" target="_blank" rel="noopener noreferrer">
         <div class="project-body">
           <div class="project-number">06 / CHEMISTRY × DATA</div>
           <div class="project-title">Aqueous Solubility Prediction (AqSolDB)</div>
+          <p class="project-insight">
+            Gradient Boosting improved scaffold-aware validation performance,
+            with molecular lipophilicity and size emerging as the strongest predictors
+            of aqueous solubility.
+          </p>
           <div class="project-tags">
             <span class="tag">Python</span><span class="tag">RDKit</span><span class="tag">Machine Learning</span>
             <span class="tag">PostgreSQL</span><span class="tag">dbt</span>
           </div>
-          <span class="upcoming-label">In progress</span>
+          <span class="project-link">View project</span>
         </div>
-      </div>
+      </a>
 
     </div>
   </div>
