@@ -1,0 +1,100 @@
+SCRIPT 31 — MODEL CALIBRATION & ERROR STRATIFICATION
+======================================================================
+
+PURPOSE
+-------
+Assess calibration of the nonlinear Gradient Boosting model across observed and predicted solubility ranges, and determine whether systematic error varies across solubility and prediction-uncertainty strata.
+
+DATA DESIGN
+-----------
+Population C: 8,643 compounds
+Repeated held-out prediction rows: 22,872
+Unique compounds represented: 8,160
+Prediction source: Script 26 nonlinear residual analysis
+
+OVERALL CALIBRATION
+-------------------
+Observations: 22,872
+Mean observed solubility: -2.9015
+Mean predicted solubility: -2.9090
+Mean residual: +0.0076
+Median residual: -0.0216
+MAE: 0.8164
+RMSE: 1.1086
+R²: 0.7600
+Pearson r: +0.8718, p=0.0000e+00
+Spearman r: +0.8574, p=0.0000e+00
+
+CALIBRATION REGRESSION
+----------------------
+Calibration equation: Predicted = -0.6990 + 0.7617 × Observed
+Calibration slope: 0.7617
+Calibration intercept: -0.6990
+Calibration slope p-value: 0.0000e+00
+Interpretation: prediction compression detected; predictions vary less than observed values.
+
+CALIBRATION BY OBSERVED SOLUBILITY
+----------------------------------
+    region    n  mean_observed  mean_predicted  mean_residual  median_residual  mean_absolute_error  median_absolute_error     rmse         r2
+      < -6 2322      -7.481864       -6.396836      -1.085028        -0.887983             1.219058               0.935917 1.627716  -1.432101
+-6 to < -4 3959      -4.842450       -4.466269      -0.376181        -0.402247             0.844192               0.693073 1.109757  -3.027560
+-4 to < -2 7989      -2.926815       -2.881805      -0.045011        -0.134332             0.700818               0.555261 0.921804  -1.717123
+ -2 to < 0 6652      -1.162581       -1.544994       0.382413         0.285345             0.726708               0.547221 0.991352  -2.195574
+      >= 0 1950       0.665616       -0.358809       1.024425         0.825817             1.060265               0.826119 1.387445 -12.357589
+
+CALIBRATION BY PREDICTED SOLUBILITY
+-----------------------------------
+   n  mean_observed  mean_predicted  mean_residual  median_residual  mean_absolute_error  median_absolute_error     rmse       r2  prediction_bias_ratio            region
+2289      -6.974435       -6.880744      -0.093691        -0.281672             0.999469               0.791148 1.319785 0.310632               0.986567 (-11.817, -5.702]
+2286      -4.921230       -4.989369       0.068139         0.038318             1.031891               0.752396 1.381502 0.058219               1.013846  (-5.702, -4.459]
+2287      -4.051452       -4.118900       0.067448         0.007997             0.909060               0.689582 1.210087 0.024755               1.016648  (-4.459, -3.784]
+2287      -3.436117       -3.462762       0.026645        -0.015481             0.885432               0.684690 1.188096 0.014436               1.007754  (-3.784, -3.154]
+2287      -2.842324       -2.891806       0.049482        -0.015208             0.791090               0.585511 1.063888 0.010429               1.017409  (-3.154, -2.644]
+2287      -2.382848       -2.426723       0.043875        -0.020765             0.723898               0.573323 0.960729 0.027614               1.018413  (-2.644, -2.196]
+2287      -1.947667       -1.976041       0.028375         0.015724             0.685502               0.535500 0.924228 0.004615               1.014569   (-2.196, -1.77]
+2287      -1.544968       -1.533981      -0.010986        -0.038989             0.717022               0.564867 0.928094 0.008729               0.992889   (-1.77, -1.285]
+2287      -0.923297       -0.932078       0.008782         0.011983             0.746294               0.587177 0.973409 0.046977               1.009511  (-1.285, -0.503]
+2288       0.011223        0.123435      -0.112212         0.040530             0.674564               0.523892 1.022127 0.128410              10.998476   (-0.503, 1.112]
+
+DIRECTIONAL ERROR
+-----------------
+error_direction_recomputed  compound_or_row_count  mean_absolute_error  mean_residual  percentage
+            Overprediction                  11679             0.792024      -0.792024   51.062434
+           Underprediction                  11193             0.841880       0.841880   48.937566
+
+COMPOUND-LEVEL CALIBRATION
+---------------------------
+Compound observations: 8,160
+Calibration equation: Mean prediction = -0.7336 + 0.7466 × Observed
+Calibration slope: 0.7466
+Calibration intercept: -0.7336
+Calibration slope p-value: 0.0000e+00
+MAE: 0.8253
+RMSE: 1.1179
+R²: 0.7442
+Pearson r: +0.8627, p=0.0000e+00
+Spearman r: +0.8545, p=0.0000e+00
+
+COMPOUND-LEVEL CALIBRATION BY SOLUBILITY
+-----------------------------------------
+    region  compound_count  mean_observed  mean_prediction  mean_residual  median_residual  mean_absolute_error  median_absolute_error     rmse  mean_prediction_sd
+      < -6             776      -7.375260        -6.176071      -1.199189        -1.038927             1.335389               1.090808 1.737678            0.232033
+-6 to < -4            1457      -4.829145        -4.437638      -0.391507        -0.424056             0.846119               0.686524 1.110526            0.148483
+-4 to < -2            2862      -2.935956        -2.899670      -0.036287        -0.120205             0.700496               0.561209 0.917187            0.117766
+ -2 to < 0            2368      -1.165091        -1.556464       0.391373         0.290361             0.725038               0.545461 0.986808            0.106480
+      >= 0             697       0.664031        -0.370102       1.034132         0.841158             1.066761               0.841158 1.388892            0.109425
+
+CALIBRATION BY PREDICTION UNCERTAINTY
+-------------------------------------
+       uncertainty_region  compound_count  mean_prediction_sd  median_prediction_sd  mean_absolute_error  median_absolute_error     rmse  mean_residual
+       Lowest uncertainty            1854            0.033782              0.035116             0.768006               0.599697 1.030724       0.076682
+ Low-moderate uncertainty            1853            0.074985              0.074652             0.768426               0.559035 1.060034       0.027348
+Moderate-high uncertainty            1854            0.122598              0.119958             0.763863               0.572982 1.033534       0.002005
+      Highest uncertainty            1853            0.284952              0.226813             0.955119               0.756163 1.273491      -0.067273
+
+INTERPRETATION FRAMEWORK
+------------------------
+A calibration slope below 1 indicates prediction compression: the model reproduces the central range more strongly than the extreme observed values.
+Regional residual patterns identify conditional prediction bias that can be hidden by a near-zero overall mean residual.
+High error in a particular solubility region does not by itself establish a causal mechanism.
+Compound-level calibration summarizes repeated scaffold-aware held-out predictions rather than fitted training predictions.

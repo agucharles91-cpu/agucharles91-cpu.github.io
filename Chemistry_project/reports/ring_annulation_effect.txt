@@ -1,0 +1,71 @@
+SCRIPT 14 — RING-COUNT / STRUCTURAL COMPLEXITY EFFECT
+======================================================================
+
+OBJECTIVE
+Quantify whether molecular ring complexity is systematically associated with baseline solubility residuals across the full 8,643-compound Population C.
+
+CANONICAL BASELINE
+Solubility ~ rdkit_molwt + rdkit_mollogp
+Residual = observed Solubility - baseline predicted Solubility
+
+IMPORTANT INTERPRETATION
+Positive residual = observed solubility is higher than the baseline prediction.
+Negative residual = observed solubility is lower than the baseline prediction.
+Ring count is not equivalent to fused-ring count and is not a direct measurement of crystal packing or lattice stability.
+
+DATA VALIDATION
+Population C rows after merge: 8,643
+Expected Population C rows: 8,643
+
+TOTAL RING COUNT — GROUPED STATISTICS
+ rdkit_ring_count    n mean_residual median_residual mean_abs_residual median_abs_residual
+                0 2198        0.4016          0.5012            1.0236              0.8492
+                1 2712        0.1139          0.0711            0.8073              0.6380
+                2 2191       -0.3769         -0.4964            0.9632              0.8220
+                3  821       -0.3715         -0.4122            1.2214              0.9288
+                4  475       -0.2408         -0.1856            1.1232              0.8028
+                5  144       -0.2222         -0.0811            1.4440              1.1937
+                6   44        0.2694          0.5118            1.5535              1.3319
+                7   29        1.1018          0.8766            1.8658              1.9657
+                8   17        1.1454          1.3456            1.5334              1.3723
+                9    8        2.7018          2.7493            2.7266              2.7493
+               11    3        2.3553          3.3838            2.9668              3.3838
+               13    1       -6.5288         -6.5288            6.5288              6.5288
+
+AROMATIC RING COUNT — GROUPED STATISTICS
+ rdkit_aromatic_rings    n mean_residual median_residual mean_abs_residual median_abs_residual
+                    0 3312        0.2881          0.3659            1.0008              0.8251
+                    1 2634        0.0353          0.0040            0.7773              0.6061
+                    2 2084       -0.4170         -0.5216            1.0436              0.8601
+                    3  425       -0.3707         -0.4573            1.3243              1.0649
+                    4  115       -0.3345         -0.5967            1.8372              1.5121
+                    5   42       -0.7100         -1.6169            2.0946              2.2308
+                    6   13        1.4052          2.2243            2.5353              2.4465
+                    7   10        1.4613          2.1643            2.4894              2.6455
+                    8    3        0.5022         -0.3690            2.4108              2.4939
+                    9    3        3.6600          3.7529            3.6600              3.7529
+                   11    2        1.2333          1.2333            2.1505              2.1505
+
+SPEARMAN TREND TESTS
+rdkit_ring_count vs Residual: rho = -0.236231; p = 6.50131e-110; n = 8,643
+rdkit_ring_count vs abs_residual: rho = 0.065220; p = 1.2874e-09; n = 8,643
+rdkit_aromatic_rings vs Residual: rho = -0.239291; p = 8.20862e-113; n = 8,643
+rdkit_aromatic_rings vs abs_residual: rho = 0.066169; p = 7.39182e-10; n = 8,643
+
+ROBUST OLS TREND MODELS
+Residual ~ rdkit_ring_count: slope = -0.139030; 95% CI = [-0.168397, -0.109664]; p = 1.71022e-20; R² = 0.021520
+abs_residual ~ rdkit_ring_count: slope = 0.081700; 95% CI = [0.064044, 0.099357]; p = 1.20053e-19; R² = 0.017510
+Residual ~ rdkit_aromatic_rings: slope = -0.206790; 95% CI = [-0.246295, -0.167285]; p = 1.07324e-24; R² = 0.029631
+abs_residual ~ rdkit_aromatic_rings: slope = 0.114648; 95% CI = [0.093351, 0.135945]; p = 5.01757e-26; R² = 0.021461
+
+FIGURES
+C:\Users\arnel\Documents\githubpub\Chemistry_project\reports\figures\ring_annulation\residual_by_total_ring_count.png
+C:\Users\arnel\Documents\githubpub\Chemistry_project\reports\figures\ring_annulation\median_residual_by_ring_count.png
+C:\Users\arnel\Documents\githubpub\Chemistry_project\reports\figures\ring_annulation\absolute_residual_by_total_ring_count.png
+C:\Users\arnel\Documents\githubpub\Chemistry_project\reports\figures\ring_annulation\residual_by_aromatic_ring_count.png
+
+INTERPRETATION GUIDANCE
+A negative association between ring count and residual indicates that compounds with greater ring counts tend to have observed solubilities below the MolWt + MolLogP baseline prediction.
+A positive association would indicate the opposite and would contradict the current working hypothesis.
+Statistical significance alone should not be treated as evidence of a causal ring effect. Ring count is correlated with molecular size, aromaticity and other molecular properties.
+The subsequent multivariable analysis should therefore test whether ring-related descriptors provide explanatory power beyond MolWt and MolLogP.

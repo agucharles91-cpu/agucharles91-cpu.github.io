@@ -1,0 +1,61 @@
+SCRIPT 23 — NONLINEAR MODEL EVALUATION
+======================================================================
+Population C: 8,643 compounds
+Unique scaffolds: 1,667
+Repeats: 10
+Test fraction: 20%
+
+MODELS
+----------------------------------------------------------------------
+M0: MolWt + MolLogP
+M4: MolWt + MolLogP + RingCount + AromaticRings + RotatableBonds + FractionCSP3
+RF: Random Forest using the six M4 descriptors
+GB: Gradient Boosting using the six M4 descriptors
+
+NONLINEAR MODEL PARAMETERS
+----------------------------------------------------------------------
+Random Forest: {'n_estimators': 500, 'max_depth': None, 'min_samples_leaf': 5, 'max_features': 1.0, 'random_state': 42, 'n_jobs': -1}
+Gradient Boosting: {'n_estimators': 300, 'learning_rate': 0.03, 'max_depth': 3, 'min_samples_leaf': 5, 'loss': 'squared_error', 'random_state': 42}
+
+REPEATED PERFORMANCE SUMMARY
+----------------------------------------------------------------------
+M0_baseline | r_squared | mean=0.646520 | SD=0.037401 | 95% CI=[0.623338, 0.669701] | range=[0.604839, 0.710050]
+M0_baseline | rmse | mean=1.279021 | SD=0.173283 | 95% CI=[1.171619, 1.386423] | range=[1.006062, 1.428218]
+M0_baseline | mae | mean=0.980394 | SD=0.147858 | 95% CI=[0.888751, 1.072037] | range=[0.741709, 1.098372]
+M4_linear_structural | r_squared | mean=0.663201 | SD=0.041183 | 95% CI=[0.637675, 0.688726] | range=[0.554625, 0.699671]
+M4_linear_structural | rmse | mean=1.242220 | SD=0.117530 | 95% CI=[1.169374, 1.315066] | range=[1.068072, 1.353779]
+M4_linear_structural | mae | mean=0.943376 | SD=0.094368 | 95% CI=[0.884887, 1.001866] | range=[0.801655, 1.025587]
+RF_random_forest | r_squared | mean=0.730532 | SD=0.033976 | 95% CI=[0.709473, 0.751590] | range=[0.643566, 0.761501]
+RF_random_forest | rmse | mean=1.109213 | SD=0.084912 | 95% CI=[1.056585, 1.161842] | range=[0.955493, 1.201018]
+RF_random_forest | mae | mean=0.818258 | SD=0.052638 | 95% CI=[0.785632, 0.850883] | range=[0.721077, 0.885312]
+GB_gradient_boosting | r_squared | mean=0.737576 | SD=0.031244 | 95% CI=[0.718211, 0.756941] | range=[0.654605, 0.768385]
+GB_gradient_boosting | rmse | mean=1.096018 | SD=0.096151 | 95% CI=[1.036423, 1.155613] | range=[0.940580, 1.175743]
+GB_gradient_boosting | mae | mean=0.814707 | SD=0.072942 | 95% CI=[0.769497, 0.859917] | range=[0.700278, 0.902333]
+
+RANDOM FOREST IMPROVEMENT OVER M4
+----------------------------------------------------------------------
+rf_delta_r2_vs_m4: mean=0.067331, SD=0.018076, 95% CI=[0.056127, 0.078535], range=[0.035626, 0.088941], positive_fraction=1.000
+rf_delta_rmse_vs_m4: mean=-0.133007, SD=0.040144, 95% CI=[-0.157888, -0.108126], range=[-0.174408, -0.064981], positive_fraction=0.000
+rf_delta_mae_vs_m4: mean=-0.125119, SD=0.046221, 95% CI=[-0.153767, -0.096471], range=[-0.167192, -0.042650], positive_fraction=0.000
+
+GRADIENT BOOSTING IMPROVEMENT OVER M4
+----------------------------------------------------------------------
+gb_delta_r2_vs_m4: mean=0.074375, SD=0.012160, 95% CI=[0.066838, 0.081912], range=[0.058897, 0.099980], positive_fraction=1.000
+gb_delta_rmse_vs_m4: mean=-0.146203, SD=0.024291, 95% CI=[-0.161258, -0.131147], range=[-0.179818, -0.107627], positive_fraction=0.000
+gb_delta_mae_vs_m4: mean=-0.128669, SD=0.028854, 95% CI=[-0.146553, -0.110785], range=[-0.168455, -0.085707], positive_fraction=0.000
+
+METHODOLOGICAL INTERPRETATION
+----------------------------------------------------------------------
+This analysis tests whether nonlinear machine-learning models capture additional predictive structure beyond the linear M4 structural model.
+The same Population C and the same deterministic scaffold splitting procedure used by Script 22 are reproduced here.
+Entire Bemis-Murcko scaffold groups remain together within each train/test repetition.
+Random Forest and Gradient Boosting receive exactly the same six molecular descriptors used by M4.
+Therefore, any improvement over M4 is attributable to the nonlinear model form rather than the introduction of additional molecular descriptors.
+The nonlinear models are evaluated using fixed hyperparameters rather than separately tuned configurations within each split, avoiding an additional layer of optimization during the comparative experiment.
+A nonlinear model should only be considered substantively better if its improvement is consistent across scaffold-aware repetitions rather than driven by a small number of favorable splits.
+
+BEST MEAN-PERFORMANCE MODELS
+----------------------------------------------------------------------
+Best mean R²: GB_gradient_boosting
+Best mean RMSE: GB_gradient_boosting
+Best mean MAE: GB_gradient_boosting

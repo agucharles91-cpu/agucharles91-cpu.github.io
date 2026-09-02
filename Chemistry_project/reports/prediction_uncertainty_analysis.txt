@@ -1,0 +1,61 @@
+SCRIPT 28 — PREDICTION UNCERTAINTY & STABILITY ANALYSIS
+======================================================================
+
+PURPOSE
+-------
+Quantify prediction instability across repeated scaffold-aware held-out evaluations and determine whether instability is associated with prediction error, solubility regime, or molecular-property region.
+
+VALIDATION / DATA DESIGN
+------------------------
+Molecular feature population: 8,643 compounds
+Script 26 prediction rows: 22,872
+Compounds represented in Script 26: 8,160
+Compound-level uncertainty analysis: 8,160 compounds
+Mean predictions per compound: 2.80
+Median predictions per compound: 3
+Maximum predictions per compound: 6
+
+IMPORTANT INTERPRETATION NOTE
+------------------------------
+Prediction SD and prediction range quantify instability across repeated scaffold-aware train/test splits. They are not calibrated probabilistic prediction intervals.
+
+Overall prediction stability
+-----------------------------
+Mean prediction SD: 0.1173
+Median prediction SD: 0.0865
+Mean prediction range: 0.2205
+Median prediction range: 0.1609
+Mean absolute error of mean prediction: 0.8253
+RMSE of mean prediction: 1.1179
+
+UNCERTAINTY ASSOCIATION WITH ERROR
+----------------------------------
+Prediction SD vs absolute error (Pearson): r=+0.1070, p=3.3732e-22
+Prediction SD vs absolute error (Spearman): r=+0.0437, p=7.7234e-05
+Prediction range vs absolute error (Pearson): r=+0.0955, p=5.3554e-18
+Prediction range vs absolute error (Spearman): r=+0.0311, p=4.8961e-03
+
+UNCERTAINTY BY OBSERVED SOLUBILITY REGION
+-----------------------------------------
+    region  compound_count  mean_prediction_sd  median_prediction_sd  mean_prediction_range  median_prediction_range  mean_absolute_error  median_absolute_error     rmse  mean_residual  underprediction_pct  overprediction_pct
+      < -6             776            0.197946              0.142516               0.387503                 0.289893             1.335389               1.090808 1.737678      -1.199189            14.432990           85.567010
+-6 to < -4            1457            0.128713              0.091180               0.238832                 0.165931             0.846119               0.686524 1.110526      -0.391507            30.542210           69.457790
+-4 to < -2            2862            0.106944              0.086466               0.201861                 0.161777             0.700496               0.561209 0.917187      -0.036287            43.501048           56.498952
+ -2 to < 0            2368            0.100139              0.079699               0.185775                 0.148114             0.725038               0.545461 0.986808       0.391373            65.751689           34.248311
+  0 to < 2             697            0.104087              0.073014               0.190172                 0.135898             1.066761               0.841158 1.388892       1.034132            92.252511            7.747489
+
+MOLECULAR PROPERTY ASSOCIATIONS
+-------------------------------
+              feature    n  pearson_prediction_sd  pearson_prediction_sd_p  spearman_prediction_sd  spearman_prediction_sd_p  pearson_prediction_range  pearson_prediction_range_p  spearman_prediction_range  spearman_prediction_range_p  pearson_absolute_error  pearson_absolute_error_p  spearman_absolute_error  spearman_absolute_error_p
+          rdkit_molwt 8160               0.214533             1.400660e-85                0.097524              1.052855e-18                  0.216049                8.526230e-87                   0.086531                 4.874867e-15                0.206257              4.149554e-79                 0.184745               1.444592e-63
+        rdkit_mollogp 8160               0.221054             7.086372e-91                0.121410              3.563063e-28                  0.236965               1.567203e-104                   0.127157                 9.151967e-31                0.116467              4.810474e-26                 0.091321               1.394053e-16
+     rdkit_ring_count 8160               0.050419             5.197588e-06               -0.014845              1.799614e-01                  0.040415                2.604541e-04                  -0.036109                 1.104619e-03                0.120978              5.511252e-28                 0.095392               5.854425e-18
+ rdkit_aromatic_rings 8160              -0.028219             1.079567e-02               -0.075396              9.141538e-12                 -0.020385                6.557193e-02                  -0.077109                 3.062790e-12                0.123641              3.634316e-29                 0.080049               4.436713e-13
+rdkit_rotatable_bonds 8160               0.316337            4.619046e-189                0.075798              7.089146e-12                  0.316165               7.563904e-189                   0.076494                 4.547316e-12                0.141467              9.561508e-38                 0.104634               2.630341e-21
+  rdkit_fraction_csp3 8160               0.155473             2.548025e-45                0.099679              1.790176e-19                  0.136299                3.887401e-35                   0.088381                 1.263196e-15               -0.019813              7.350995e-02                -0.018001               1.039543e-01
+
+HIGH-UNCERTAINTY DEFINITION
+---------------------------
+High uncertainty is defined descriptively as prediction SD at or above the 95th percentile of compound-level prediction SD.
+Threshold: 0.3283
+Compounds above threshold: 408

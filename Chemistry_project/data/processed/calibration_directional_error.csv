@@ -1,0 +1,3 @@
+error_direction_recomputed,compound_or_row_count,mean_absolute_error,mean_residual,percentage
+Overprediction,11679,0.7920242586395637,-0.7920242586395637,51.062434417628545
+Underprediction,11193,0.8418803795474538,0.8418803795474538,48.937565582371455

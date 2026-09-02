@@ -1,0 +1,86 @@
+SCRIPT 29 — MODEL FAILURE MODE ANALYSIS
+======================================================================
+
+PURPOSE
+-------
+Synthesize repeated scaffold-aware held-out prediction error and prediction instability to identify interpretable model failure modes.
+
+DATA DESIGN
+-----------
+Molecular feature population: 8,643
+Integrated compounds analysed: 8,160
+Error source: Script 26 repeated scaffold-aware held-out predictions
+Uncertainty source: Script 28 repeated prediction stability analysis
+
+IMPORTANT INTERPRETATION NOTE
+------------------------------
+Failure-mode categories are descriptive diagnostic groupings. They do not establish causal relationships between molecular properties and model failure.
+
+FAILURE MODE THRESHOLDS
+75th-percentile absolute error: 1.1282
+75th-percentile prediction SD: 0.1493
+
+FAILURE MODE SUMMARY
+--------------------
+                 failure_mode  compound_count  percentage  mean_absolute_error  median_absolute_error  mean_prediction_sd  median_prediction_sd  mean_prediction_range  mean_residual
+           Low-error + stable            4699     57.5858               0.4792                 0.4430              0.0662                0.0659                 0.1247        -0.0038
+          High-error + stable            1420     17.4020               1.8302                 1.5959              0.0628                0.0637                 0.1157         0.1319
+ Low-error + high-uncertainty            1421     17.4142               0.5297                 0.4946              0.2531                0.2065                 0.4795        -0.1027
+High-error + high-uncertainty             620      7.5980               1.9141                 1.6477              0.3180                0.2444                 0.5922         0.0308
+
+DIRECTIONAL ERROR AMONG HIGH-ERROR COMPOUNDS
+--------------------------------------------
+error_direction  compound_count  mean_absolute_error  mean_prediction_sd  mean_residual  percentage
+ Overprediction             960               1.8630              0.1439        -1.8630     47.0588
+Underprediction            1080               1.8492              0.1372         1.8471     52.9412
+
+FAILURE MODES BY OBSERVED SOLUBILITY
+------------------------------------
+solubility_region  compound_count  mean_absolute_error  mean_prediction_sd  high_error_pct  high_uncertainty_pct  high_error_high_uncertainty_pct  mean_residual
+             < -6             776               1.3506              0.1979         48.0670               48.5825                          21.6495        -1.1992
+       -6 to < -4            1457               0.8540              0.1287         26.5614               30.5422                           8.5106        -0.3915
+       -4 to < -2            2862               0.7067              0.1069         18.6583               22.1523                           6.0447        -0.0363
+        -2 to < 0            2368               0.7305              0.1001         20.1858               19.4679                           4.3497         0.3914
+             >= 0             697               1.0693              0.1041         38.4505               17.7905                           7.4605         1.0341
+
+ERROR / UNCERTAINTY CORRELATIONS
+--------------------------------
+              feature                 target  pearson_r  pearson_p  spearman_r  spearman_p
+          rdkit_molwt        error_magnitude   0.212557   0.000000    0.194917    0.000000
+          rdkit_molwt prediction_uncertainty   0.214533   0.000000    0.097524    0.000000
+          rdkit_molwt       prediction_range   0.216049   0.000000    0.086531    0.000000
+        rdkit_mollogp        error_magnitude   0.122124   0.000000    0.098467    0.000000
+        rdkit_mollogp prediction_uncertainty   0.221054   0.000000    0.121410    0.000000
+        rdkit_mollogp       prediction_range   0.236965   0.000000    0.127157    0.000000
+     rdkit_ring_count        error_magnitude   0.121771   0.000000    0.095445    0.000000
+     rdkit_ring_count prediction_uncertainty   0.050419   0.000005   -0.014845    0.179961
+     rdkit_ring_count       prediction_range   0.040415   0.000260   -0.036109    0.001105
+ rdkit_aromatic_rings        error_magnitude   0.123839   0.000000    0.078007    0.000000
+ rdkit_aromatic_rings prediction_uncertainty  -0.028219   0.010796   -0.075396    0.000000
+ rdkit_aromatic_rings       prediction_range  -0.020385   0.065572   -0.077109    0.000000
+rdkit_rotatable_bonds        error_magnitude   0.150908   0.000000    0.113200    0.000000
+rdkit_rotatable_bonds prediction_uncertainty   0.316337   0.000000    0.075798    0.000000
+rdkit_rotatable_bonds       prediction_range   0.316165   0.000000    0.076494    0.000000
+  rdkit_fraction_csp3        error_magnitude  -0.017093   0.122607   -0.013603    0.219191
+  rdkit_fraction_csp3 prediction_uncertainty   0.155473   0.000000    0.099679    0.000000
+  rdkit_fraction_csp3       prediction_range   0.136299   0.000000    0.088381    0.000000
+
+OVERALL ERROR VS UNCERTAINTY
+----------------------------
+Pearson r=+0.1300, p=4.4335e-32
+Spearman r=+0.0693, p=3.6263e-10
+
+HIGH-ERROR + HIGH-UNCERTAINTY COMPOUNDS
+---------------------------------------
+Count: 620
+
+
+INTERPRETATION FRAMEWORK
+------------------------
+The most important failure category is the High-error + high-uncertainty group because these compounds combine poor predictive accuracy with instability across repeated scaffold-aware splits.
+
+High-error + stable compounds indicate systematic predictive difficulty that is relatively insensitive to split variation.
+
+Low-error + high-uncertainty compounds indicate prediction instability that does not currently translate into large observed errors.
+
+Low-error + stable compounds represent the most reliable region of the current model's applicability within the analysed population.

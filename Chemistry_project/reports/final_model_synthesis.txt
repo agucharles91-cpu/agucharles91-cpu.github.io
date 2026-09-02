@@ -1,0 +1,95 @@
+SCRIPT 32 — FINAL MODEL SYNTHESIS
+======================================================================
+
+PURPOSE
+-------
+Synthesize the established modelling and diagnostic evidence for the AqSolDB aqueous-solubility project without fitting or tuning any new model.
+
+DATA DESIGN
+-----------
+Population C: 8,643 compounds
+Repeated held-out prediction rows: 22,872
+Unique compounds represented: 8,160
+Validation design: repeated scaffold-aware holdout
+
+
+MODEL COMPARISON
+----------------
+
+M0_baseline
+  Description: MolWt + MolLogP
+  Mean R²: 0.646520
+  Mean RMSE: 1.279021
+  Mean MAE: 0.980394
+  ΔR² vs M0: +0.000000
+  ΔRMSE vs M0: +0.000000
+  ΔMAE vs M0: +0.000000
+
+M3_ring_model
+  Description: MolWt + MolLogP + RingCount + AromaticRings
+  Mean R²: 0.663819
+  Mean RMSE: 1.245696
+  Mean MAE: 0.950100
+  ΔR² vs M0: +0.017299
+  ΔRMSE vs M0: -0.033325
+  ΔMAE vs M0: -0.030294
+
+M4_selective_model
+  Description: M3 + RotatableBonds + FractionCSP3
+  Mean R²: 0.663201
+  Mean RMSE: 1.242220
+  Mean MAE: 0.943376
+  ΔR² vs M0: +0.016681
+  ΔRMSE vs M0: -0.036801
+  ΔMAE vs M0: -0.037018
+
+GB_gradient_boosting
+  Description: Gradient Boosting using six M4 descriptors
+  Mean R²: 0.737576
+  Mean RMSE: 1.096018
+  Mean MAE: 0.814707
+  ΔR² vs M0: +0.091056
+  ΔRMSE vs M0: -0.183003
+  ΔMAE vs M0: -0.165687
+
+
+NONLINEAR MODEL CONCLUSION
+--------------------------
+Gradient Boosting provides the strongest mean predictive performance among the evaluated models. Its improvement over M4 was positive for R² and negative for RMSE and MAE in every one of the ten scaffold-aware repetitions.
+
+FEATURE IMPORTANCE CONCLUSION
+-----------------------------
+MolLogP is the dominant predictive descriptor within the evaluated six-feature set. MolWt provides the next-largest contribution, while FractionCSP3, RingCount, RotatableBonds and AromaticRings contribute smaller amounts of predictive information.
+
+CALIBRATION CONCLUSION
+----------------------
+The row-level calibration slope is 0.7617 and the compound-level calibration slope is 0.7466. Both indicate prediction compression: the model reproduces central solubility values more closely than the extreme observed values.
+
+REGIONAL ERROR CONCLUSION
+-------------------------
+The model systematically overestimates solubility for the most insoluble compounds and underestimates solubility for the most soluble compounds. Near-zero global mean residual therefore does not imply uniform calibration.
+
+UNCERTAINTY CONCLUSION
+----------------------
+Repeated-prediction variability provides a useful diagnostic signal. The highest-uncertainty group has materially higher prediction error than the lower-uncertainty groups. This variability measure should not be interpreted as a formal confidence interval or probabilistic prediction interval.
+
+OVERALL SCIENTIFIC CONCLUSION
+-----------------------------
+Aqueous solubility in this dataset is strongly associated with molecular lipophilicity and molecular size, while additional structural descriptors provide smaller incremental information. The substantially better performance of nonlinear models indicates that the relationship between the available molecular descriptors and solubility is not adequately represented by a simple linear form. Gradient Boosting provides the strongest predictive model among those evaluated under repeated scaffold-aware validation.
+
+However, the model is not uniformly reliable across the solubility domain. Calibration analysis demonstrates systematic compression toward the central range, with increased error at both extreme insolubility and high-solubility regions. Prediction uncertainty and applicability-domain diagnostics further indicate that prediction reliability varies across compounds.
+
+LIMITATIONS
+-----------
+1. Results are specific to the curated AqSolDB dataset and the defined Population C.
+2. Scaffold-aware validation reduces structural leakage but does not establish universal external validity.
+3. Descriptor importance is predictive rather than causal.
+4. Repeated-prediction standard deviation is an empirical uncertainty proxy rather than a formal predictive interval.
+5. Calibration and regional error patterns identify systematic behaviour but do not establish the underlying chemical mechanism.
+6. The evaluated models use a relatively small descriptor set rather than the full molecular representation available from modern cheminformatics methods.
+
+FINAL MODEL SELECTION
+---------------------
+For predictive modelling within this project, Gradient Boosting is the preferred model because it achieved the strongest mean held-out performance under repeated scaffold-aware validation.
+
+This selection is based on predictive performance and robustness within the established experimental design, not on a claim that Gradient Boosting is universally optimal for aqueous-solubility prediction.

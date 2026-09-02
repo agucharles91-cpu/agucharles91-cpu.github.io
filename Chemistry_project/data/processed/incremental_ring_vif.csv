@@ -1,0 +1,5 @@
+predictor,VIF
+rdkit_molwt,1.9006833137168175
+rdkit_mollogp,1.4248052956067632
+rdkit_ring_count,2.4586726106411922
+rdkit_aromatic_rings,2.1172749160387774

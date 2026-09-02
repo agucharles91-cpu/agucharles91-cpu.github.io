@@ -110,3 +110,13 @@ desktop.ini
 *.temp
 *.bak
 /.quarto/
+
+# Chemistry project source archive
+Chemistry_project/*.zip
+
+# Chemistry project generated processed data
+Chemistry_project/data/processed/*
+
+
+# Chemistry project raw source data
+Chemistry_project/data/raw/

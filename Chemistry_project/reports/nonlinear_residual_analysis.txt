@@ -1,0 +1,112 @@
+SCRIPT 26 — NONLINEAR MODEL RESIDUAL & ERROR ANALYSIS
+======================================================================
+Population C: 8,643 compounds
+Unique scaffolds: 1,667
+Repeats: 10
+Test fraction: 20%
+
+MODEL
+----------------------------------------------------------------------
+Gradient Boosting Regressor
+n_estimators: 300
+learning_rate: 0.05
+max_depth: 3
+min_samples_split: 2
+min_samples_leaf: 1
+loss: squared_error
+random_state: 42
+
+FEATURES
+- rdkit_molwt
+- rdkit_mollogp
+- rdkit_ring_count
+- rdkit_aromatic_rings
+- rdkit_rotatable_bonds
+- rdkit_fraction_csp3
+
+RESIDUAL DEFINITION
+residual = observed solubility - predicted solubility
+Positive residual indicates underprediction.
+Negative residual indicates overprediction.
+
+REPEATED PERFORMANCE
+----------------------------------------------------------------------
+Repetition 01 | seed=100 | R2=0.759813 | RMSE=1.161561 | MAE=0.865201 | mean_error=-0.034906
+Repetition 02 | seed=101 | R2=0.736846 | RMSE=1.167292 | MAE=0.889738 | mean_error=+0.009727
+Repetition 03 | seed=102 | R2=0.750279 | RMSE=0.980447 | MAE=0.731033 | mean_error=-0.007216
+Repetition 04 | seed=103 | R2=0.738425 | RMSE=1.132709 | MAE=0.858846 | mean_error=-0.027620
+Repetition 05 | seed=104 | R2=0.759388 | RMSE=1.139593 | MAE=0.841159 | mean_error=-0.048271
+Repetition 06 | seed=105 | R2=0.732609 | RMSE=1.167491 | MAE=0.838071 | mean_error=-0.016777
+Repetition 07 | seed=106 | R2=0.651542 | RMSE=0.944741 | MAE=0.704960 | mean_error=+0.062811
+Repetition 08 | seed=107 | R2=0.728440 | RMSE=1.147756 | MAE=0.825435 | mean_error=-0.028175
+Repetition 09 | seed=108 | R2=0.761073 | RMSE=1.180825 | MAE=0.870244 | mean_error=+0.077184
+Repetition 10 | seed=109 | R2=0.740984 | RMSE=0.969053 | MAE=0.719821 | mean_error=+0.029790
+
+OVERALL HELD-OUT ERROR DISTRIBUTION
+----------------------------------------------------------------------
+Total held-out predictions: 22,872
+Mean residual: +0.007569
+Median residual: -0.021578
+Residual SD: 1.108557
+Mean absolute error: 0.816423
+Median absolute error: 0.615293
+90th percentile absolute error: 1.740222
+95th percentile absolute error: 2.279358
+99th percentile absolute error: 3.528520
+Underprediction fraction: 0.489376
+Overprediction fraction: 0.510624
+
+ERROR ASSOCIATION WITH MOLECULAR FEATURES
+----------------------------------------------------------------------
+rdkit_molwt | residual_correlation=+0.010030 | absolute_error_correlation=+0.185976
+rdkit_mollogp | residual_correlation=-0.042087 | absolute_error_correlation=+0.113034
+rdkit_ring_count | residual_correlation=-0.009351 | absolute_error_correlation=+0.092655
+rdkit_aromatic_rings | residual_correlation=+0.001332 | absolute_error_correlation=+0.089622
+rdkit_rotatable_bonds | residual_correlation=+0.023650 | absolute_error_correlation=+0.142654
+rdkit_fraction_csp3 | residual_correlation=+0.006249 | absolute_error_correlation=+0.001396
+
+ERROR BY OBSERVED SOLUBILITY REGION
+----------------------------------------------------------------------
+< -6 | n=2322 | mean_observed=-7.481864 | mean_predicted=-6.396836 | mean_residual=-1.085028 | MAE=1.219058 | RMSE=1.627716
+-6 to < -4 | n=3959 | mean_observed=-4.842450 | mean_predicted=-4.466269 | mean_residual=-0.376181 | MAE=0.844192 | RMSE=1.109757
+-4 to < -2 | n=7989 | mean_observed=-2.926815 | mean_predicted=-2.881805 | mean_residual=-0.045011 | MAE=0.700818 | RMSE=0.921804
+-2 to < 0 | n=6652 | mean_observed=-1.162581 | mean_predicted=-1.544994 | mean_residual=+0.382413 | MAE=0.726708 | RMSE=0.991352
+0 to < 2 | n=1950 | mean_observed=0.665616 | mean_predicted=-0.358809 | mean_residual=+1.024425 | MAE=1.060265 | RMSE=1.387445
+>= 2 | n=0 | mean_observed=nan | mean_predicted=nan | mean_residual=+nan | MAE=nan | RMSE=nan
+
+OBSERVED VS PREDICTED
+----------------------------------------------------------------------
+Observed/predicted correlation: 0.871803
+
+EXTREME ERRORS
+----------------------------------------------------------------------
+ID=A-5980 | repetition=4 | observed=-9.024974 | predicted=-1.913659 | residual=-7.111315 | absolute_error=7.111315
+ID=A-4449 | repetition=4 | observed=-0.698476 | predicted=-7.690416 | residual=+6.991940 | absolute_error=6.991940
+ID=A-5980 | repetition=3 | observed=-9.024974 | predicted=-2.043664 | residual=-6.981310 | absolute_error=6.981310
+ID=A-5980 | repetition=5 | observed=-9.024974 | predicted=-2.340455 | residual=-6.684519 | absolute_error=6.684519
+ID=A-5820 | repetition=8 | observed=-6.575188 | predicted=0.108640 | residual=-6.683828 | absolute_error=6.683828
+ID=A-5820 | repetition=9 | observed=-6.575188 | predicted=0.105991 | residual=-6.681179 | absolute_error=6.681179
+ID=A-5820 | repetition=6 | observed=-6.575188 | predicted=0.097639 | residual=-6.672827 | absolute_error=6.672827
+ID=A-2783 | repetition=8 | observed=-6.394784 | predicted=0.233294 | residual=-6.628078 | absolute_error=6.628078
+ID=A-5604 | repetition=8 | observed=-6.566718 | predicted=0.057857 | residual=-6.624575 | absolute_error=6.624575
+ID=A-2783 | repetition=6 | observed=-6.394784 | predicted=0.139555 | residual=-6.534339 | absolute_error=6.534339
+ID=A-4449 | repetition=1 | observed=-0.698476 | predicted=-7.205701 | residual=+6.507224 | absolute_error=6.507224
+ID=A-2783 | repetition=9 | observed=-6.394784 | predicted=0.105991 | residual=-6.500776 | absolute_error=6.500776
+ID=A-4449 | repetition=5 | observed=-0.698476 | predicted=-7.177209 | residual=+6.478733 | absolute_error=6.478733
+ID=A-5786 | repetition=6 | observed=-6.717140 | predicted=-0.302212 | residual=-6.414928 | absolute_error=6.414928
+ID=A-2714 | repetition=6 | observed=-6.830456 | predicted=-0.442635 | residual=-6.387822 | absolute_error=6.387822
+ID=A-5604 | repetition=6 | observed=-6.566718 | predicted=-0.184041 | residual=-6.382677 | absolute_error=6.382677
+ID=A-5786 | repetition=9 | observed=-6.717140 | predicted=-0.412206 | residual=-6.304934 | absolute_error=6.304934
+ID=A-5786 | repetition=8 | observed=-6.717140 | predicted=-0.446679 | residual=-6.270460 | absolute_error=6.270460
+ID=A-5980 | repetition=6 | observed=-9.024974 | predicted=-2.778645 | residual=-6.246329 | absolute_error=6.246329
+ID=A-5604 | repetition=9 | observed=-6.566718 | predicted=-0.335273 | residual=-6.231446 | absolute_error=6.231446
+
+METHODOLOGICAL INTERPRETATION
+----------------------------------------------------------------------
+Residuals were calculated exclusively from held-out scaffold-aware test observations.
+The same ten scaffold-level seeds used in Scripts 22–25 were used to maintain methodological continuity.
+Positive residuals represent cases where the model underpredicted measured solubility.
+Negative residuals represent cases where the model overpredicted measured solubility.
+Feature-error correlations are descriptive and do not establish causal relationships.
+Large residuals identify compounds or structural regions where the six-descriptor Gradient Boosting model has limited predictive accuracy.
+Error patterns should be interpreted alongside the scaffold-aware performance results and SHAP analysis from Scripts 23–25.

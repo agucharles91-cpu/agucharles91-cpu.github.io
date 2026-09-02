@@ -1,0 +1,5 @@
+model,description,mean_r2,mean_rmse,mean_mae,delta_r2_vs_m0,delta_rmse_vs_m0,delta_mae_vs_m0
+M0_baseline,MolWt + MolLogP,0.64652,1.279021,0.980394,0.0,0.0,0.0
+M3_ring_model,MolWt + MolLogP + RingCount + AromaticRings,0.663819,1.245696,0.9501,0.017299000000000064,-0.03332500000000005,-0.030294000000000043
+M4_selective_model,M3 + RotatableBonds + FractionCSP3,0.663201,1.24222,0.943376,0.016681000000000057,-0.03680099999999986,-0.037017999999999995
+GB_gradient_boosting,Gradient Boosting using six M4 descriptors,0.737576,1.096018,0.814707,0.09105600000000003,-0.18300300000000003,-0.16568700000000003

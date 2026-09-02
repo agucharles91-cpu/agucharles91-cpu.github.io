@@ -1,0 +1,9 @@
+analysis,value
+Prediction observations,22872.0
+Unique compounds,8160.0
+Repeated validation sets,10.0
+Mean nearest-training distance,0.5290337831319727
+Median nearest-training distance,0.3753215334757644
+Mean absolute error,0.8164226305056888
+Pearson novelty-error correlation,0.11029535357861876
+Spearman novelty-error correlation,0.07397670999994597

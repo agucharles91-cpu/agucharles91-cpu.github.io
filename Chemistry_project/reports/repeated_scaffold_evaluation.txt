@@ -1,0 +1,37 @@
+SCRIPT 22 — REPEATED SCAFFOLD-AWARE MODEL EVALUATION
+======================================================================
+Population C: 8,643 compounds
+Unique scaffolds: 1,667
+Repeats: 10
+Test fraction: 20%
+
+Models:
+M0: MolWt + MolLogP
+M3: MolWt + MolLogP + RingCount + AromaticRings
+M4: M3 + RotatableBonds + FractionCSP3
+
+REPEATED PERFORMANCE SUMMARY
+----------------------------------------------------------------------
+M0_baseline | r_squared | mean=0.646520 | SD=0.037401 | 95% CI=[0.623338, 0.669701] | range=[0.604839, 0.710050]
+M0_baseline | rmse | mean=1.279021 | SD=0.173283 | 95% CI=[1.171619, 1.386423] | range=[1.006062, 1.428218]
+M0_baseline | mae | mean=0.980394 | SD=0.147858 | 95% CI=[0.888751, 1.072037] | range=[0.741709, 1.098372]
+M3_ring_model | r_squared | mean=0.663819 | SD=0.031073 | 95% CI=[0.644560, 0.683079] | range=[0.605489, 0.709216]
+M3_ring_model | rmse | mean=1.245696 | SD=0.149009 | 95% CI=[1.153339, 1.338053] | range=[1.005234, 1.381209]
+M3_ring_model | mae | mean=0.950100 | SD=0.122602 | 95% CI=[0.874111, 1.026089] | range=[0.748288, 1.050350]
+M4_selective_model | r_squared | mean=0.663201 | SD=0.041183 | 95% CI=[0.637675, 0.688726] | range=[0.554625, 0.699671]
+M4_selective_model | rmse | mean=1.242220 | SD=0.117530 | 95% CI=[1.169374, 1.315066] | range=[1.068072, 1.353779]
+M4_selective_model | mae | mean=0.943376 | SD=0.094368 | 95% CI=[0.884887, 1.001866] | range=[0.801655, 1.025587]
+
+M4 IMPROVEMENT OVER M0
+----------------------------------------------------------------------
+m4_delta_r2_vs_m0: mean=0.016681, SD=0.033906, 95% CI=[-0.004334, 0.037696], range=[-0.050214, 0.047062], positive_fraction=0.700
+m4_delta_rmse_vs_m0: mean=-0.036801, SD=0.057585, 95% CI=[-0.072492, -0.001109], range=[-0.089273, 0.062011], positive_fraction=0.300
+m4_delta_mae_vs_m0: mean=-0.037018, SD=0.057839, 95% CI=[-0.072866, -0.001169], range=[-0.102516, 0.059946], positive_fraction=0.300
+
+METHODOLOGICAL INTERPRETATION
+----------------------------------------------------------------------
+The purpose of this analysis is to determine whether the structural-model improvement observed in the original scaffold-aware split is stable across multiple independent scaffold-level holdouts.
+Each repetition keeps entire Bemis-Murcko scaffold groups together, preventing the same scaffold from appearing in both training and test data.
+Positive M4 delta R-squared indicates that M4 explains more held-out variance than the MolWt + MolLogP baseline.
+Negative M4 delta RMSE or MAE indicates improved prediction error relative to the baseline.
+These results should be interpreted as robustness evidence, not as a final estimate of universal model performance.

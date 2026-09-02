@@ -1,0 +1,47 @@
+SCRIPT 18 — MODEL EXPLAINABILITY
+======================================================================
+
+Purpose:
+Determine which molecular descriptors contribute most to the predictive performance of M4 using manual permutation importance (R² decrease) on the held-out scaffold test set.
+
+Population C:
+8,643 compounds
+
+Scaffold-aware split:
+Training:   6,054
+Validation: 1,308
+Test:       1,281
+
+M4 scaffold-test performance:
+R² = 0.701222
+RMSE = 1.302001
+MAE = 1.004923
+Mean error = 0.063297
+
+Permutation importance:
+
+              feature  mean_importance  std_importance  ci_approx_low  ci_approx_high
+        rdkit_mollogp         0.827565        0.029028       0.770670        0.884460
+          rdkit_molwt         0.138657        0.009849       0.119352        0.157961
+  rdkit_fraction_csp3         0.021784        0.003285       0.015345        0.028223
+     rdkit_ring_count         0.007681        0.001917       0.003923        0.011438
+rdkit_rotatable_bonds         0.006960        0.001394       0.004228        0.009692
+ rdkit_aromatic_rings        -0.000090        0.000727      -0.001514        0.001334
+
+Standardized coefficients:
+
+              feature  coefficient  standardized_coefficient      p_value    ci_low   ci_high
+        rdkit_mollogp    -0.692349                 -1.490479 0.000000e+00 -0.715034 -0.669663
+          rdkit_molwt    -0.005324                 -0.596762 1.042615e-42 -0.006086 -0.004562
+  rdkit_fraction_csp3     0.704208                  0.242350 3.139522e-15  0.529169  0.879246
+     rdkit_ring_count    -0.084078                 -0.110317 1.168592e-02 -0.149432 -0.018724
+rdkit_rotatable_bonds     0.029517                  0.106215 1.213063e-03  0.011638  0.047395
+ rdkit_aromatic_rings     0.047307                  0.048845 2.908657e-01 -0.040477  0.135091
+
+Interpretation guidance:
+- Permutation importance is calculated manually on the held-out scaffold test set by shuffling one feature at a time and re-predicting with the fixed, already-fitted model.
+- Larger positive importance means that permuting the feature causes a larger decrease in test R².
+- Importance is predictive, not causal.
+- Correlated descriptors can share predictive information.
+- Standardized coefficients describe the fitted linear model and are not causal effects.
+- Ring-related importance should be interpreted as evidence that structural information adds predictive value beyond MolWt and MolLogP, not as direct proof of lattice-energy effects.
