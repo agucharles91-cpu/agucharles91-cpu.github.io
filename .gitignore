@@ -120,3 +120,6 @@ Chemistry_project/data/processed/*
 
 # Chemistry project raw source data
 Chemistry_project/data/raw/
+
+# Standalone project repositories
+/Chemistry-Property-Analytics/
