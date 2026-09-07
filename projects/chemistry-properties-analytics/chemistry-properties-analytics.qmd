@@ -2891,7 +2891,7 @@ strong {
 
       <a
         class="case-btn case-btn-secondary"
-        href="../../index.html#projects">
+        href="/#projects">
         Back to Projects
       </a>
 
@@ -2906,7 +2906,7 @@ strong {
   <div>
     AC / DATA
   </div>
-  <a href="../../index.html#projects">
+  <a href="/#projects">
     ← All Projects
   </a>
 </footer>
