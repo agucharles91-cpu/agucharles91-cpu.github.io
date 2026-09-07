@@ -1,0 +1,2913 @@
+---
+title: ""
+format:
+  html:
+    page-layout: full
+    toc: false
+    html-math-method: plain
+    embed-resources: false
+    include-in-header:
+      text: |
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+        <meta name="description" content="Aqueous Solubility Prediction using AqSolDB — a reproducible scientific data science project investigating molecular property prediction, generalisation, model reliability, explainability, and applicability domain.">
+---
+
+```{=html}
+<style>
+/* =========================================================
+   AGU CHARLES CHIBUIKE — CASE STUDY
+   Scientific Data Science / AqSolDB
+   ========================================================= */
+
+
+/* =========================================================
+   DESIGN TOKENS
+   ========================================================= */
+
+:root {
+  --navy: #0D1B2A;
+  --navy-2: #14263A;
+  --teal: #00A878;
+  --teal-dark: #008A65;
+  --gold: #E8C547;
+
+  --ink: #1A1A2E;
+  --slate: #4A5568;
+  --muted: #718096;
+
+  --mist: #F7F6F2;
+  --white: #FFFFFF;
+  --border: #E2E0DA;
+
+  --display: "Space Grotesk", sans-serif;
+  --serif: "Source Serif 4", Georgia, serif;
+  --mono: "JetBrains Mono", monospace;
+
+  --content-width: 1180px;
+  --text-width: 760px;
+}
+
+
+/* =========================================================
+   GLOBAL RESET
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--white);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+body,
+.quarto-container,
+#quarto-content,
+main {
+  max-width: none !important;
+}
+
+main {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+p {
+  margin: 0 0 20px;
+}
+
+a {
+  color: inherit;
+}
+
+strong {
+  font-weight: 600;
+}
+
+::selection {
+  background: rgba(0,168,120,0.18);
+}
+
+
+/* =========================================================
+   HIDE QUARTO DEFAULT CHROME
+   ========================================================= */
+
+#quarto-header,
+.navbar,
+.sidebar,
+.sidebar-navigation,
+.quarto-title-block,
+.quarto-title-banner,
+#TOC {
+  display: none !important;
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.case-nav {
+  background: var(--navy);
+  border-bottom: 1px solid rgba(255,255,255,0.09);
+}
+
+.case-nav-inner {
+  width: min(var(--content-width), calc(100% - 48px));
+  margin: 0 auto;
+
+  min-height: 76px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.case-nav-back,
+.case-nav-brand {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.case-nav-back {
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+
+  transition: color 0.2s ease;
+}
+
+.case-nav-back:hover {
+  color: var(--teal);
+}
+
+.case-nav-brand {
+  color: var(--white);
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.case-hero {
+  background: var(--navy);
+  color: var(--white);
+
+  padding: 105px 0 100px;
+
+  position: relative;
+  overflow: hidden;
+}
+
+.case-hero::after {
+  content: "";
+
+  position: absolute;
+  width: 340px;
+  height: 340px;
+
+  right: -120px;
+  bottom: -180px;
+
+  border: 1px solid rgba(0,168,120,0.16);
+  border-radius: 50%;
+
+  pointer-events: none;
+}
+
+.case-hero-inner {
+  width: min(var(--content-width), calc(100% - 48px));
+  margin: 0 auto;
+
+  max-width: 900px;
+  margin-left: max(24px, calc((100% - var(--content-width)) / 2));
+}
+
+.case-kicker {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--teal);
+  text-transform: uppercase;
+
+  margin-bottom: 25px;
+}
+
+.case-title {
+  font-family: var(--display);
+  font-size: clamp(52px, 7vw, 88px);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+
+  margin: 0 0 32px;
+
+  color: var(--white);
+}
+
+.case-subtitle {
+  max-width: 730px;
+
+  font-family: var(--serif);
+  font-size: 22px;
+  line-height: 1.55;
+
+  color: #CBD5E0;
+
+  margin-bottom: 34px;
+}
+
+.case-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  margin-bottom: 34px;
+}
+
+.case-meta span {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+
+  color: var(--teal);
+
+  border: 1px solid rgba(0,168,120,0.3);
+  background: rgba(0,168,120,0.07);
+
+  padding: 7px 10px;
+  border-radius: 2px;
+}
+
+
+/* =========================================================
+   BUTTONS / LINKS
+   ========================================================= */
+
+.case-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.case-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 44px;
+  padding: 11px 17px;
+
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+
+  text-decoration: none;
+
+  border-radius: 3px;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.case-btn:hover {
+  transform: translateY(-2px);
+}
+
+.case-btn-primary {
+  background: var(--teal);
+  color: var(--navy);
+
+  border: 1px solid var(--teal);
+}
+
+.case-btn-primary:hover {
+  background: #08B985;
+  color: var(--navy);
+}
+
+.case-btn-secondary {
+  color: var(--ink);
+  background: transparent;
+
+  border: 1px solid var(--border);
+}
+
+.case-btn-secondary:hover {
+  border-color: var(--teal);
+  color: var(--teal-dark);
+}
+
+
+/* =========================================================
+   STATS STRIP
+   ========================================================= */
+
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+
+  border-bottom: 1px solid var(--border);
+  background: var(--mist);
+}
+
+.stat {
+  min-height: 145px;
+
+  padding: 30px 28px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  border-right: 1px solid var(--border);
+}
+
+.stat:last-child {
+  border-right: none;
+}
+
+.stat-value {
+  font-family: var(--display);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1;
+
+  color: var(--navy);
+
+  margin-bottom: 10px;
+}
+
+.stat-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+
+/* =========================================================
+   GENERAL SECTION
+   ========================================================= */
+
+.case-section {
+  width: min(var(--content-width), calc(100% - 48px));
+  margin: 0 auto;
+
+  padding-top: 105px;
+  padding-bottom: 105px;
+}
+
+.case-section-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+
+  color: var(--teal);
+  text-transform: uppercase;
+
+  margin-bottom: 22px;
+}
+
+.case-section-title {
+  max-width: 850px;
+
+  font-family: var(--display);
+  font-size: clamp(34px, 4vw, 52px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+
+  color: var(--ink);
+
+  margin: 0 0 28px;
+}
+
+.section-intro {
+  max-width: var(--text-width);
+
+  font-family: var(--serif);
+  font-size: 18px;
+  color: var(--slate);
+
+  margin-bottom: 38px;
+}
+
+
+/* =========================================================
+   INTRO / QUESTION
+   ========================================================= */
+
+.case-intro {
+  width: min(var(--content-width), calc(100% - 48px));
+  margin: 0 auto;
+
+  padding: 105px 0;
+}
+
+.case-two-column {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.85fr) minmax(320px, 1.15fr);
+  gap: 90px;
+  align-items: start;
+}
+
+.case-two-column h2 {
+  font-family: var(--display);
+  font-size: clamp(34px, 4vw, 50px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+
+  color: var(--ink);
+
+  margin: 0;
+}
+
+.case-two-column p {
+  max-width: 700px;
+  color: var(--slate);
+}
+
+.case-two-column .lead {
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+
+/* =========================================================
+   DARK SECTIONS
+   ========================================================= */
+
+.dark-section {
+  background: var(--navy);
+  color: var(--white);
+}
+
+.section-title-light {
+  max-width: 850px;
+
+  font-family: var(--display);
+  font-size: clamp(34px, 4vw, 52px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+
+  color: var(--white);
+
+  margin: 0 0 45px;
+}
+
+
+/* =========================================================
+   DATA CARDS
+   ========================================================= */
+
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+
+  margin-top: 42px;
+}
+
+.data-card {
+  padding: 30px;
+
+  min-height: 235px;
+
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 5px;
+
+  background: rgba(255,255,255,0.035);
+}
+
+.data-number {
+  font-family: var(--display);
+  font-size: 38px;
+  font-weight: 600;
+  line-height: 1;
+
+  color: var(--teal);
+
+  margin-bottom: 18px;
+}
+
+.data-heading {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 600;
+
+  color: var(--white);
+
+  margin-bottom: 10px;
+}
+
+.data-card p {
+  font-size: 15px;
+  line-height: 1.6;
+
+  color: #A0AEC0;
+
+  margin: 0;
+}
+
+.source-note {
+  margin-top: 28px;
+
+  font-family: var(--mono);
+  font-size: 9px;
+  line-height: 1.7;
+
+  color: #718096;
+
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.source-note strong {
+  color: #A0AEC0;
+}
+
+
+/* =========================================================
+   PIPELINE
+   ========================================================= */
+
+.pipeline {
+  display: flex;
+  align-items: stretch;
+
+  margin-top: 48px;
+
+  overflow-x: auto;
+
+  padding-bottom: 8px;
+}
+
+.pipeline-step {
+  flex: 1;
+  min-width: 145px;
+
+  padding: 22px 18px;
+
+  border: 1px solid var(--border);
+  background: var(--mist);
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pipeline-number {
+  width: 30px;
+  height: 30px;
+
+  flex: 0 0 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: var(--navy);
+  color: var(--teal);
+
+  font-family: var(--mono);
+  font-size: 9px;
+}
+
+.pipeline-step strong {
+  display: block;
+
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 600;
+
+  color: var(--ink);
+
+  margin-bottom: 3px;
+}
+
+.pipeline-step span {
+  display: block;
+
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.04em;
+
+  color: var(--muted);
+}
+
+.pipeline-arrow {
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 30px;
+
+  font-family: var(--mono);
+  font-size: 14px;
+
+  color: var(--teal);
+}
+
+
+/* =========================================================
+   SPLIT SECTIONS
+   ========================================================= */
+
+.split-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+
+  gap: 80px;
+
+  width: min(var(--content-width), calc(100% - 48px));
+  margin: 0 auto;
+
+  padding: 105px 0;
+}
+
+.split-content h2 {
+  max-width: 760px;
+
+  font-family: var(--display);
+  font-size: clamp(36px, 4vw, 54px);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+
+  color: var(--ink);
+
+  margin: 0 0 30px;
+}
+
+.split-content > p {
+  max-width: 720px;
+  color: var(--slate);
+}
+
+.split-aside {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+
+/* =========================================================
+   METHOD CALLOUT
+   ========================================================= */
+
+.method-callout {
+  margin-top: 34px;
+  padding: 22px 24px;
+
+  border-left: 3px solid var(--teal);
+
+  background: var(--mist);
+
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.method-callout strong {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+
+  color: var(--teal-dark);
+}
+
+.method-callout span {
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.55;
+
+  color: var(--slate);
+}
+
+
+/* =========================================================
+   METHOD CARD
+   ========================================================= */
+
+.method-card {
+  width: 100%;
+  max-width: 340px;
+
+  padding: 32px;
+
+  background: var(--navy);
+
+  border-radius: 5px;
+
+  box-shadow: 8px 8px 0 var(--teal);
+}
+
+.method-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+
+  color: var(--teal);
+
+  text-transform: uppercase;
+
+  margin-bottom: 18px;
+}
+
+.method-big {
+  font-family: var(--display);
+  font-size: 56px;
+  font-weight: 600;
+  line-height: 1;
+
+  color: var(--white);
+
+  margin-bottom: 18px;
+}
+
+.method-card p {
+  font-size: 15px;
+  line-height: 1.6;
+
+  color: #A0AEC0;
+
+  margin: 0;
+}
+
+
+/* =========================================================
+   RESULTS
+   ========================================================= */
+
+.results-section {
+  background: var(--mist);
+
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+
+  margin-top: 45px;
+}
+
+.result-card {
+  padding: 30px;
+
+  min-height: 210px;
+
+  background: var(--white);
+
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+
+.result-primary {
+  border-top: 3px solid var(--teal);
+}
+
+.result-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+
+  color: var(--muted);
+
+  text-transform: uppercase;
+
+  margin-bottom: 28px;
+}
+
+.result-number {
+  font-family: var(--display);
+  font-size: 50px;
+  font-weight: 600;
+  line-height: 1;
+
+  color: var(--navy);
+
+  margin-bottom: 9px;
+}
+
+.result-caption {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+
+  color: var(--teal-dark);
+
+  text-transform: uppercase;
+}
+
+
+/* =========================================================
+   CHART PLACEHOLDERS
+   ========================================================= */
+
+.chart-placeholder {
+  min-height: 330px;
+
+  margin-top: 42px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  border: 1px dashed #C8C6BF;
+  background: rgba(255,255,255,0.5);
+
+  padding: 40px;
+}
+
+.chart-placeholder-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+
+  color: var(--teal-dark);
+
+  text-transform: uppercase;
+
+  margin-bottom: 12px;
+}
+
+.chart-placeholder p {
+  max-width: 500px;
+
+  font-family: var(--serif);
+  font-size: 15px;
+
+  color: var(--muted);
+
+  margin: 0;
+}
+
+.chart-dark {
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.035);
+}
+
+.chart-dark .chart-placeholder-label {
+  color: var(--teal);
+}
+
+.chart-dark p {
+  color: #718096;
+}
+
+
+/* =========================================================
+   FINDINGS
+   ========================================================= */
+
+.finding-layout {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.finding-stat {
+  font-family: var(--display);
+  font-size: clamp(64px, 8vw, 100px);
+  font-weight: 600;
+  line-height: 0.95;
+
+  color: var(--teal);
+
+  margin-bottom: 15px;
+}
+
+.finding-heading {
+  font-family: var(--display);
+  font-size: 25px;
+  font-weight: 600;
+
+  color: var(--white);
+
+  margin-bottom: 18px;
+}
+
+.finding-main p {
+  max-width: 520px;
+
+  color: #A0AEC0;
+}
+
+.calibration-callout {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 42px;
+}
+
+/* =========================================================
+   APPLICABILITY DOMAIN
+   ========================================================= */
+
+.ad-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 12px;
+
+  margin-top: 35px;
+}
+
+.ad-stat-grid > div {
+  padding: 20px;
+
+  background: var(--mist);
+  border: 1px solid var(--border);
+
+  display: flex;
+  flex-direction: column;
+}
+
+.ad-stat-grid strong {
+  font-family: var(--display);
+  font-size: 30px;
+  line-height: 1;
+
+  color: var(--teal-dark);
+
+  margin-bottom: 8px;
+}
+
+.ad-stat-grid span {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+
+  color: var(--ink);
+
+  text-transform: uppercase;
+
+  margin-bottom: 7px;
+}
+
+.ad-stat-grid small {
+  font-family: var(--serif);
+  font-size: 12px;
+  line-height: 1.45;
+
+  color: var(--muted);
+}
+
+
+/* =========================================================
+   EXPLAINABILITY
+   ========================================================= */
+
+.explain-grid {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+
+  gap: 75px;
+
+  align-items: center;
+}
+
+.lead-light {
+  font-family: var(--serif);
+  font-size: 22px;
+  line-height: 1.55;
+
+  color: var(--white);
+}
+
+.light-text {
+  color: #A0AEC0;
+}
+
+.explain-grid strong {
+  color: var(--white);
+}
+
+
+/* =========================================================
+   WHAT I BUILT
+   ========================================================= */
+
+.build-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 16px;
+
+  margin-top: 45px;
+}
+
+.build-card {
+  padding: 30px;
+
+  border: 1px solid var(--border);
+  border-radius: 5px;
+
+  background: var(--white);
+}
+
+.build-number {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+
+  color: var(--teal);
+
+  margin-bottom: 22px;
+}
+
+.build-card h3 {
+  font-family: var(--display);
+  font-size: 21px;
+  font-weight: 600;
+
+  color: var(--ink);
+
+  margin: 0 0 10px;
+}
+
+.build-card p {
+  font-size: 15px;
+  line-height: 1.6;
+
+  color: var(--slate);
+
+  margin: 0;
+}
+
+
+/* =========================================================
+   LIMITATIONS
+   ========================================================= */
+
+.limitations {
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+
+  max-width: 760px;
+}
+
+.limitations li {
+  position: relative;
+
+  padding: 0 0 20px 28px;
+  margin-bottom: 20px;
+
+  border-bottom: 1px solid var(--border);
+
+  color: var(--slate);
+}
+
+.limitations li::before {
+  content: "—";
+
+  position: absolute;
+  left: 0;
+  top: 0;
+
+  color: var(--teal);
+
+  font-family: var(--mono);
+}
+
+.limitation-note {
+  width: 100%;
+  max-width: 340px;
+
+  padding: 30px;
+
+  background: var(--mist);
+
+  border-left: 3px solid var(--gold);
+}
+
+.limitation-note p {
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.5;
+
+  color: var(--ink);
+
+  margin: 0;
+}
+
+
+/* =========================================================
+   EVIDENCE
+   ========================================================= */
+
+.evidence-section {
+  background: var(--mist);
+
+  border-top: 1px solid var(--border);
+}
+
+.evidence-section h2 {
+  font-family: var(--display);
+  font-size: clamp(36px, 4vw, 54px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+
+  color: var(--ink);
+
+  margin: 0 0 25px;
+}
+
+.evidence-section p {
+  max-width: 680px;
+
+  color: var(--slate);
+
+  margin-bottom: 30px;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.case-footer {
+  min-height: 100px;
+
+  padding: 30px max(24px, calc((100% - var(--content-width)) / 2));
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: var(--navy);
+
+  color: rgba(255,255,255,0.6);
+
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.case-footer a {
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+
+  transition: color 0.2s ease;
+}
+
+.case-footer a:hover {
+  color: var(--teal);
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .case-hero {
+    padding: 85px 0 80px;
+  }
+
+  .case-title {
+    font-size: clamp(48px, 9vw, 72px);
+  }
+
+  .case-two-column,
+  .finding-layout,
+  .explain-grid {
+    grid-template-columns: 1fr;
+    gap: 45px;
+  }
+
+  .split-section {
+    grid-template-columns: 1fr;
+    gap: 45px;
+  }
+
+  .split-aside {
+    justify-content: flex-start;
+  }
+
+  .method-card,
+  .limitation-note {
+    max-width: none;
+  }
+
+  .data-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .result-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .build-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat:nth-child(2) {
+    border-right: none;
+  }
+
+  .stat:nth-child(-n+2) {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat:nth-child(3) {
+    border-right: 1px solid var(--border);
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVE — MOBILE
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+  body {
+    font-size: 16px;
+  }
+
+  .case-nav-inner,
+  .case-hero-inner,
+  .case-section,
+  .case-intro {
+    width: calc(100% - 36px);
+  }
+
+  .case-nav-inner {
+    min-height: 64px;
+  }
+
+  .case-nav-brand {
+    display: none;
+  }
+
+  .case-hero {
+    padding: 65px 0 65px;
+  }
+
+  .case-kicker {
+    font-size: 9px;
+    margin-bottom: 20px;
+  }
+
+  .case-title {
+    font-size: clamp(44px, 13vw, 60px);
+    margin-bottom: 25px;
+  }
+
+  .case-subtitle {
+    font-size: 18px;
+  }
+
+  .case-meta {
+    gap: 6px;
+  }
+
+  .case-meta span {
+    font-size: 8px;
+    padding: 6px 8px;
+  }
+
+  .case-section,
+  .case-intro,
+  .split-section {
+    padding-top: 72px;
+    padding-bottom: 72px;
+  }
+
+  .case-two-column h2,
+  .split-content h2,
+  .case-section-title,
+  .section-title-light {
+    font-size: 34px;
+  }
+
+  .case-two-column {
+    gap: 30px;
+  }
+
+  .case-two-column .lead {
+    font-size: 18px;
+  }
+
+  .stats-strip {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .stat {
+    min-height: 125px;
+    padding: 22px 18px;
+  }
+
+  .stat-value {
+    font-size: 29px;
+  }
+
+  .stat-label {
+    font-size: 8px;
+  }
+
+  .pipeline {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .pipeline-step {
+    min-width: 0;
+  }
+
+  .pipeline-arrow {
+    width: auto;
+    height: 18px;
+    transform: rotate(90deg);
+  }
+
+  .finding-stat {
+    font-size: 72px;
+  }
+
+  .ad-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-placeholder {
+    min-height: 250px;
+    padding: 25px;
+  }
+
+  .case-links {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .case-btn {
+    width: 100%;
+  }
+
+  .case-footer {
+    min-height: 120px;
+
+    padding: 28px 18px;
+
+    align-items: flex-start;
+
+    flex-direction: column;
+    gap: 18px;
+  }
+}
+
+
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
+}
+
+
+/* =========================================================
+   EXTENDED SECTIONS — generic .section wrapper
+   (used by validation-section, ad-section)
+   ========================================================= */
+
+.section {
+  width: 100%;
+  background: var(--white);
+}
+
+.section-inner {
+  width: min(var(--content-width), calc(100% - 48px));
+  margin: 0 auto;
+
+  padding-top: 105px;
+  padding-bottom: 105px;
+}
+
+.section-kicker {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+
+  color: var(--teal);
+  text-transform: uppercase;
+
+  margin-bottom: 22px;
+}
+
+.section-heading {
+  max-width: 850px;
+  margin-bottom: 48px;
+}
+
+.section-heading h2 {
+  font-family: var(--display);
+  font-size: clamp(34px, 4vw, 52px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+
+  color: var(--ink);
+
+  margin: 0 0 22px;
+}
+
+.section-lead {
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.6;
+
+  color: var(--slate);
+
+  margin: 0;
+}
+
+/* =========================================================
+   TWO COLUMN (generic — used within .section)
+   ========================================================= */
+
+.two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  margin-bottom: 60px;
+}
+
+.two-column .column h3 {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 600;
+
+  color: var(--ink);
+
+  margin: 0 0 16px;
+}
+
+.two-column .column p {
+  color: var(--slate);
+}
+
+.two-column.ad-explanation {
+  margin-top: 50px;
+  margin-bottom: 0;
+}
+
+/* Method card variant used inline in a two-column layout
+   (distinct usage from the split-section .method-card, but
+   shares the same dark card treatment) */
+
+.two-column .method-card {
+  max-width: none;
+  box-shadow: none;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.two-column .method-card .method-number {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: var(--teal);
+  color: var(--navy);
+
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+
+  margin-bottom: 20px;
+}
+
+.two-column .method-card h3 {
+  color: var(--white);
+  margin-bottom: 14px;
+}
+
+.two-column .method-card p {
+  color: #A0AEC0;
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: none;
+  margin-bottom: 14px;
+}
+
+.two-column .method-card p:last-child {
+  margin-bottom: 0;
+}
+
+.interpretation-card {
+  height: 100%;
+
+  padding: 32px;
+
+  background: var(--mist);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+
+.interpretation-card h3 {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 600;
+
+  color: var(--ink);
+
+  margin: 0 0 14px;
+}
+
+.interpretation-card p {
+  font-size: 15px;
+  line-height: 1.6;
+
+  color: var(--slate);
+}
+
+.interpretation-card p:last-child {
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   VALIDATION PROCESS STEPS
+   ========================================================= */
+
+.validation-process {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+
+  margin-bottom: 60px;
+}
+
+.validation-step {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  padding: 26px 22px;
+
+  background: var(--mist);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+
+.validation-step .step-label {
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: var(--navy);
+  color: var(--teal);
+
+  font-family: var(--mono);
+  font-size: 9px;
+}
+
+.validation-step h4 {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 600;
+
+  color: var(--ink);
+
+  margin: 0;
+}
+
+.validation-step p {
+  font-size: 14px;
+  line-height: 1.55;
+
+  color: var(--slate);
+
+  margin: 0;
+}
+
+/* =========================================================
+   VALIDATION RESULT
+   ========================================================= */
+
+.validation-result {
+  display: grid;
+  grid-template-columns: 1.3fr 0.9fr;
+  gap: 50px;
+
+  padding: 46px;
+
+  background: var(--navy);
+  border-radius: 6px;
+
+  margin-bottom: 46px;
+}
+
+.result-kicker {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+
+  color: var(--teal);
+  text-transform: uppercase;
+
+  margin-bottom: 16px;
+}
+
+.result-copy h3 {
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 600;
+
+  color: var(--white);
+
+  margin: 0 0 18px;
+}
+
+.result-copy p {
+  color: #A0AEC0;
+  max-width: 560px;
+}
+
+.result-callout {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 12px;
+
+  border-left: 3px solid var(--teal);
+  padding-left: 26px;
+}
+
+.callout-number {
+  font-family: var(--display);
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1;
+
+  color: var(--teal);
+}
+
+.callout-label {
+  font-family: var(--serif);
+  font-size: 14px;
+  line-height: 1.5;
+
+  color: #A0AEC0;
+}
+
+/* =========================================================
+   SECTION ASIDE (callout box, light variant of method-callout)
+   ========================================================= */
+
+.section-aside {
+  padding: 26px 28px;
+
+  border-left: 3px solid var(--gold);
+  background: var(--mist);
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.section-aside strong {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+
+  color: var(--ink);
+}
+
+.section-aside p {
+  font-family: var(--serif);
+  font-size: 15px;
+  line-height: 1.6;
+
+  color: var(--slate);
+
+  margin: 0;
+}
+
+.section-aside p + p {
+  margin-top: 12px;
+}
+
+/* =========================================================
+   APPLICABILITY DOMAIN RESULTS
+   ========================================================= */
+
+.ad-results {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+
+  margin-bottom: 20px;
+}
+
+.ad-result {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding: 30px 26px;
+
+  background: var(--navy);
+  border-radius: 5px;
+}
+
+.ad-value {
+  font-family: var(--display);
+  font-size: 42px;
+  font-weight: 600;
+  line-height: 1;
+
+  color: var(--teal);
+}
+
+.ad-label {
+  font-family: var(--serif);
+  font-size: 14px;
+  line-height: 1.5;
+
+  color: #A0AEC0;
+}
+
+/* =========================================================
+   TECHNICAL SAFEGUARD
+   ========================================================= */
+
+.technical-safeguard {
+  margin-top: 50px;
+  padding: 34px 36px;
+
+  background: var(--mist);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+
+.safeguard-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  color: var(--teal-dark);
+
+  margin-bottom: 16px;
+}
+
+.technical-safeguard h3 {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 600;
+
+  color: var(--ink);
+
+  margin: 0 0 14px;
+}
+
+.technical-safeguard p {
+  color: var(--slate);
+  max-width: 760px;
+}
+
+.technical-safeguard p:last-child {
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   RESPONSIVE — new section types
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .two-column,
+  .validation-process,
+  .validation-result,
+  .ad-results {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .result-callout {
+    border-left: none;
+    border-top: 3px solid var(--teal);
+    padding-left: 0;
+    padding-top: 20px;
+  }
+
+  .validation-result {
+    padding: 34px 26px;
+  }
+
+  .technical-safeguard {
+    padding: 28px 24px;
+  }
+}
+</style>
+```
+
+```{=html}
+<nav class="case-nav">
+  <div class="case-nav-inner">
+    <a class="case-nav-back" href="../index.html#projects">← All Projects</a>
+    <div class="case-nav-brand">AC / DATA</div>
+  </div>
+</nav>
+
+
+<section class="case-hero">
+  <div class="case-hero-inner">
+
+    <div class="case-kicker">SCIENTIFIC DATA SCIENCE · CHEMISTRY</div>
+
+    <h1 class="case-title">
+      Aqueous Solubility<br>
+      Prediction
+    </h1>
+
+    <p class="case-subtitle">
+      Can a machine-learning model predict how well a molecule dissolves in
+      water — and, more importantly, can we tell when that prediction should
+      be trusted?
+    </p>
+
+    <div class="case-meta">
+      <span>Python</span>
+      <span>RDKit</span>
+      <span>PostgreSQL</span>
+      <span>scikit-learn</span>
+      <span>SHAP</span>
+    </div>
+
+    <div class="case-links">
+      <a
+        class="case-btn case-btn-primary"
+        href="https://github.com/agucharles91-cpu/Chemistry-Property-Analytics"
+        target="_blank"
+        rel="noopener noreferrer">
+        View GitHub Repository
+      </a>
+    </div>
+
+  </div>
+</section>
+
+
+<section class="stats-strip">
+
+  <div class="stat">
+    <div class="stat-value">9,982</div>
+    <div class="stat-label">AqSolDB compounds</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-value">8,643</div>
+    <div class="stat-label">Locked analytical population</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-value">6</div>
+    <div class="stat-label">Interpretable molecular descriptors</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-value">10×</div>
+    <div class="stat-label">Repeated scaffold-aware validation</div>
+  </div>
+
+</section>
+
+
+<section class="case-intro">
+
+  <div class="case-section-num">01 — THE QUESTION</div>
+
+  <div class="case-two-column">
+
+    <div>
+      <h2>
+        Can we predict a molecule's
+        solubility from its structure?
+      </h2>
+    </div>
+
+    <div>
+      <p class="lead">
+        Solubility describes how readily a substance dissolves in water.
+        It matters in areas ranging from pharmaceutical development to
+        environmental chemistry because a molecule's behaviour in water
+        can influence how it is formulated, transported, absorbed, or
+        detected.
+      </p>
+
+      <p>
+        The basic idea behind this project is straightforward: molecules
+        have measurable structural and physical characteristics, and those
+        characteristics may contain enough information for a machine-learning
+        model to estimate aqueous solubility.
+      </p>
+
+      <p>
+        But producing a prediction is only part of the problem. A model can
+        perform well on familiar molecules while performing much worse on
+        chemistry it has not seen before.
+      </p>
+
+      <p>
+        The project therefore asks two questions:
+        <strong>how accurately can solubility be predicted, and how reliable
+        are those predictions when the chemistry changes?</strong>
+      </p>
+
+      <p>
+        That second question shaped the analysis. Predictive performance,
+        generalisation, calibration, chemical-space familiarity, and
+        explainability were treated as important outcomes rather than
+        reporting a single model score and stopping there.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="dark-section">
+
+  <div class="case-section">
+
+    <div class="case-section-num">02 — THE DATA</div>
+
+    <h2 class="section-title-light">
+      A public chemistry dataset,
+      turned into a controlled analytical population
+    </h2>
+
+    <div class="data-grid">
+
+      <div class="data-card">
+        <div class="data-number">9,982</div>
+        <div class="data-heading">Original compounds</div>
+        <p>
+          Curated observations from AqSolDB, a public database containing
+          experimentally measured aqueous solubility information.
+        </p>
+      </div>
+
+      <div class="data-card">
+        <div class="data-number">8,643</div>
+        <div class="data-heading">Analytical population</div>
+        <p>
+          A defined modelling population of single-component, metal-free,
+          neutral compounds used consistently throughout the analysis.
+        </p>
+      </div>
+
+      <div class="data-card">
+        <div class="data-number">6</div>
+        <div class="data-heading">Molecular descriptors</div>
+        <p>
+          Six interpretable numerical descriptions of molecular structure
+          and properties, generated from the molecular records.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="source-note">
+      <strong>Dataset:</strong> AqSolDB · Harvard Dataverse ·
+      DOI 10.7910/DVN/OVHAW8
+    </div>
+
+    <figure class="chart-placeholder" style="max-width:760px;margin:42px auto 0;">
+      <img
+        src="reports/figures/01_target_distribution.png"
+        alt="Distribution of the aqueous solubility target"
+        style="width:100%;height:auto;">
+      <figcaption class="chart-placeholder-label">
+        TARGET DISTRIBUTION
+      </figcaption>
+    </figure>
+
+    <figure class="chart-placeholder" style="max-width:760px;margin:28px auto 0;">
+      <img
+        src="reports/figures/05_descriptor_target_correlations.png"
+        alt="Correlations between molecular descriptors and aqueous solubility"
+        style="width:100%;height:auto;">
+      <figcaption class="chart-placeholder-label">
+        DESCRIPTOR–TARGET CORRELATIONS
+      </figcaption>
+    </figure>
+
+  </div>
+
+</section>
+
+
+<section class="case-section">
+
+  <div class="case-section-num">03 — THE PIPELINE</div>
+
+  <h2 class="case-section-title">
+    From chemical records to a reliability-audited model
+  </h2>
+
+  <p class="section-intro">
+    The project was built as a reproducible analytical workflow. The model
+    is one component of a larger system covering data preparation,
+    molecular feature generation, validation, error analysis, and
+    interpretation.
+  </p>
+
+  <div class="pipeline">
+
+    <div class="pipeline-step">
+      <div class="pipeline-number">01</div>
+      <div>
+        <strong>Dataset</strong>
+        <span>AqSolDB</span>
+      </div>
+    </div>
+
+    <div class="pipeline-arrow">→</div>
+
+    <div class="pipeline-step">
+      <div class="pipeline-number">02</div>
+      <div>
+        <strong>Data layer</strong>
+        <span>PostgreSQL</span>
+      </div>
+    </div>
+
+    <div class="pipeline-arrow">→</div>
+
+    <div class="pipeline-step">
+      <div class="pipeline-number">03</div>
+      <div>
+        <strong>Descriptors</strong>
+        <span>RDKit</span>
+      </div>
+    </div>
+
+    <div class="pipeline-arrow">→</div>
+
+    <div class="pipeline-step">
+      <div class="pipeline-number">04</div>
+      <div>
+        <strong>Modelling</strong>
+        <span>Gradient Boosting</span>
+      </div>
+    </div>
+
+    <div class="pipeline-arrow">→</div>
+
+    <div class="pipeline-step">
+      <div class="pipeline-number">05</div>
+      <div>
+        <strong>Validation</strong>
+        <span>Scaffold-aware CV</span>
+      </div>
+    </div>
+
+    <div class="pipeline-arrow">→</div>
+
+    <div class="pipeline-step">
+      <div class="pipeline-number">06</div>
+      <div>
+        <strong>Reliability</strong>
+        <span>AD + calibration</span>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ============================================================
+     04 — VALIDATION
+     ============================================================ -->
+
+<section class="section validation-section" id="validation">
+  <div class="section-inner">
+
+    <div class="section-kicker">04 — VALIDATION</div>
+
+    <div class="section-heading">
+      <h2>Does the model actually generalise?</h2>
+      <p class="section-lead">
+        A model can appear highly accurate if the test data closely resembles
+        the data it was trained on. For molecular data, that is an important
+        risk because chemically related molecules can be very similar in
+        structure and properties.
+      </p>
+    </div>
+
+    <div class="two-column">
+
+      <div class="column">
+        <h3>Why the split matters</h3>
+
+        <p>
+          The usual way to evaluate a machine-learning model is to divide the
+          dataset into training and test sets, train the model on one part,
+          and measure its predictions on the other.
+        </p>
+
+        <p>
+          That works well when the observations are reasonably independent.
+          Molecules are different. A dataset can contain families of compounds
+          that share much of the same underlying structure. If closely related
+          molecules appear in both the training and test sets, the evaluation
+          can become easier than the real prediction problem.
+        </p>
+
+        <p>
+          In practice, this can make a model look better at predicting
+          <em>new molecules</em> than it really is.
+        </p>
+      </div>
+
+      <div class="column">
+        <div class="method-card">
+          <div class="method-number">01</div>
+          <h3>Scaffold-aware validation</h3>
+          <p>
+            Instead of treating every molecule as an unrelated observation,
+            compounds were grouped according to their underlying structural
+            frameworks. Related structures were therefore kept together when
+            constructing the validation sets.
+          </p>
+
+          <p>
+            This creates a more demanding test: the model has to make
+            predictions for molecular structures that are more separated from
+            the structures available during training.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="validation-process">
+
+      <div class="validation-step">
+        <span class="step-label">01</span>
+        <div>
+          <h4>Separate related chemistry</h4>
+          <p>
+            Structural families are kept together rather than being randomly
+            scattered across training and test data.
+          </p>
+        </div>
+      </div>
+
+      <div class="validation-step">
+        <span class="step-label">02</span>
+        <div>
+          <h4>Train on one chemical landscape</h4>
+          <p>
+            The model learns relationships between molecular descriptors and
+            measured aqueous solubility from the training compounds.
+          </p>
+        </div>
+      </div>
+
+      <div class="validation-step">
+        <span class="step-label">03</span>
+        <div>
+          <h4>Test on separated structures</h4>
+          <p>
+            Predictions are evaluated on compounds whose structural families
+            were not used to train that particular model.
+          </p>
+        </div>
+      </div>
+
+      <div class="validation-step">
+        <span class="step-label">04</span>
+        <div>
+          <h4>Repeat the experiment</h4>
+          <p>
+            The process was repeated across 10 validation runs to determine
+            whether the observed model advantage was consistent rather than
+            dependent on one particular split.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="validation-result">
+
+      <div class="result-copy">
+        <div class="result-kicker">WHAT THE VALIDATION SHOWED</div>
+
+        <h3>The nonlinear model remained ahead.</h3>
+
+        <p>
+          Across all 10 repeated scaffold-aware validation runs, the Gradient
+          Boosting model outperformed the linear baseline. The overall result
+          was an R² of <strong>0.7376</strong>, compared with
+          <strong>0.6632</strong> for the linear model.
+        </p>
+
+        <p>
+          The improvement of <strong>0.0744 R²</strong> suggests that the
+          relationship between molecular structure and aqueous solubility is
+          not adequately described by a simple linear relationship. The
+          nonlinear model was able to capture additional structure in the
+          relationship between the molecular descriptors and the target.
+        </p>
+      </div>
+
+      <div class="result-callout">
+        <span class="callout-number">10 / 10</span>
+        <span class="callout-label">
+          repeated scaffold-aware validation runs in which the nonlinear model
+          outperformed the linear baseline
+        </span>
+      </div>
+
+    </div>
+
+    <div class="section-aside">
+      <strong>What this does — and does not — prove</strong>
+
+      <p>
+        This result provides stronger evidence of generalisation than a single
+        random train/test split, because the evaluation deliberately separates
+        related molecular structures. It does not mean that the model will
+        predict every new molecule accurately. Performance can still vary
+        substantially depending on how similar a new compound is to the
+        chemistry represented during training.
+      </p>
+
+      <p>
+        That limitation leads to the next question: <strong>how does prediction
+        reliability change as a molecule moves further away from the chemistry
+        the model has seen?</strong>
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<section class="results-section">
+
+  <div class="case-section">
+
+    <div class="case-section-num">05 — RESULTS</div>
+
+    <h2 class="case-section-title">
+      The nonlinear model captured more
+      of the observed solubility variation
+    </h2>
+
+    <p class="section-intro">
+      Under the project's validation framework, the Gradient Boosting model
+      explained more of the variation in measured solubility than the
+      simpler linear baseline.
+    </p>
+
+    <div class="result-grid">
+
+      <div class="result-card result-primary">
+        <div class="result-label">GRADIENT BOOSTING</div>
+        <div class="result-number">0.7376</div>
+        <div class="result-caption">R²</div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-label">LINEAR BASELINE</div>
+        <div class="result-number">0.6632</div>
+        <div class="result-caption">R²</div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-label">IMPROVEMENT</div>
+        <div class="result-number">+0.0744</div>
+        <div class="result-caption">R² over baseline</div>
+      </div>
+
+    </div>
+
+    <div class="method-callout" style="margin-top:42px;">
+      <strong>What does R² mean?</strong>
+      <span>
+        R² describes how much of the variation in the measured values is
+        captured by the model. A higher value indicates that the model
+        explains more of the observed variation. Here, Gradient Boosting
+        achieved an R² of 0.7376 compared with 0.6632 for the linear
+        baseline.
+      </span>
+    </div>
+
+    <div class="method-callout" style="margin-top:24px;">
+      <strong>What this result does not mean</strong>
+      <span>
+        A stronger average score does not mean that every prediction is
+        accurate, nor does it establish that the model will perform equally
+        well on all future chemical structures. The remainder of the
+        analysis examines those questions directly.
+      </span>
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="dark-section">
+
+  <div class="case-section">
+
+    <div class="case-section-num">06 — WHERE IT FAILS</div>
+
+    <h2 class="section-title-light">
+      Good average performance does not
+      mean every prediction is equally reliable
+    </h2>
+
+    <div class="finding-layout">
+
+      <div class="finding-main">
+
+        <div class="finding-stat">≈ 0.75</div>
+
+        <div class="finding-heading">
+          The model compresses the extremes
+        </div>
+
+        <p>
+          Looking beyond R² reveals an important limitation: the model does
+          not reproduce the full range of observed solubility values equally
+          well.
+        </p>
+
+        <p>
+          Very low measured solubility values tend to be predicted as
+          somewhat less extreme, while very high measured values tend to be
+          predicted as somewhat less high.
+        </p>
+
+        <p>
+          In other words, the model generally gets the direction of change
+          right, but its predictions are pulled toward the middle of the
+          observed range.
+        </p>
+      </div>
+      
+      <figure class="chart-placeholder chart-dark" style="max-width:620px;margin:auto;">
+        <img
+          src="reports/figures/residual_by_total_ring_count.png"
+          alt="Prediction residuals by total molecular ring count"
+          style="width:100%;height:auto;">
+        <figcaption class="chart-placeholder-label">
+          RESIDUALS BY TOTAL RING COUNT
+        </figcaption>
+      </figure>
+
+    </div>
+    
+    <div class="method-callout" calibration-callout>
+      <strong>Calibration slope ≈ 0.75</strong>
+      <span>
+        A calibration slope of 1 would indicate that the predicted range
+        closely follows the observed range. A value around 0.75 indicates
+        that the model reproduces the broad pattern in the data while
+        compressing the most extreme predictions toward the centre.
+      </span>
+    </div>
+
+    <div class="finding-layout" style="margin-top:48px;">
+
+      <div class="finding-main">
+
+        <div class="finding-heading">
+          Prediction error also varies with molecular structure
+        </div>
+
+        <p>
+          The model does not make the same size or type of mistake for every
+          molecule. Examining residuals against structural characteristics
+          helps identify where prediction errors become more concentrated.
+        </p>
+
+        <p>
+          Ring complexity is one structural characteristic examined in the
+          analysis. The relationship should not be interpreted as evidence
+          that ring count alone causes prediction error. Instead, it provides
+          a useful diagnostic for investigating how model behaviour changes
+          across different parts of chemical space.
+        </p>
+
+      </div>
+
+      <figure class="chart-placeholder chart-dark" style="max-width:560px;margin:auto;">
+        <img
+          src="reports/figures/pair_B-2770_H-482.png"
+          alt="Molecular structure pair illustrating variation in prediction error"
+          style="width:100%;height:auto;">
+        <figcaption class="chart-placeholder-label">
+          STRUCTURAL CASE STUDY
+        </figcaption>
+      </figure>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ============================================================
+     07 — APPLICABILITY DOMAIN
+     ============================================================ -->
+
+<section class="section ad-section" id="applicability-domain">
+  <div class="section-inner">
+
+    <div class="section-kicker">07 — APPLICABILITY DOMAIN</div>
+
+    <div class="section-heading">
+      <h2>When should we trust the prediction?</h2>
+
+      <p class="section-lead">
+        A model can have good average performance and still produce unreliable
+        predictions for particular compounds. The important question is not
+        only how accurate the model is overall, but whether a new molecule
+        resembles the chemistry from which the model learned.
+      </p>
+    </div>
+
+    <div class="two-column">
+
+      <div class="column">
+        <h3>A model cannot learn every kind of chemistry</h3>
+
+        <p>
+          The training data defines the chemical world the model has experience
+          with. Some new molecules may sit close to that experience, while
+          others may be structurally very different.
+        </p>
+
+        <p>
+          A prediction for a familiar type of molecule is therefore not the
+          same kind of prediction as one made for a molecule occupying a much
+          less represented part of chemical space.
+        </p>
+
+        <p>
+          This is the purpose of an <strong>applicability domain</strong>: to
+          describe where the model has meaningful support from the chemistry
+          represented in its training data.
+        </p>
+      </div>
+
+      <div class="column">
+        <div class="method-card">
+          <div class="method-number">01</div>
+          <h3>Chemical-space distance</h3>
+
+          <p>
+            Each compound was evaluated according to how far its molecular
+            descriptor profile was from the chemistry available to the model
+            during training.
+          </p>
+
+          <p>
+            Greater distance indicates greater chemical novelty relative to
+            that training set. It does not automatically mean that a prediction
+            is wrong — it indicates that the model is operating with less
+            directly similar training experience.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="ad-results">
+
+      <div class="ad-result">
+        <span class="ad-value">+27%</span>
+        <span class="ad-label">
+          MAE in the highest-novelty group compared with the lowest-novelty
+          group
+        </span>
+      </div>
+
+      <div class="ad-result">
+        <span class="ad-value">+34%</span>
+        <span class="ad-label">
+          RMSE in the highest-novelty group compared with the lowest-novelty
+          group
+        </span>
+      </div>
+
+    </div>
+
+    <div class="two-column ad-explanation">
+
+      <div class="column">
+        <h3>What the pattern means</h3>
+
+        <p>
+          The compounds furthest from the training chemistry showed larger
+          prediction errors than compounds closer to it. This provides evidence
+          that chemical novelty is associated with reduced predictive
+          reliability in this dataset.
+        </p>
+
+        <p>
+          Put simply: <strong>the model generally performed better when it was
+          working within chemistry that looked more familiar to it.</strong>
+        </p>
+
+        <p>
+          This is an important distinction from simply reporting one overall
+          accuracy score. Two compounds can receive predictions from the same
+          model, while the evidence supporting those predictions is very
+          different.
+        </p>
+      </div>
+
+      <div class="column">
+        <div class="interpretation-card">
+          <h3>What applicability domain does not mean</h3>
+
+          <p>
+            A high-novelty compound is not automatically a bad prediction, and
+            a low-novelty compound is not guaranteed to be accurate.
+          </p>
+
+          <p>
+            The analysis identifies a <strong>group-level relationship</strong>:
+            prediction error increased as chemical novelty increased. It is
+            therefore better interpreted as a warning about expected reliability
+            than as a mechanism for declaring individual predictions correct or
+            incorrect.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="technical-safeguard">
+
+      <div class="safeguard-label">METHODOLOGICAL SAFEGUARD</div>
+
+      <h3>The test compounds were not used to define their own novelty.</h3>
+
+      <p>
+        Applicability-domain distances were calculated separately within each
+        scaffold-aware validation repetition, using only the compounds
+        available in that repetition's training set as the reference chemical
+        space.
+      </p>
+
+      <p>
+        This matters because using the complete dataset to define chemical
+        novelty would allow information from the test compounds to influence
+        the analysis of their own predictions. The fold-specific approach keeps
+        the reliability analysis aligned with the same separation used to
+        evaluate model performance.
+      </p>
+
+    </div>
+
+    <div class="section-aside">
+      <strong>Why this matters beyond this dataset</strong>
+
+      <p>
+        In a real scientific or operational setting, a prediction is more useful
+        when its limitations are visible. Applicability-domain analysis does
+        not make the model universally reliable; it provides additional
+        evidence about where its historical training experience is strongest
+        and where greater caution may be appropriate.
+      </p>
+
+      <p>
+        Combined with calibration, residual analysis, and explainability, this
+        turns the model from a single performance number into a more complete
+        picture of <strong>prediction reliability</strong>.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<section class="dark-section">
+
+  <div class="case-section">
+
+    <div class="case-section-num">08 — EXPLAINABILITY</div>
+
+    <h2 class="section-title-light">
+      What characteristics of a molecule
+      does the model rely on?
+    </h2>
+
+    <div class="explain-grid">
+
+      <div>
+
+        <p class="lead-light">
+          Knowing that a model predicts well is useful.
+          Understanding what it is responding to is better.
+        </p>
+
+        <p class="light-text">
+          The project therefore examined the relationship between the
+          model's predictions and the molecular characteristics supplied
+          to it.
+        </p>
+
+        <p class="light-text">
+          Two complementary approaches — SHAP and permutation importance —
+          were used to investigate which descriptors had the greatest
+          influence on model behaviour.
+        </p>
+
+        <p class="light-text">
+          Across these analyses, <strong>MolLogP</strong> and
+          <strong>MolWt</strong> emerged as the dominant descriptors.
+        </p>
+
+        <p class="light-text">
+          MolLogP is related to how a molecule tends to distribute between
+          water and a non-water-like environment, while MolWt describes
+          molecular weight. Their importance is consistent with the broader
+          chemical intuition that both molecular size and how a molecule
+          interacts with water can influence solubility.
+        </p>
+
+        <p class="light-text">
+          This does not mean either descriptor alone determines solubility.
+          The model uses the descriptors together, and the importance
+          analysis describes model behaviour rather than proving a causal
+          relationship.
+        </p>
+
+      </div>
+
+      <figure class="chart-placeholder chart-dark" style="max-width:620px;margin:auto;">
+        <img
+          src="reports/figures/permutation_importance.png"
+          alt="Permutation importance of molecular descriptors in the solubility model"
+          style="width:100%;height:auto;">
+        <figcaption class="chart-placeholder-label">
+          PERMUTATION FEATURE IMPORTANCE
+        </figcaption>
+      </figure>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="case-section">
+
+  <div class="case-section-num">09 — WHAT I BUILT</div>
+
+  <h2 class="case-section-title">
+    An analytical system around the model
+  </h2>
+
+  <p class="section-intro">
+    The main output of the project is not simply a trained model. It is a
+    reproducible workflow for taking scientific data from raw records to
+    an evaluated and interpretable prediction system.
+  </p>
+
+  <div class="build-grid">
+
+    <div class="build-card">
+      <div class="build-number">01</div>
+      <h3>Scientific data layer</h3>
+      <p>
+        Structured the source data into a PostgreSQL-backed analytical layer,
+        separating compound information, solubility measurements, and
+        molecular descriptors.
+      </p>
+    </div>
+
+    <div class="build-card">
+      <div class="build-number">02</div>
+      <h3>Molecular representation</h3>
+      <p>
+        Converted molecular information into a small set of interpretable
+        numerical descriptors using RDKit, creating features that could be
+        analysed by conventional machine-learning methods.
+      </p>
+    </div>
+
+    <div class="build-card">
+      <div class="build-number">03</div>
+      <h3>Predictive modelling</h3>
+      <p>
+        Compared a simple linear baseline with a nonlinear Gradient Boosting
+        model using the same controlled validation framework.
+      </p>
+    </div>
+
+    <div class="build-card">
+      <div class="build-number">04</div>
+      <h3>Model reliability</h3>
+      <p>
+        Extended evaluation beyond predictive performance with calibration,
+        residual analysis, applicability-domain assessment, and model
+        explainability.
+      </p>
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="split-section">
+
+  <div class="split-content">
+
+    <div class="case-section-num">10 — LIMITATIONS</div>
+
+    <h2>
+      What this analysis
+      cannot establish
+    </h2>
+
+    <ul class="limitations">
+
+      <li>
+        AqSolDB is a public scientific benchmark rather than an operational
+        or proprietary dataset. Results should therefore be interpreted in
+        the context of this dataset.
+      </li>
+
+      <li>
+        Scaffold-aware validation provides a more demanding estimate of
+        structural generalisation, but it is still internal validation and
+        does not constitute independent external validation.
+      </li>
+
+      <li>
+        Applicability-domain distance is associated with prediction error
+        magnitude at the group level. It does not reliably determine the
+        direction of an individual prediction error.
+      </li>
+
+      <li>
+        The descriptor set deliberately prioritises interpretability.
+        More complex molecular representations could capture information
+        that these six descriptors do not.
+      </li>
+
+      <li>
+        The model should therefore be treated as an analytical prediction
+        tool and not as a substitute for experimental measurement.
+      </li>
+
+    </ul>
+
+  </div>
+
+  <div class="split-aside">
+
+    <div class="limitation-note">
+      <div class="method-label">SCIENTIFIC PRINCIPLE</div>
+      <p>
+        A useful model is not necessarily a universally reliable model.
+      </p>
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="evidence-section">
+
+  <div class="case-section">
+
+    <div class="case-section-num">EVIDENCE</div>
+
+    <h2>
+      Explore the implementation
+    </h2>
+
+    <p>
+      The complete project contains the data-ingestion workflow, analytical
+      data layer, molecular descriptor generation, modelling pipeline,
+      scaffold-aware validation, applicability-domain analysis,
+      explainability work, and supporting documentation.
+    </p>
+
+    <p>
+      The repository provides the technical detail behind the conclusions
+      presented here, including the code and analytical workflow used to
+      produce the results.
+    </p>
+
+    <div class="case-links">
+
+      <a
+        class="case-btn case-btn-primary"
+        href="https://github.com/agucharles91-cpu/Chemistry-Property-Analytics"
+        target="_blank"
+        rel="noopener noreferrer">
+        GitHub Repository
+      </a>
+
+      <a
+        class="case-btn case-btn-secondary"
+        href="../index.html#projects">
+        Back to Projects
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<footer class="case-footer">
+  <div>
+    AC / DATA
+  </div>
+  <a href="../index.html#projects">
+    ← All Projects
+  </a>
+</footer>
+```
