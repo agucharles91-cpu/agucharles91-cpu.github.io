@@ -298,7 +298,23 @@ a {
    POSITIONING
    ========================================================= */
 
-  .profile-photo-wrap { display: flex; align-items: center; gap: 24px; }
+  .about-profile {
+  display: block;
+}
+
+.profile-photo {
+  width: 130px;
+  height: 130px;
+  object-fit: cover;
+  object-position: center top;
+
+  float: left;
+  margin: 0 28px 12px 0;
+
+  border-radius: 6px;
+  border: 3px solid var(--teal);
+  box-shadow: 6px 6px 0px var(--teal);
+}
   .profile-photo {
     width: 130px; height: 130px; object-fit: cover; object-position: center top;
     border-radius: 6px; border: 3px solid var(--teal); box-shadow: 6px 6px 0px var(--teal); flex-shrink: 0;
@@ -1096,11 +1112,11 @@ a {
         <div class="project-card-top">
 
           <div class="project-number">
-            02 / DATA SCIENCE
+            02 / SPORTS SCIENCE
           </div>
 
           <h3 class="project-title">
-            Nairobi Runners
+            Nairobi Runners Analytics
           </h3>
 
           <p class="project-question">
@@ -1137,7 +1153,7 @@ a {
 
       <a class="project-card"
          href="projects/aqsoldb.html">
-
+         <img src="images/Chemistry-dashboard.png" alt="Chemical solubility analytics" class="project-thumb-large">
         <div class="project-card-top">
 
           <div class="project-number">
