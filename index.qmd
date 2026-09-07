@@ -13,18 +13,17 @@ format:
     embed-resources: false
     include-in-header:
       text: |
-        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-        <meta name="description" content="Agu Charles Chibuike is an Analytics Engineer and Data Scientist based in Nairobi, Kenya, specializing in ETL pipelines, longitudinal data modelling, and business intelligence.">
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"> <meta name="description" content="Agu Charles Chibuike — Analytics Engineer and Data Analyst building reliable analytical systems, data models, and decision-ready analysis.">
 ---
 
 ```{=html}
 <style>
-/* =========================================================
-   RESET
-   ========================================================= */
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   margin: 0;
@@ -44,141 +43,188 @@ main.content {
   display: none !important;
 }
 
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body { margin: 0; padding: 0; background: #F7F6F2; }
+:root {
+  --navy: #0D1B2A;
+  --navy-2: #14263A;
+  --teal: #00A878;
+  --teal-dark: #008A65;
+  --gold: #E8C547;
+  --ink: #1A1A2E;
+  --mist: #F7F6F2;
+  --slate: #4A5568;
+  --muted: #718096;
+  --border: #E2E0DA;
+  --card: #FFFFFF;
 
-  :root {
-    --navy:   #0D1B2A;
-    --navy-2: #14263A;
-    --teal:   #00A878;
-    --teal-dark: #008A65;
-    --gold:   #E8C547;
-    --ink:    #1A1A2E;
-    --mist:   #F7F6F2;
-    --slate:  #4A5568;
-    --muted:  #718096;
-    --border: #E2E0DA;
-    --card:   #FFFFFF;
+  --display: 'Space Grotesk', sans-serif;
+  --serif: 'Source Serif 4', Georgia, serif;
+  --mono: 'JetBrains Mono', monospace;
+}
 
-    --display: 'Space Grotesk', sans-serif;
-    --serif:   'Source Serif 4', Georgia, serif;
-    --mono:    'JetBrains Mono', monospace;
-  }
+a {
+  text-decoration: none;
+}
 
-  a { text-decoration: none; }
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
 
-  /* ── Nav ──────────────────────────────────────────────── */
-  .site-nav {
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 50;
-  }
-  .site-nav-inner {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 15px 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-  }
-  .nav-brand {
-    color: var(--ink);
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.08em;
-  }
-  .nav-links { display: flex; flex-wrap: wrap; gap: 22px; }
-  .nav-links a {
-    color: var(--slate);
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.05em;
-  }
-  .nav-links a:hover { color: var(--teal-dark); }
+.site-nav {
+  background: rgba(255,255,255,0.96);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+}
 
-  /* ── Hero ─────────────────────────────────────────────── */
-  .hero {
-    background: var(--navy);
-    padding: 90px 48px 80px;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 420px; height: 420px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(0,168,120,0.14) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .hero-inner { max-width: 860px; margin: 0 auto; position: relative; z-index: 1; }
-  .hero-eyebrow {
-    font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em;
-    color: var(--teal); text-transform: uppercase; margin-bottom: 20px;
-  }
-  .hero-name {
-    font-family: var(--display); font-size: clamp(38px, 6vw, 68px);
-    font-weight: 700; color: #F7F6F2; line-height: 1.05;
-    margin: 0 0 18px; letter-spacing: -0.02em;
-  }
-  .hero-name span { color: var(--teal); }
-  .hero-title {
-    font-family: var(--serif); font-size: clamp(16px, 2.2vw, 20px);
-    font-weight: 300; color: #A0AEC0; margin: 0 0 36px; line-height: 1.6; max-width: 580px;
-  }
-  .hero-title strong { color: #CBD5E0; font-weight: 400; }
-  .hero-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 34px; }
-  .badge {
-    font-family: var(--mono); font-size: 11px; padding: 5px 12px;
-    border-radius: 3px; letter-spacing: 0.06em;
-  }
-  .badge-outline { border: 1px solid rgba(255,255,255,0.18); color: #A0AEC0; background: transparent; }
-  .badge-teal { background: rgba(0,168,120,0.15); color: var(--teal); border: 1px solid rgba(0,168,120,0.3); }
-  .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
-  .btn {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
-    padding: 12px 20px; border-radius: 3px; display: inline-block;
-  }
-  .btn-primary { background: var(--teal); color: var(--navy); font-weight: 600; }
-  .btn-primary:hover { background: #00C896; }
-  .btn-outline { border: 1px solid rgba(255,255,255,0.25); color: #E2E8F0; }
-  .btn-outline:hover { border-color: var(--teal); color: var(--teal); }
-  
-  .hero-role {
+.site-nav-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 15px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-brand {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+}
+
+.nav-links a {
+  color: var(--slate);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+
+.nav-links a:hover {
+  color: var(--teal-dark);
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero {
+  background: var(--navy);
+  padding: 105px 32px 95px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  right: -200px;
+  top: -250px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(0,168,120,0.16) 0%,
+    transparent 68%
+  );
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  left: -220px;
+  bottom: -220px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.hero-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--teal);
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+
+.hero-name {
   font-family: var(--display);
-  font-size: clamp(18px, 2.5vw, 24px);
+  font-size: clamp(42px, 7vw, 76px);
+  font-weight: 700;
+  color: #F7F6F2;
+  line-height: 0.98;
+  margin: 0 0 24px;
+  letter-spacing: -0.035em;
+}
+
+.hero-name span {
+  color: var(--teal);
+}
+
+.hero-role {
+  font-family: var(--display);
+  font-size: clamp(20px, 3vw, 28px);
   font-weight: 500;
   color: #CBD5E0;
-  margin: 0 0 18px;
+  margin-bottom: 18px;
+}
+
+.hero-description {
+  font-family: var(--serif);
+  font-size: clamp(17px, 2.3vw, 21px);
+  font-weight: 300;
+  color: #A0AEC0;
+  line-height: 1.65;
+  max-width: 720px;
+  margin: 0 0 34px;
+}
+
+.hero-description strong {
+  color: #E2E8F0;
+  font-weight: 400;
 }
 
 .hero-context {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 10px;
   color: #718096;
-  letter-spacing: 0.06em;
-  margin: -18px 0 28px;
+  letter-spacing: 0.07em;
+  line-height: 1.8;
+  margin-bottom: 34px;
+  max-width: 700px;
 }
 
 .hero-actions {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 24px;
 }
 
 .hero-btn {
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.05em;
-  padding: 9px 16px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  padding: 12px 18px;
   border-radius: 3px;
-  text-decoration: none;
   transition: all 0.2s ease;
 }
 
@@ -186,11 +232,15 @@ main.content {
   background: var(--teal);
   color: var(--navy);
   border: 1px solid var(--teal);
+  font-weight: 600;
+}
+
+.hero-btn-primary:hover {
+  background: #00C896;
 }
 
 .hero-btn-secondary {
-  background: transparent;
-  color: #A0AEC0;
+  color: #CBD5E0;
   border: 1px solid rgba(255,255,255,0.18);
 }
 
@@ -199,139 +249,452 @@ main.content {
   border-color: rgba(0,168,120,0.5);
 }
 
-  /* ── Section wrapper ──────────────────────────────────── */
-  .section { max-width: 860px; margin: 0 auto; padding: 76px 48px; }
-  .section-label {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
-    color: var(--teal); text-transform: uppercase; margin-bottom: 10px;
-  }
-  .section-title {
-    font-family: var(--display); font-size: clamp(24px, 3.5vw, 34px);
-    font-weight: 600; color: var(--ink); margin: 0 0 14px; letter-spacing: -0.02em;
-  }
-  .section-divider { width: 40px; height: 3px; background: var(--teal); border-radius: 2px; margin-bottom: 40px; }
+/* =========================================================
+   GENERAL SECTIONS
+   ========================================================= */
 
-  /* ── About ────────────────────────────────────────────── */
-  .about-grid { display: flex; flex-direction: column; gap: 28px; max-width: 680px; }
+.section {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 82px 32px;
+}
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--teal);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.section-title {
+  font-family: var(--display);
+  font-size: clamp(27px, 4vw, 38px);
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 14px;
+  letter-spacing: -0.025em;
+}
+
+.section-intro {
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--slate);
+  max-width: 690px;
+  margin: 0 0 34px;
+}
+
+.section-divider {
+  width: 42px;
+  height: 3px;
+  background: var(--teal);
+  border-radius: 2px;
+  margin-bottom: 42px;
+}
+
+/* =========================================================
+   POSITIONING
+   ========================================================= */
+
   .profile-photo-wrap { display: flex; align-items: center; gap: 24px; }
   .profile-photo {
     width: 130px; height: 130px; object-fit: cover; object-position: center top;
     border-radius: 6px; border: 3px solid var(--teal); box-shadow: 6px 6px 0px var(--teal); flex-shrink: 0;
   }
-  .profile-meta { display: flex; flex-direction: column; gap: 6px; }
-  .profile-name { font-family: var(--display); font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1.2; }
-  .profile-role { font-family: var(--mono); font-size: 11px; color: var(--teal); letter-spacing: 0.1em; text-transform: uppercase; }
-  .profile-uni { font-family: var(--serif); font-size: 13px; color: var(--slate); font-style: italic; }
-  .about-text { font-family: var(--serif); font-size: 17px; line-height: 1.8; color: var(--slate); }
-  .about-text p { margin: 0 0 16px; }
-  .stat-label {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--slate);
-    text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between;
-  }
-  .stat-label span { color: var(--teal); font-weight: 500; }
-  .stat-bar-bg { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
-  .stat-bar-fill {
-    height: 100%; background: linear-gradient(90deg, var(--teal), #00C896);
-    border-radius: 2px; width: 0%; transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
-  }
 
-  /* ── Impact strip ─────────────────────────────────────── */
-  .impact-bg { background: var(--card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-  .impact-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-  .impact-item { text-align: left; }
-  .impact-number {
-    font-family: var(--display); font-size: clamp(28px, 4vw, 38px); font-weight: 700;
-    color: var(--teal-dark); line-height: 1; margin-bottom: 8px;
-  }
-  .impact-label { font-family: var(--mono); font-size: 11px; color: var(--slate); line-height: 1.5; letter-spacing: 0.02em; }
 
-  /* ── Experience timeline ──────────────────────────────── */
-  .timeline { position: relative; padding-left: 28px; }
-  .timeline::before {
-    content: ''; position: absolute; left: 5px; top: 6px; bottom: 6px;
-    width: 2px; background: var(--border);
-  }
-  .tl-item { position: relative; padding-bottom: 44px; }
-  .tl-item:last-child { padding-bottom: 0; }
-  .tl-dot {
-    position: absolute; left: -28px; top: 4px; width: 12px; height: 12px;
-    border-radius: 50%; background: var(--teal); border: 3px solid var(--mist);
-    box-shadow: 0 0 0 2px var(--teal);
-  }
-  .tl-dot.faded { background: var(--muted); box-shadow: 0 0 0 2px var(--border); }
-  .tl-dates {
-    font-family: var(--mono); font-size: 11px; color: var(--teal-dark);
-    letter-spacing: 0.05em; margin-bottom: 6px;
-  }
-  .tl-role { font-family: var(--display); font-size: 18px; font-weight: 600; color: var(--ink); margin: 0 0 3px; }
-  .tl-org { font-family: var(--mono); font-size: 12px; color: var(--slate); margin-bottom: 14px; }
-  .tl-org span { color: var(--muted); }
-  .tl-bullets { margin: 0; padding-left: 18px; }
-  .tl-bullets li {
-    font-family: var(--serif); font-size: 15px; line-height: 1.7; color: var(--slate); margin-bottom: 8px;
-  }
-  .tl-bullets li:last-child { margin-bottom: 0; }
-  .tl-bullets li::marker { color: var(--teal); }
 
-  /* ── Education ────────────────────────────────────────── */
-  .edu-grid { display: flex; flex-direction: column; gap: 24px; }
-  .edu-card {
-    background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--teal);
-    padding: 26px 28px; border-radius: 4px;
-  }
-  .edu-degree { font-family: var(--display); font-size: 17px; font-weight: 600; color: var(--ink); margin: 0 0 6px; }
-  .edu-school { font-family: var(--mono); font-size: 12px; color: var(--teal-dark); margin-bottom: 10px; }
-  .edu-meta { font-family: var(--serif); font-size: 14px; color: var(--slate); line-height: 1.6; }
+.positioning-bg {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
 
-  /* ── Projects ─────────────────────────────────────────── */
-  .projects-bg { background: var(--navy); }
-  .projects-bg .section-title { color: #F7F6F2; }
-  .projects-bg .section-label { color: var(--teal); }
-  .project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 28px; }
-  .project-card {
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
-    border-radius: 8px; overflow: hidden; transition: border-color 0.2s, transform 0.2s;
-    text-decoration: none; display: flex; flex-direction: column; height: 100%; position: relative;
-  }
-  .project-card::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: var(--teal); transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease; z-index: 2;
-  }
-  .project-card:hover { border-color: rgba(0,168,120,0.4); transform: translateY(-3px); }
-  .project-card:hover::before { transform: scaleX(1); }
-  .project-card.upcoming { border-style: dashed; opacity: 0.65; cursor: default; }
-  .project-card.upcoming:hover { transform: none; border-color: rgba(255,255,255,0.10); }
-  .project-card.upcoming::before { display: none; }
-  .project-body { padding: 26px 30px 28px; display: flex; flex-direction: column; flex: 1; }
-  .project-number { font-family: var(--mono); font-size: 11px; color: var(--teal); letter-spacing: 0.12em; margin-bottom: 12px; }
-  .project-title { font-family: var(--display); font-size: 21px; font-weight: 600; color: #F7F6F2; margin: 0 0 14px; line-height: 1.3; }
-  .project-insight {
-    font-family: var(--serif); font-size: 17px; font-style: italic; color: #E2E8F0;
-    line-height: 1.6; margin: 0 0 22px; padding-left: 16px; border-left: 3px solid var(--teal);
-  }
-  .project-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; margin-top: auto; }
-  .tag { font-family: var(--mono); font-size: 10px; padding: 3px 8px; background: rgba(0,168,120,0.12); color: var(--teal); border-radius: 2px; letter-spacing: 0.06em; }
-  .tag-gold { background: rgba(232,197,71,0.12); color: var(--gold); }
-  .project-links { display: flex; gap: 20px; flex-wrap: wrap; }
-  .project-link { font-family: var(--mono); font-size: 11px; color: var(--teal); letter-spacing: 0.08em; display: inline-flex; align-items: center; gap: 6px; }
-  .project-link::after { content: '→'; }
-  .upcoming-label { font-family: var(--mono); font-size: 10px; color: var(--gold); letter-spacing: 0.12em; text-transform: uppercase; }
-  .project-thumb-large {
-    width: 100%;
-    max-width: 100%;
-    height: auto;
-    display: block;
-    background: rgba(0,0,0,0.15);
-  }
-  .project-card.upcoming .project-body { padding: 24px 26px; }
+.positioning-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 60px;
+  align-items: start;
+}
 
-  /* ── Skills ───────────────────────────────────────────── */
-  .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
-  .skill-group-title {
-    font-family: var(--display); font-size: 14px; font-weight: 600; color: var(--ink);
-    letter-spacing: 0.04em; margin: 0 0 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
-  }
-  .skill-list { display: flex; flex-direction: column; gap: 16px; }
+.positioning-text {
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.85;
+  color: var(--slate);
+}
+
+.positioning-text p {
+  margin: 0 0 18px;
+}
+
+.positioning-text strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.positioning-list {
+  border-left: 2px solid var(--teal);
+  padding-left: 24px;
+}
+
+.positioning-item {
+  margin-bottom: 24px;
+}
+
+.positioning-item:last-child {
+  margin-bottom: 0;
+}
+
+.positioning-item-title {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 5px;
+}
+
+.positioning-item-text {
+  font-family: var(--serif);
+  font-size: 14px;
+  color: var(--slate);
+  line-height: 1.6;
+}
+
+/* =========================================================
+   SELECTED PROJECTS
+   ========================================================= */
+
+.projects-bg {
+  background: var(--navy);
+}
+
+.projects-bg .section-title {
+  color: #F7F6F2;
+}
+
+.projects-bg .section-intro {
+  color: #A0AEC0;
+}
+
+.featured-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.project-card {
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(255,255,255,0.11);
+  border-radius: 7px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 420px;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0,168,120,0.5);
+  background: rgba(255,255,255,0.065);
+}
+
+.project-card-top {
+  padding: 25px 25px 0;
+}
+
+.project-number {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--teal);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.project-title {
+  font-family: var(--display);
+  font-size: 21px;
+  font-weight: 600;
+  color: #F7F6F2;
+  line-height: 1.25;
+  margin: 0 0 14px;
+}
+
+.project-question {
+  font-family: var(--serif);
+  font-size: 15px;
+  color: #CBD5E0;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.project-bottom {
+  margin-top: auto;
+  padding: 22px 25px 25px;
+}
+
+.project-type {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: #718096;
+  text-transform: uppercase;
+  margin-bottom: 13px;
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 21px;
+}
+
+.tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 4px 7px;
+  background: rgba(0,168,120,0.11);
+  color: var(--teal);
+  border-radius: 2px;
+}
+
+.project-action {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--teal);
+  letter-spacing: 0.07em;
+}
+
+.project-action::after {
+  content: ' →';
+}
+
+.project-thumb-large {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+
+/* =========================================================
+   ADDITIONAL WORK
+   ========================================================= */
+
+.additional-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: rgba(255,255,255,0.38);
+  text-transform: uppercase;
+  margin: 58px 0 18px;
+}
+
+.additional-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.additional-card {
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  gap: 24px;
+  align-items: center;
+  padding: 20px 22px;
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 6px;
+  background: rgba(255,255,255,0.025);
+  transition: border-color 0.2s ease;
+}
+
+.additional-card:hover {
+  border-color: rgba(0,168,120,0.35);
+}
+
+.additional-number {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--teal);
+  letter-spacing: 0.12em;
+}
+
+.additional-title {
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 600;
+  color: #F7F6F2;
+  margin-bottom: 5px;
+}
+
+.additional-description {
+  font-family: var(--serif);
+  font-size: 13px;
+  color: #A0AEC0;
+  line-height: 1.55;
+}
+
+.additional-action {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--teal);
+  white-space: nowrap;
+}
+
+.additional-card .project-thumb-large {
+  width: 140px;
+  height: 85px;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+}
+
+/* =========================================================
+   EXPERIENCE
+   ========================================================= */
+
+.experience-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.experience-intro {
+  font-family: var(--serif);
+  font-size: 17px;
+  color: var(--slate);
+  line-height: 1.8;
+  max-width: 700px;
+  margin-bottom: 42px;
+}
+
+.experience-highlights {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.experience-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--teal);
+  padding: 23px;
+  border-radius: 4px;
+}
+
+.experience-date {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--teal-dark);
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.experience-role {
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.experience-org {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--slate);
+  margin-bottom: 13px;
+}
+
+.experience-description {
+  font-family: var(--serif);
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--slate);
+}
+
+/* =========================================================
+   EDUCATION
+   ========================================================= */
+
+.education-bg {
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.education-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.education-card {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--teal);
+  padding: 25px;
+  border-radius: 4px;
+}
+
+.education-degree {
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 7px;
+}
+
+.education-school {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--teal-dark);
+  letter-spacing: 0.03em;
+  margin-bottom: 10px;
+}
+
+.education-description {
+  font-family: var(--serif);
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--slate);
+}
+
+/* =========================================================
+   SKILLS
+   ========================================================= */
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.skill-card {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--card);
+}
+
+.skill-title {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 13px;
+}
+
+.skill-list {
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 2;
+  color: var(--slate);
+}
 
   /* ── Contact ──────────────────────────────────────────── */
   .contact-bg { background: var(--navy); }
@@ -348,50 +711,125 @@ main.content {
   .contact-card:hover { border-color: rgba(0,168,120,0.5); background: rgba(0,168,120,0.12); transform: translateY(-3px); }
   .contact-card svg { width: 26px; height: 26px; }
 
-  /* ── Footer ───────────────────────────────────────────── */
-  .footer { background: #091520; padding: 32px 48px; text-align: center; }
-  .footer-text { font-family: var(--mono); font-size: 10px; color: #4A5568; letter-spacing: 0.07em; }
-  .footer-text a { color: var(--teal); }
 
-  /* ── Responsive ───────────────────────────────────────── */
-  @media (max-width: 700px) {
-    .hero { padding: 60px 24px 56px; }
-    .section { padding: 56px 24px; }
-    .skills-grid { grid-template-columns: 1fr; gap: 32px; }
-    .impact-grid { grid-template-columns: 1fr 1fr; }
-    .profile-photo { width: 100px; height: 100px; }
-    .footer { padding: 26px 24px; }
-    .nav-links { display: none; }
-    .project-grid { grid-template-columns: 1fr; }
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.footer {
+  background: #091520;
+  padding: 28px 32px;
+  text-align: center;
+}
+
+.footer-text {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: #4A5568;
+  letter-spacing: 0.06em;
+}
+
+.footer-text a {
+  color: var(--teal);
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+  .featured-grid {
+    grid-template-columns: 1fr;
   }
+
+  .positioning-grid {
+    grid-template-columns: 1fr;
+    gap: 38px;
+  }
+
+  .experience-highlights {
+    grid-template-columns: 1fr;
+  }
+
+  .skills-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 650px) {
+
+  .hero {
+    padding: 72px 24px 65px;
+  }
+
+  .section {
+    padding: 62px 24px;
+  }
+
+  .site-nav-inner {
+    padding: 13px 20px;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .education-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .additional-card {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .additional-action {
+    margin-top: 6px;
+  }
+
+}
 
 </style>
 
-<!-- ═══════════════════════════════════════════════════════
-     NAV
-════════════════════════════════════════════════════════ -->
+
+<!-- =====================================================
+     NAVIGATION
+     ===================================================== -->
+
 <nav class="site-nav">
+
   <div class="site-nav-inner">
-    <div class="nav-brand">AC / DATA</div>
+
+    <div class="nav-brand">
+      AC / DATA
+    </div>
+
     <div class="nav-links">
       <a href="#about">ABOUT</a>
+      <a href="#projects">PROJECTS</a>
       <a href="#experience">EXPERIENCE</a>
       <a href="#education">EDUCATION</a>
-      <a href="#projects">PROJECTS</a>
       <a href="#skills">SKILLS</a>
       <a href="#contact">CONTACT</a>
     </div>
+
   </div>
+
 </nav>
 
-<!-- ═══════════════════════════════════════════════════════
+
+<!-- =====================================================
      HERO
-════════════════════════════════════════════════════════ -->
+     ===================================================== -->
+
 <section class="hero">
+
   <div class="hero-inner">
 
     <div class="hero-eyebrow">
-      Analytics Engineering · Data Analytics
+      Analytics Engineering · Data Analytics · Data Science
     </div>
 
     <h1 class="hero-name">
@@ -400,385 +838,671 @@ main.content {
     </h1>
 
     <div class="hero-role">
-      Analytics Engineer · Data Analyst
+      Analytics Engineer &amp; Data Analyst
     </div>
 
-    <p class="hero-title">
-      I build reliable analytical workflows from raw operational data
-      to analytical models, dashboards, and decision-ready insights.
+    <p class="hero-description">
+      I build <strong>reliable analytical systems</strong> that turn
+      raw operational and scientific data into structured models,
+      rigorous analysis, and decision-ready outputs.
     </p>
 
+    <div class="hero-context">
+      5+ YEARS PROFESSIONAL EXPERIENCE &nbsp;·&nbsp;
+      MSc DATA SCIENCE &nbsp;·&nbsp;
+      BSc CHEMISTRY &nbsp;·&nbsp;
+      NAIROBI, KENYA
+    </div>
+
     <div class="hero-actions">
-      <a href="cv.pdf" class="hero-btn hero-btn-primary">
-        View CV
+
+      <a href="cv.pdf"
+         class="hero-btn hero-btn-primary">
+        VIEW CV
       </a>
 
       <a href="https://github.com/agucharles91-cpu"
          target="_blank"
+         rel="noopener noreferrer"
          class="hero-btn hero-btn-secondary">
-        GitHub
+        GITHUB
       </a>
 
       <a href="https://www.linkedin.com/in/agu-charles-3b8140128"
          target="_blank"
+         rel="noopener noreferrer"
          class="hero-btn hero-btn-secondary">
-        LinkedIn
+        LINKEDIN
       </a>
 
-      <a href="#contact" class="hero-btn hero-btn-secondary">
-        Contact
+      <a href="#projects"
+         class="hero-btn hero-btn-secondary">
+        VIEW PROJECTS
       </a>
-    </div>
 
-    <div class="hero-badges">
-      <span class="badge badge-teal">SQL / PostgreSQL</span>
-      <span class="badge badge-teal">Python / R</span>
-      <span class="badge badge-teal">Power BI / DAX</span>
-      <span class="badge badge-teal">Machine Learning</span>
-      <span class="badge badge-outline">dbt</span>
-      <span class="badge badge-outline">Statistical Modelling</span>
-      <span class="badge badge-outline">Data Engineering</span>
     </div>
 
   </div>
+
 </section>
 
-<!-- ═══════════════════════════════════════════════════════
-     ABOUT
-════════════════════════════════════════════════════════ -->
-<div style="background: #F7F6F2;">
+
+<!-- =====================================================
+     POSITIONING / ABOUT
+     ===================================================== -->
+
+<div class="positioning-bg">
+
   <div class="section" id="about">
-    <div class="section-label">About</div>
-    <h2 class="section-title">Turning complex data into clear decisions</h2>
+
+    <div class="section-label">
+      Positioning
+    </div>
+
+    <h2 class="section-title">
+      Engineering the layer between data and decisions
+    </h2>
+
     <div class="section-divider"></div>
-    <div class="about-grid">
-      <div class="profile-photo-wrap">
-        <img src="images/profile.jpg" alt="Agu Charles Chibuike" class="profile-photo" />
-        <div class="profile-meta">
-          <div class="profile-name">Agu Charles<br>Chibuike</div>
-          <div class="profile-role">Analytics Engineer</div>
-          <div class="profile-uni">MSc Data Science<br>University of Nairobi</div>
+
+<div class="positioning-grid">
+
+  <div class="positioning-text">
+
+    <div class="about-profile">
+
+      <img
+        src="images/profile.jpg"
+        alt="Agu Charles Chibuike"
+        class="profile-photo"
+      />
+
+      <div class="profile-meta">
+
+        <p>
+          My work sits at the intersection of
+          <strong>analytics engineering, data analysis,
+          business intelligence, and applied data science.</strong>
+        </p>
+
+        <p>
+          I am most interested in the part of analytics that is often
+          invisible in the final dashboard: understanding the source data,
+          designing reliable transformations, modelling the data correctly,
+          validating the result, and choosing an analytical method that
+          actually fits the question.
+        </p>
+
+        <p>
+          My background in Chemistry also influences how I approach
+          analytical problems. I tend to start with the measurement and
+          underlying process, rather than beginning with a preferred
+          visualisation or model.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="positioning-list">
+
+    <div class="positioning-item">
+
+      <div class="positioning-item-title">
+        Data systems
+      </div>
+
+      <div class="positioning-item-text">
+        ETL/ELT pipelines, SQL, PostgreSQL, Snowflake,
+        DuckDB, dbt and analytical data modelling.
+      </div>
+
         </div>
-      </div>
-      <div class="about-text">
-        <p>
-          I'm an analytics engineer with 5+ years of end-to-end experience
-          designing data pipelines, warehousing solutions, and BI dashboards
-          across IoT, EV infrastructure, technology, hospitality, and fitness
-          sectors — spanning Dubai, Abu Dhabi, and Nairobi.
-        </p>
-        <p>
-          My MSc capstone at the University of Nairobi investigates how
-          training behaviour, sleep architecture, and recovery physiology
-          interact across a cohort of 14 runners over four years — combining
-          Garmin wearable data with mixed-effects modelling in R.
-        </p>
-        <p>
-          Before analytics, I taught Chemistry and Physics — a background
-          that still shapes how I work with data: define the measurement
-          carefully, understand the underlying process, validate the result,
-          and only then draw conclusions.
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- ═══════════════════════════════════════════════════════
-     IMPACT STRIP
-════════════════════════════════════════════════════════ -->
-<div class="impact-bg">
-  <div class="section" style="padding-top: 48px; padding-bottom: 48px;">
-    <div class="impact-grid">
-      <div class="impact-item">
-        <div class="impact-number">78→94%</div>
-        <div class="impact-label">Data accuracy raised on ANPR &amp; IoT sensor pipelines</div>
-      </div>
-      <div class="impact-item">
-        <div class="impact-number">60%+</div>
-        <div class="impact-label">Reporting cycle time cut via SQL/Python automation</div>
-      </div>
-      <div class="impact-item">
-        <div class="impact-number">12,760</div>
-        <div class="impact-label">Wearable observations analysed in self-initiated study</div>
-      </div>
-      <div class="impact-item">
-        <div class="impact-number">1,000+</div>
-        <div class="impact-label">Members segmented for retention analysis at DROP 10</div>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- ═══════════════════════════════════════════════════════
-     EXPERIENCE
-════════════════════════════════════════════════════════ -->
-<div style="background: #F7F6F2;">
-  <div class="section" id="experience">
-    <div class="section-label">Experience</div>
-    <h2 class="section-title">Where I've built this</h2>
-    <div class="section-divider"></div>
+        <div class="positioning-item">
 
-    <div class="timeline">
+          <div class="positioning-item-title">
+            Analytical work
+          </div>
 
-      <div class="tl-item">
-        <div class="tl-dot"></div>
-        <div class="tl-dates">SEP 2023 – OCT 2024</div>
-        <h3 class="tl-role">Analytics Engineer</h3>
-        <div class="tl-org">EVINET <span>· Abu Dhabi, UAE</span></div>
-        <ul class="tl-bullets">
-          <li>Developed and maintained ETL pipelines ingesting real-time telemetry from EV charging stations into a centralised Snowflake data warehouse, enabling sub-hourly operational reporting.</li>
-          <li>Built Power BI dashboards monitoring uptime, session throughput, energy consumption, and fault frequency — the primary SLA reporting interface for commercial and operations teams.</li>
-          <li>Implemented a multi-layer data validation framework on IoT sensor streams, improving data reliability for downstream analytics.</li>
-          <li>Automated grid utilisation and performance reporting workflows, saving an estimated 15+ hours per reporting cycle.</li>
-        </ul>
-      </div>
+          <div class="positioning-item-text">
+            Exploratory analysis, cohort analysis, longitudinal
+            analysis, statistical modelling and applied machine learning.
+          </div>
 
-      <div class="tl-item">
-        <div class="tl-dot"></div>
-        <div class="tl-dates">OCT 2022 – AUG 2023</div>
-        <h3 class="tl-role">Data Analytics Consultant</h3>
-        <div class="tl-org">DROP 10 Fitness &amp; Bar <span>· Dubai, UAE</span></div>
-        <ul class="tl-bullets">
-          <li>Designed and deployed customer analytics dashboards tracking acquisition, retention, churn risk, and lifetime value (LTV) — directly informing pricing and promotional strategy.</li>
-          <li>Built automated reporting pipelines integrating POS, booking, and revenue data sources into unified dashboards, replacing fragmented manual reporting.</li>
-          <li>Conducted cohort and segmentation analysis across 1,000+ members to identify high-value customer groups and early-stage churn signals.</li>
-          <li>Tracked MRR, revenue per member, and utilisation rates, supporting measurable improvements in scheduling efficiency and member engagement.</li>
-        </ul>
-      </div>
+        </div>
 
-      <div class="tl-item">
-        <div class="tl-dot"></div>
-        <div class="tl-dates">FEB 2022 – AUG 2023</div>
-        <h3 class="tl-role">Technical Systems Analyst</h3>
-        <div class="tl-org">Scansmart Technologies <span>· Dubai, UAE</span></div>
-        <ul class="tl-bullets">
-          <li>Supported ETL workflows transforming raw ANPR sensor logs into structured analytical datasets, underpinning system performance reporting across multiple client deployments.</li>
-          <li>Improved data accuracy from ~78% to 94%+ — a 16-point gain sustained in production — by designing and implementing validation and data quality pipelines.</li>
-          <li>Automated report generation using SQL and Python, reducing reporting cycle time by 60%+.</li>
-          <li>Built Power BI dashboards tracking throughput, uptime, and recognition rates, and standardised data schemas across deployments to improve cross-site consistency.</li>
-          <li>Led BI tool adoption across engineering and commercial teams, delivering training that accelerated time-to-insight for non-technical stakeholders.</li>
-        </ul>
-      </div>
 
-      <div class="tl-item">
-        <div class="tl-dot"></div>
-        <div class="tl-dates">MAY 2020 – JAN 2022</div>
-        <h3 class="tl-role">Commercial Analytics Lead</h3>
-        <div class="tl-org">The Usual Café <span>· Dubai, UAE</span></div>
-        <ul class="tl-bullets">
-          <li>Designed Excel dashboards tracking revenue, customer traffic, product mix, and labour efficiency — converting raw POS data into weekly operational reporting for management.</li>
-          <li>Developed inventory forecasting models that reduced waste and improved cost efficiency using historical sales trends and seasonal demand patterns.</li>
-          <li>Delivered margin analysis, peak-hour optimisation insights, and staffing recommendations that informed scheduling decisions.</li>
-        </ul>
-      </div>
+        <div class="positioning-item">
 
-      <div class="tl-item">
-        <div class="tl-dot faded"></div>
-        <div class="tl-dates">2016</div>
-        <h3 class="tl-role">Chemistry &amp; Physics Teacher</h3>
-        <div class="tl-org">Lexington High School <span>· Lagos, Nigeria</span></div>
-        <ul class="tl-bullets">
-          <li>Taught Chemistry and Physics, building the habit of defining measurements carefully and validating results before drawing conclusions — a discipline that carried directly into my analytics work.</li>
-        </ul>
+          <div class="positioning-item-title">
+            Decision support
+          </div>
+
+          <div class="positioning-item-text">
+            Power BI, Tableau and reproducible analytical reporting
+            designed to communicate evidence rather than simply display data.
+          </div>
+
+        </div>
+
+
+        <div class="positioning-item">
+
+          <div class="positioning-item-title">
+            Scientific perspective
+          </div>
+
+          <div class="positioning-item-text">
+            A chemistry background combined with ongoing postgraduate
+            training in data science.
+          </div>
+
+        </div>
+
       </div>
 
     </div>
+
   </div>
+
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     EDUCATION
-════════════════════════════════════════════════════════ -->
-<div class="impact-bg">
-  <div class="section" id="education">
-    <div class="section-label">Education</div>
-    <h2 class="section-title">Academic background</h2>
-    <div class="section-divider"></div>
 
-    <div class="edu-grid">
-      <div class="edu-card">
-        <h3 class="edu-degree">MSc Data Science <span style="color:var(--muted); font-weight:400;">(In Progress)</span></h3>
-        <div class="edu-school">University of Nairobi · Expected 2027 ·</div>
-        <div class="edu-meta">Research interest: time series forecasting, financial analytics, applied machine learning.</div>
-      </div>
-      <div class="edu-card">
-        <h3 class="edu-degree">BSc Chemistry (Honours)</h3>
-        <div class="edu-school">University of Nigeria, Nsukka · 2015</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════
+<!-- =====================================================
      PROJECTS
-════════════════════════════════════════════════════════ -->
+     ===================================================== -->
+
 <div class="projects-bg">
+
   <div class="section" id="projects">
-    <div class="section-label">Projects</div>
-    <h2 class="section-title">Selected work</h2>
-    <div class="section-divider"></div>
-    <div class="project-grid">
 
-      <div class="project-card">
-        <img src="images/nairobi-runners.png" alt="Nairobi Runners research report" class="project-thumb-large">
-        <div class="project-body">
-          <div class="project-number">01 / MSc CAPSTONE</div>
-          <div class="project-title">Training, Sleep &amp; Recovery Dynamics in Recreational Runners</div>
-          <p class="project-insight">
-            Mixed-effects modelling identified sleep architecture (Deep+REM%) as the
-            strongest predictor of next-morning recovery.
-          </p>
-          <div class="project-tags">
-            <span class="tag">R</span><span class="tag">lme4</span><span class="tag">Longitudinal</span>
-            <span class="tag">Plotly</span><span class="tag">Quarto</span>
-          </div>
-          <div class="project-links">
-            <a class="project-link" href="nairobi_runners_report.html">View report</a>
-            <a class="project-link" href="https://github.com/agucharles91-cpu/Nairobi-Runners" target="_blank" rel="noopener noreferrer">GitHub</a>
-          </div>
-        </div>
-      </div>
+    <div class="section-label">
+      Selected Work
+    </div>
 
-      <a class="project-card" href="https://agucharles.shinyapps.io/nairobi-runners/" target="_blank" rel="noopener noreferrer">
-        <img src="images/nairobi-dashboard.png" alt="Nairobi Runners live Shiny dashboard" class="project-thumb-large">
-        <div class="project-body">
-          <div class="project-number">01 / INTERACTIVE</div>
-          <div class="project-title">Live Dashboard — Nairobi Runners</div>
-          <p class="project-insight">
-            47 figures, one dashboard — explore training, sleep, and recovery
-            patterns athlete by athlete, in real time.
-          </p>
-          <div class="project-tags">
-            <span class="tag">Shiny</span><span class="tag">bslib</span><span class="tag">DT</span><span class="tag">shinyapps.io</span>
+    <h2 class="section-title">
+      Projects that demonstrate how I work
+    </h2>
+
+    <p class="section-intro">
+      These projects are deliberately different. Together they demonstrate
+      analytical engineering, scientific modelling, longitudinal analysis,
+      business intelligence, and the ability to work from raw data through
+      to an interpretable result.
+    </p>
+
+    <div class="featured-grid">
+
+
+      <!-- PARKING -->
+
+      <a class="project-card"
+         href="projects/parking-enforcement-analytics.html">
+            <img src="images/parking-dashboard.png" alt="Parking Enforcement Power BI dashboard" class="project-thumb-large">
+
+        <div class="project-card-top">
+
+          <div class="project-number">
+            01 / ANALYTICS ENGINEERING
           </div>
-          <span class="project-link">Open dashboard</span>
+
+          <h3 class="project-title">
+            Parking Enforcement Analytics
+          </h3>
+
+          <p class="project-question">
+            How can operational enforcement data be transformed into a
+            reliable analytical system for monitoring performance,
+            workload, and operational coverage?
+          </p>
+
         </div>
+
+        <div class="project-bottom">
+
+          <div class="project-type">
+            Operational analytics · Analytics engineering
+          </div>
+
+          <div class="project-tags">
+            <span class="tag">Python</span>
+            <span class="tag">Parquet</span>
+            <span class="tag">DuckDB</span>
+            <span class="tag">dbt</span>
+            <span class="tag">SQL</span>
+            <span class="tag">Power BI</span>
+          </div>
+
+          <div class="project-action">
+            VIEW CASE STUDY
+          </div>
+
+        </div>
+
       </a>
 
-      <a class="project-card" href="https://github.com/agucharles91-cpu/Olist-Ecommerce-Analytics" target="_blank" rel="noopener noreferrer">
-        <img src="images/olist-dashboard.png" alt="Olist Power BI dashboard" class="project-thumb-large">
-        <div class="project-body">
-          <div class="project-number">02 / ANALYTICS ENGINEERING</div>
-          <div class="project-title">Olist E-Commerce Analytics</div>
-          <p class="project-insight">
-            Analysis surfaced R$15.42M in total revenue with 92% on-time delivery,
-            and a 97% one-time-purchase retention gap.
-          </p>
-          <div class="project-tags">
-            <span class="tag">PostgreSQL</span><span class="tag">SQL</span><span class="tag">Power BI</span><span class="tag">Python</span>
+
+      <!-- NAIROBI RUNNERS -->
+
+      <a class="project-card"
+         href="projects/nairobi-runners.html">
+         <img src="images/nairobi-runners.png" alt="Nairobi Runners research report" class="project-thumb-large">
+
+        <div class="project-card-top">
+
+          <div class="project-number">
+            02 / DATA SCIENCE
           </div>
-          <span class="project-link">View project</span>
+
+          <h3 class="project-title">
+            Nairobi Runners
+          </h3>
+
+          <p class="project-question">
+            How do training behaviour, sleep, and recovery interact
+            longitudinally across recreational runners?
+          </p>
+
         </div>
+
+        <div class="project-bottom">
+
+          <div class="project-type">
+            Longitudinal analysis · Applied statistics
+          </div>
+
+          <div class="project-tags">
+            <span class="tag">R</span>
+            <span class="tag">Longitudinal</span>
+            <span class="tag">Mixed Effects</span>
+            <span class="tag">Quarto</span>
+            <span class="tag">Garmin</span>
+          </div>
+
+          <div class="project-action">
+            VIEW CASE STUDY
+          </div>
+
+        </div>
+
       </a>
 
-      <a class="project-card" href="https://github.com/agucharles91-cpu/Parking-Enforcement-Analytics" target="_blank" rel="noopener noreferrer">
-        <img src="images/parking-dashboard.png" alt="Parking Enforcement Power BI dashboard" class="project-thumb-large">
-        <div class="project-body">
-          <div class="project-number">03 / ANALYTICS ENGINEERING</div>
-          <div class="project-title">Parking Enforcement Analytics</div>
-          <p class="project-insight">
-            Found a fleet-wide map-coverage gap affecting 5–11% of enforcement scans,
-            plus workload concentration in the review pipeline.
-          </p>
-          <div class="project-tags">
-            <span class="tag">Python</span><span class="tag">DuckDB</span><span class="tag">dbt</span>
-            <span class="tag">SQL</span><span class="tag tag-gold">Power BI</span>
-          </div>
-          <span class="project-link">View project</span>
-        </div>
-      </a>
 
-      <div class="project-card upcoming">
-        <div class="project-body">
-          <div class="project-number">05 / FINANCIAL ANALYTICS</div>
-          <div class="project-title">Nigerian Financial Dataset</div>
-          <div class="project-tags">
-            <span class="tag">SQL</span><span class="tag tag-gold">Power BI</span><span class="tag">Python</span>
-          </div>
-          <span class="upcoming-label">Coming soon</span>
-        </div>
-      </div>
+      <!-- AQSOLDB -->
 
-      <a class="project-card" href="https://github.com/agucharles91-cpu/Chemistry-Property-Analytics" target="_blank" rel="noopener noreferrer">
-        <div class="project-body">
-          <div class="project-number">06 / CHEMISTRY × DATA</div>
-          <div class="project-title">Aqueous Solubility Prediction (AqSolDB)</div>
-          <p class="project-insight">
-            Gradient Boosting improved scaffold-aware validation performance,
-            with molecular lipophilicity and size emerging as the strongest predictors
-            of aqueous solubility.
-          </p>
-          <div class="project-tags">
-            <span class="tag">Python</span><span class="tag">RDKit</span><span class="tag">Machine Learning</span>
-            <span class="tag">PostgreSQL</span><span class="tag">dbt</span>
+      <a class="project-card"
+         href="projects/aqsoldb.html">
+
+        <div class="project-card-top">
+
+          <div class="project-number">
+            03 / SCIENTIFIC DATA SCIENCE
           </div>
-          <span class="project-link">View project</span>
+
+          <h3 class="project-title">
+            Chemical Property Analytics
+          </h3>
+
+          <p class="project-question">
+            Can molecular structure and physicochemical properties be used
+            to predict aqueous solubility, and what can the model reveal
+            about chemical behaviour?
+          </p>
+
         </div>
+
+        <div class="project-bottom">
+
+          <div class="project-type">
+            Chemistry · Machine learning · Scientific modelling
+          </div>
+
+          <div class="project-tags">
+            <span class="tag">Python</span>
+            <span class="tag">RDKit</span>
+            <span class="tag">PostgreSQL</span>
+            <span class="tag">Machine Learning</span>
+            <span class="tag">Validation</span>
+          </div>
+
+          <div class="project-action">
+            VIEW CASE STUDY
+          </div>
+
+        </div>
+
       </a>
 
     </div>
+
+
+    <!-- ADDITIONAL WORK -->
+
+    <div class="additional-label">
+      Additional Work
+    </div>
+
+    <div class="additional-grid">
+
+      <a class="additional-card"
+         href="projects/olist-ecommerce.html">
+         <img src="images/olist-dashboard.png" alt="Olist Power BI dashboard" class="project-thumb-large">
+
+        <div class="additional-number">
+          04 / BUSINESS ANALYTICS
+        </div>
+
+        <div>
+
+          <div class="additional-title">
+            Olist E-Commerce Analytics
+          </div>
+
+          <div class="additional-description">
+            PostgreSQL, dimensional modelling, SQL analytics and Power BI
+            applied to Brazilian e-commerce data.
+          </div>
+
+        </div>
+
+        <div class="additional-action">
+          CASE STUDY →
+        </div>
+
+      </a>
+
+
+      <a class="additional-card"
+         href="https://agucharles.shinyapps.io/nairobi-runners/"
+         target="_blank"
+         rel="noopener noreferrer">
+         <img src="images/nairobi-dashboard.png" alt="Nairobi Runners live Shiny dashboard" class="project-thumb-large">
+
+        <div class="additional-number">
+          05 / INTERACTIVE ANALYTICS
+        </div>
+
+        <div>
+
+          <div class="additional-title">
+            Nairobi Runners Interactive
+          </div>
+
+          <div class="additional-description">
+            An interactive Shiny application for exploring athlete-level
+            training, recovery, sleep, and longitudinal patterns.
+          </div>
+
+        </div>
+
+        <div class="additional-action">
+          OPEN APPLICATION →
+        </div>
+
+      </a>
+
+    </div>
+
   </div>
+
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
+
+<!-- =====================================================
+     EXPERIENCE
+     ===================================================== -->
+
+<div>
+
+  <div class="section" id="experience">
+
+    <div class="section-label">
+      Professional Experience
+    </div>
+
+    <h2 class="section-title">
+      The projects build on real-world experience
+    </h2>
+
+    <div class="section-divider"></div>
+
+    <p class="experience-intro">
+      My portfolio projects are not intended to substitute for professional
+      experience. They extend it by demonstrating how I apply analytical
+      methods independently and document the reasoning behind them.
+    </p>
+
+
+    <div class="experience-highlights">
+
+
+      <div class="experience-card">
+
+        <div class="experience-date">
+          2023 – 2024
+        </div>
+
+        <div class="experience-role">
+          Analytics Engineer
+        </div>
+
+        <div class="experience-org">
+          EVINET · Abu Dhabi
+        </div>
+
+        <div class="experience-description">
+          Built and maintained analytical pipelines around EV charging
+          telemetry, data validation, operational reporting and Power BI.
+        </div>
+
+      </div>
+
+
+      <div class="experience-card">
+
+        <div class="experience-date">
+          2022 – 2023
+        </div>
+
+        <div class="experience-role">
+          Technical Systems Analyst
+        </div>
+
+        <div class="experience-org">
+          Scansmart Technologies · Dubai
+        </div>
+
+        <div class="experience-description">
+          Worked with ANPR and IoT data, ETL workflows, data-quality
+          pipelines, SQL/Python automation and operational BI.
+        </div>
+
+      </div>
+
+
+      <div class="experience-card">
+
+        <div class="experience-date">
+          2022 – 2023
+        </div>
+
+        <div class="experience-role">
+          Data Analytics Consultant
+        </div>
+
+        <div class="experience-org">
+          DROP 10 Fitness &amp; Bar · Dubai
+        </div>
+
+        <div class="experience-description">
+          Built customer, retention, cohort and revenue analytics,
+          connecting operational data to business decisions.
+        </div>
+
+      </div>
+
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     EDUCATION
+     ===================================================== -->
+
+<div class="education-bg">
+
+  <div class="section" id="education">
+
+    <div class="section-label">
+      Education
+    </div>
+
+    <h2 class="section-title">
+      Scientific foundation, data-science training
+    </h2>
+
+    <div class="section-divider"></div>
+
+    <div class="education-grid">
+
+
+      <div class="education-card">
+
+        <div class="education-degree">
+          MSc Data Science
+        </div>
+
+        <div class="education-school">
+          University of Nairobi · In Progress
+        </div>
+
+        <div class="education-description">
+          Postgraduate study in data science, supported by independent
+          work in statistical modelling, machine learning, longitudinal
+          analysis and applied analytics.
+        </div>
+
+      </div>
+
+
+      <div class="education-card">
+
+        <div class="education-degree">
+          BSc Chemistry (Honours)
+        </div>
+
+        <div class="education-school">
+          University of Nigeria, Nsukka · 2015
+        </div>
+
+        <div class="education-description">
+          Scientific training that continues to inform how I approach
+          measurement, experimental reasoning, uncertainty and evidence.
+        </div>
+
+      </div>
+
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
      SKILLS
-════════════════════════════════════════════════════════ -->
-<div style="background: #F7F6F2;">
+     ===================================================== -->
+
+<div>
+
   <div class="section" id="skills">
-    <div class="section-label">Skills &amp; Tools</div>
-    <h2 class="section-title">Technical toolkit</h2>
-    <div class="section-divider"></div>
-    <div class="skills-grid">
-      <div>
-        <div class="skill-group-title">Analytics &amp; Statistics</div>
-        <div class="skill-list">
-          <div class="stat-item">
-            <div class="stat-label">Mixed-effects modelling (lme4) <span>Advanced</span></div>
-            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="84"></div></div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">Time series &amp; longitudinal analysis <span>Advanced</span></div>
-            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="85"></div></div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">Cohort &amp; customer segmentation <span>Advanced</span></div>
-            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="82"></div></div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">Window functions &amp; CTEs <span>Advanced</span></div>
-            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="86"></div></div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">Machine Learning (regression, forecasting) <span>Advanced</span></div>
-            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="88"></div></div>
-          </div>
-        </div>
-      </div>
-      <div>
-        <div class="skill-group-title">Engineering &amp; Visualisation</div>
-        <div class="skill-list">
-          <div class="stat-item">
-            <div class="stat-label">ETL/ELT pipelines (Snowflake, dbt) <span>Advanced</span></div>
-            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="86"></div></div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">Star schema &amp; data modelling <span>Proficient</span></div>
-            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="80"></div></div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">Plotly &amp; ggplot2 <span>Advanced</span></div>
-            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="90"></div></div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">DAX &amp; Power BI data models <span>Advanced</span></div>
-            <div class="stat-bar-bg"><div class="stat-bar-fill" data-width="84"></div></div>
-          </div>
-        </div>
-      </div>
+
+    <div class="section-label">
+      Technical Focus
     </div>
+
+    <h2 class="section-title">
+      The tools behind the work
+    </h2>
+
+    <div class="section-divider"></div>
+
+    <div class="skills-grid">
+
+
+      <div class="skill-card">
+
+        <div class="skill-title">
+          Data Engineering &amp; SQL
+        </div>
+
+        <div class="skill-list">
+          PostgreSQL<br>
+          SQL<br>
+          Snowflake<br>
+          DuckDB<br>
+          dbt<br>
+          ETL / ELT<br>
+          Data modelling
+        </div>
+
+      </div>
+
+
+      <div class="skill-card">
+
+        <div class="skill-title">
+          Analytics &amp; Data Science
+        </div>
+
+        <div class="skill-list">
+          Python<br>
+          R<br>
+          Pandas<br>
+          Statistical modelling<br>
+          Longitudinal analysis<br>
+          Machine learning<br>
+          Feature engineering
+        </div>
+
+      </div>
+
+
+      <div class="skill-card">
+
+        <div class="skill-title">
+          BI &amp; Communication
+        </div>
+
+        <div class="skill-list">
+          Power BI<br>
+          DAX<br>
+          Tableau<br>
+          Quarto<br>
+          Shiny<br>
+          Data visualisation<br>
+          Analytical reporting
+        </div>
+
+      </div>
+
+
+    </div>
+
   </div>
+
 </div>
+
 
 <!-- ═══════════════════════════════════════════════════════
      CONTACT
@@ -786,9 +1510,9 @@ main.content {
 <div class="contact-bg">
   <div class="section" id="contact">
     <div class="section-label">Contact</div>
-    <h2 class="contact-title">Let's talk about your data.</h2>
+    <h2 class="contact-title">Looking for analytical problems worth solving.</h2>
     <p class="contact-text">
-      Open to analytics engineering and data science roles. Reach out directly
+      I am open to opportunities across analytics engineering, data analytics, business intelligence, and applied data science.
     </p>
     <div class="contact-links">
       <a class="contact-card" href="mailto:agucharles91@yahoo.com" aria-label="Email" title="Email">
@@ -810,30 +1534,22 @@ main.content {
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     FOOTER
-════════════════════════════════════════════════════════ -->
-<footer class="footer">
-  <div class="footer-text">
-    Agu Charles Chibuike &nbsp;·&nbsp;
-    <a href="https://github.com/agucharles91-cpu" target="_blank">GitHub</a>
-    &nbsp;·&nbsp;
-    <a href="https://agucharles.shinyapps.io/nairobi-runners/" target="_blank">Live Dashboard</a>
-  </div>
-</footer>
 
-<script>
-  const bars = document.querySelectorAll('.stat-bar-fill');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const bar = entry.target;
-        const width = bar.getAttribute('data-width');
-        setTimeout(() => { bar.style.width = width + '%'; }, 120);
-        observer.unobserve(bar);
-      }
-    });
-  }, { threshold: 0.3 });
-  bars.forEach(bar => observer.observe(bar));
-</script>
+<!-- =====================================================
+     FOOTER
+     ===================================================== -->
+
+<footer class="footer">
+
+  <div class="footer-text">
+
+    Agu Charles Chibuike
+    &nbsp;·&nbsp;
+    Analytics Engineering / Data Analytics / Data Science
+    &nbsp;·&nbsp;
+    Nairobi, Kenya
+
+  </div>
+
+</footer>
 ```
