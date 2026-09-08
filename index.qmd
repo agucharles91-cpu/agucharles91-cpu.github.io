@@ -1106,7 +1106,7 @@ a {
       <!-- NAIROBI RUNNERS -->
 
       <a class="project-card"
-         href="projects/nairobi-runners.html">
+         href="projects/nairobi-runners/nairobi-runners.html">
          <img src="images/nairobi-runners.png" alt="Nairobi Runners research report" class="project-thumb-large">
 
         <div class="project-card-top">
@@ -1206,7 +1206,7 @@ a {
     <div class="additional-grid">
 
       <a class="additional-card"
-         href="projects/olist-ecommerce.html">
+         href="projects/olist-ecommerce/olist-ecommerce.html">
          <img src="images/olist-dashboard.png" alt="Olist Power BI dashboard" class="project-thumb-large">
 
         <div class="additional-number">
