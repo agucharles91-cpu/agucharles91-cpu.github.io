@@ -1,0 +1,2889 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>olist-ecommerce</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+
+
+<script src="olist-ecommerce_files/libs/clipboard/clipboard.min.js"></script>
+<script src="olist-ecommerce_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="olist-ecommerce_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="olist-ecommerce_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="olist-ecommerce_files/libs/quarto-html/popper.min.js"></script>
+<script src="olist-ecommerce_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="olist-ecommerce_files/libs/quarto-html/anchor.min.js"></script>
+<link href="olist-ecommerce_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="olist-ecommerce_files/libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="olist-ecommerce_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="olist-ecommerce_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="olist-ecommerce_files/libs/bootstrap/bootstrap-9e3ffae467580fdb927a41352e75a2e0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<meta name="description" content="Olist E-Commerce Analytics — an end-to-end PostgreSQL, SQL and Power BI analysis of 100,000+ Brazilian marketplace orders, examining revenue concentration, regional delivery performance and customer retention.">
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-full">
+
+<main class="content column-page" id="quarto-document-content">
+
+
+
+
+<style>
+/* =========================================================
+   AGU CHARLES CHIBUIKE — CASE STUDY
+   Scientific Data Science / OLIST
+   ========================================================= */
+
+
+/* =========================================================
+   DESIGN TOKENS
+   ========================================================= */
+
+:root {
+  --navy: #0D1B2A;
+  --navy-2: #14263A;
+  --teal: #00A878;
+  --teal-dark: #008A65;
+  --gold: #E8C547;
+
+  --ink: #1A1A2E;
+  --slate: #4A5568;
+  --muted: #718096;
+
+  --mist: #F7F6F2;
+  --white: #FFFFFF;
+  --border: #E2E0DA;
+
+  --display: "Space Grotesk", sans-serif;
+  --serif: "Source Serif 4", Georgia, serif;
+  --mono: "JetBrains Mono", monospace;
+
+  --content-width: 1180px;
+  --text-width: 760px;
+}
+
+
+/* =========================================================
+   GLOBAL RESET
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--white);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+body,
+.quarto-container,
+#quarto-content,
+main {
+  max-width: none !important;
+}
+
+main {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+p {
+  margin: 0 0 20px;
+}
+
+a {
+  color: inherit;
+}
+
+strong {
+  font-weight: 600;
+}
+
+::selection {
+  background: rgba(0,168,120,0.18);
+}
+
+
+/* =========================================================
+   HIDE QUARTO DEFAULT CHROME
+   ========================================================= */
+
+#quarto-header,
+.navbar,
+.sidebar,
+.sidebar-navigation,
+.quarto-title-block,
+.quarto-title-banner,
+#TOC {
+  display: none !important;
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.case-nav {
+  background: var(--navy);
+  border-bottom: 1px solid rgba(255,255,255,0.09);
+}
+
+.case-nav-inner {
+  width: min(var(--content-width), calc(100% - 48px));
+  margin: 0 auto;
+
+  min-height: 76px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.case-nav-back,
+.case-nav-brand {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.case-nav-back {
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+
+  transition: color 0.2s ease;
+}
+
+.case-nav-back:hover {
+  color: var(--teal);
+}
+
+.case-nav-brand {
+  color: var(--white);
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.case-hero {
+  background: var(--navy);
+  color: var(--white);
+
+  padding: 105px 0 100px;
+
+  position: relative;
+  overflow: hidden;
+}
+
+.case-hero::after {
+  content: "";
+
+  position: absolute;
+  width: 340px;
+  height: 340px;
+
+  right: -120px;
+  bottom: -180px;
+
+  border: 1px solid rgba(0,168,120,0.16);
+  border-radius: 50%;
+
+  pointer-events: none;
+}
+
+.case-hero-inner {
+  width: min(var(--content-width), calc(100% - 48px));
+  margin: 0 auto;
+
+  max-width: 900px;
+  margin-left: max(24px, calc((100% - var(--content-width)) / 2));
+}
+
+.case-kicker {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--teal);
+  text-transform: uppercase;
+
+  margin-bottom: 25px;
+}
+
+.case-title {
+  font-family: var(--display);
+  font-size: clamp(52px, 7vw, 88px);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+
+  margin: 0 0 32px;
+
+  color: var(--white);
+}
+
+.case-subtitle {
+  max-width: 730px;
+
+  font-family: var(--serif);
+  font-size: 22px;
+  line-height: 1.55;
+
+  color: #CBD5E0;
+
+  margin-bottom: 34px;
+}
+
+.case-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  margin-bottom: 34px;
+}
+
+.case-meta span {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+
+  color: var(--teal);
+
+  border: 1px solid rgba(0,168,120,0.3);
+  background: rgba(0,168,120,0.07);
+
+  padding: 7px 10px;
+  border-radius: 2px;
+}
+
+
+/* =========================================================
+   BUTTONS / LINKS
+   ========================================================= */
+
+.case-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.case-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 44px;
+  padding: 11px 17px;
+
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+
+  text-decoration: none;
+
+  border-radius: 3px;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.case-btn:hover {
+  transform: translateY(-2px);
+}
+
+.case-btn-primary {
+  background: var(--teal);
+  color: var(--navy);
+
+  border: 1px solid var(--teal);
+}
+
+.case-btn-primary:hover {
+  background: #08B985;
+  color: var(--navy);
+}
+
+.case-btn-secondary {
+  color: var(--ink);
+  background: transparent;
+
+  border: 1px solid var(--border);
+}
+
+.case-btn-secondary:hover {
+  border-color: var(--teal);
+  color: var(--teal-dark);
+}
+
+
+/* =========================================================
+   STATS STRIP
+   ========================================================= */
+
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+
+  border-bottom: 1px solid var(--border);
+  background: var(--mist);
+}
+
+.stat {
+  min-height: 145px;
+
+  padding: 30px 28px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  border-right: 1px solid var(--border);
+}
+
+.stat:last-child {
+  border-right: none;
+}
+
+.stat-value {
+  font-family: var(--display);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1;
+
+  color: var(--navy);
+
+  margin-bottom: 10px;
+}
+
+.stat-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+
+/* =========================================================
+   GENERAL SECTION
+   ========================================================= */
+
+.case-section {
+  width: min(var(--content-width), calc(100% - 48px));
+  margin: 0 auto;
+
+  padding-top: 105px;
+  padding-bottom: 105px;
+}
+
+.case-section-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+
+  color: var(--teal);
+  text-transform: uppercase;
+
+  margin-bottom: 22px;
+}
+
+.case-section-title {
+  max-width: 850px;
+
+  font-family: var(--display);
+  font-size: clamp(34px, 4vw, 52px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+
+  color: var(--ink);
+
+  margin: 0 0 28px;
+}
+
+.section-intro {
+  max-width: var(--text-width);
+
+  font-family: var(--serif);
+  font-size: 18px;
+  color: var(--slate);
+
+  margin-bottom: 38px;
+}
+
+
+/* =========================================================
+   INTRO / QUESTION
+   ========================================================= */
+
+.case-intro {
+  width: min(var(--content-width), calc(100% - 48px));
+  margin: 0 auto;
+
+  padding: 105px 0;
+}
+
+.case-two-column {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.85fr) minmax(320px, 1.15fr);
+  gap: 90px;
+  align-items: start;
+}
+
+.case-two-column h2 {
+  font-family: var(--display);
+  font-size: clamp(34px, 4vw, 50px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+
+  color: var(--ink);
+
+  margin: 0;
+}
+
+.case-two-column p {
+  max-width: 700px;
+  color: var(--slate);
+}
+
+.case-two-column .lead {
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+
+/* =========================================================
+   DARK SECTIONS
+   ========================================================= */
+
+.dark-section {
+  background: var(--navy);
+  color: var(--white);
+}
+
+.section-title-light {
+  max-width: 850px;
+
+  font-family: var(--display);
+  font-size: clamp(34px, 4vw, 52px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+
+  color: var(--white);
+
+  margin: 0 0 45px;
+}
+
+
+/* =========================================================
+   DATA CARDS
+   ========================================================= */
+
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+
+  margin-top: 42px;
+}
+
+.data-card {
+  padding: 30px;
+
+  min-height: 235px;
+
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 5px;
+
+  background: rgba(255,255,255,0.035);
+}
+
+.data-number {
+  font-family: var(--display);
+  font-size: 38px;
+  font-weight: 600;
+  line-height: 1;
+
+  color: var(--teal);
+
+  margin-bottom: 18px;
+}
+
+.data-heading {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 600;
+
+  color: var(--white);
+
+  margin-bottom: 10px;
+}
+
+.data-card p {
+  font-size: 15px;
+  line-height: 1.6;
+
+  color: #A0AEC0;
+
+  margin: 0;
+}
+
+.source-note {
+  margin-top: 28px;
+
+  font-family: var(--mono);
+  font-size: 9px;
+  line-height: 1.7;
+
+  color: #718096;
+
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.source-note strong {
+  color: #A0AEC0;
+}
+
+
+/* =========================================================
+   PIPELINE
+   ========================================================= */
+
+.pipeline {
+  display: flex;
+  align-items: stretch;
+
+  margin-top: 48px;
+
+  overflow-x: auto;
+
+  padding-bottom: 8px;
+}
+
+.pipeline-step {
+  flex: 1;
+  min-width: 145px;
+
+  padding: 22px 18px;
+
+  border: 1px solid var(--border);
+  background: var(--mist);
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pipeline-number {
+  width: 30px;
+  height: 30px;
+
+  flex: 0 0 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: var(--navy);
+  color: var(--teal);
+
+  font-family: var(--mono);
+  font-size: 9px;
+}
+
+.pipeline-step strong {
+  display: block;
+
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 600;
+
+  color: var(--ink);
+
+  margin-bottom: 3px;
+}
+
+.pipeline-step span {
+  display: block;
+
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.04em;
+
+  color: var(--muted);
+}
+
+.pipeline-arrow {
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 30px;
+
+  font-family: var(--mono);
+  font-size: 14px;
+
+  color: var(--teal);
+}
+
+
+/* =========================================================
+   SPLIT SECTIONS
+   ========================================================= */
+
+.split-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+
+  gap: 80px;
+
+  width: min(var(--content-width), calc(100% - 48px));
+  margin: 0 auto;
+
+  padding: 105px 0;
+}
+
+.split-content h2 {
+  max-width: 760px;
+
+  font-family: var(--display);
+  font-size: clamp(36px, 4vw, 54px);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+
+  color: var(--ink);
+
+  margin: 0 0 30px;
+}
+
+.split-content > p {
+  max-width: 720px;
+  color: var(--slate);
+}
+
+.split-aside {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+
+/* =========================================================
+   METHOD CALLOUT
+   ========================================================= */
+
+.method-callout {
+  margin-top: 34px;
+  padding: 22px 24px;
+
+  border-left: 3px solid var(--teal);
+
+  background: var(--mist);
+
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.method-callout strong {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+
+  color: var(--teal-dark);
+}
+
+.method-callout span {
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.55;
+
+  color: var(--slate);
+}
+
+
+/* =========================================================
+   METHOD CARD
+   ========================================================= */
+
+.method-card {
+  width: 100%;
+  max-width: 340px;
+
+  padding: 32px;
+
+  background: var(--navy);
+
+  border-radius: 5px;
+
+  box-shadow: 8px 8px 0 var(--teal);
+}
+
+.method-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+
+  color: var(--teal);
+
+  text-transform: uppercase;
+
+  margin-bottom: 18px;
+}
+
+.method-big {
+  font-family: var(--display);
+  font-size: 56px;
+  font-weight: 600;
+  line-height: 1;
+
+  color: var(--white);
+
+  margin-bottom: 18px;
+}
+
+.method-card p {
+  font-size: 15px;
+  line-height: 1.6;
+
+  color: #A0AEC0;
+
+  margin: 0;
+}
+
+
+/* =========================================================
+   RESULTS
+   ========================================================= */
+
+.results-section {
+  background: var(--mist);
+
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+
+  margin-top: 45px;
+}
+
+.result-card {
+  padding: 30px;
+
+  min-height: 210px;
+
+  background: var(--white);
+
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+
+.result-primary {
+  border-top: 3px solid var(--teal);
+}
+
+.result-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+
+  color: var(--muted);
+
+  text-transform: uppercase;
+
+  margin-bottom: 28px;
+}
+
+.result-number {
+  font-family: var(--display);
+  font-size: 50px;
+  font-weight: 600;
+  line-height: 1;
+
+  color: var(--navy);
+
+  margin-bottom: 9px;
+}
+
+.result-caption {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+
+  color: var(--teal-dark);
+
+  text-transform: uppercase;
+}
+
+
+/* =========================================================
+   CHART PLACEHOLDERS
+   ========================================================= */
+
+.chart-placeholder {
+  min-height: 330px;
+
+  margin-top: 42px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  border: 1px dashed #C8C6BF;
+  background: rgba(255,255,255,0.5);
+
+  padding: 40px;
+}
+
+.chart-placeholder-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+
+  color: var(--teal-dark);
+
+  text-transform: uppercase;
+
+  margin-bottom: 12px;
+}
+
+.chart-placeholder p {
+  max-width: 500px;
+
+  font-family: var(--serif);
+  font-size: 15px;
+
+  color: var(--muted);
+
+  margin: 0;
+}
+
+.chart-dark {
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.035);
+}
+
+.chart-dark .chart-placeholder-label {
+  color: var(--teal);
+}
+
+.chart-dark p {
+  color: #718096;
+}
+
+
+/* =========================================================
+   FINDINGS
+   ========================================================= */
+
+.finding-layout {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.finding-stat {
+  font-family: var(--display);
+  font-size: clamp(64px, 8vw, 100px);
+  font-weight: 600;
+  line-height: 0.95;
+
+  color: var(--teal);
+
+  margin-bottom: 15px;
+}
+
+.finding-heading {
+  font-family: var(--display);
+  font-size: 25px;
+  font-weight: 600;
+
+  color: var(--white);
+
+  margin-bottom: 18px;
+}
+
+.finding-main p {
+  max-width: 520px;
+
+  color: #A0AEC0;
+}
+
+.calibration-callout {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 42px;
+}
+
+/* =========================================================
+   APPLICABILITY DOMAIN
+   ========================================================= */
+
+.ad-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 12px;
+
+  margin-top: 35px;
+}
+
+.ad-stat-grid > div {
+  padding: 20px;
+
+  background: var(--mist);
+  border: 1px solid var(--border);
+
+  display: flex;
+  flex-direction: column;
+}
+
+.ad-stat-grid strong {
+  font-family: var(--display);
+  font-size: 30px;
+  line-height: 1;
+
+  color: var(--teal-dark);
+
+  margin-bottom: 8px;
+}
+
+.ad-stat-grid span {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+
+  color: var(--ink);
+
+  text-transform: uppercase;
+
+  margin-bottom: 7px;
+}
+
+.ad-stat-grid small {
+  font-family: var(--serif);
+  font-size: 12px;
+  line-height: 1.45;
+
+  color: var(--muted);
+}
+
+
+/* =========================================================
+   EXPLAINABILITY
+   ========================================================= */
+
+.explain-grid {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+
+  gap: 75px;
+
+  align-items: center;
+}
+
+.lead-light {
+  font-family: var(--serif);
+  font-size: 22px;
+  line-height: 1.55;
+
+  color: var(--white);
+}
+
+.light-text {
+  color: #A0AEC0;
+}
+
+.explain-grid strong {
+  color: var(--white);
+}
+
+
+/* =========================================================
+   WHAT I BUILT
+   ========================================================= */
+
+.build-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 16px;
+
+  margin-top: 45px;
+}
+
+.build-card {
+  padding: 30px;
+
+  border: 1px solid var(--border);
+  border-radius: 5px;
+
+  background: var(--white);
+}
+
+.build-number {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+
+  color: var(--teal);
+
+  margin-bottom: 22px;
+}
+
+.build-card h3 {
+  font-family: var(--display);
+  font-size: 21px;
+  font-weight: 600;
+
+  color: var(--ink);
+
+  margin: 0 0 10px;
+}
+
+.build-card p {
+  font-size: 15px;
+  line-height: 1.6;
+
+  color: var(--slate);
+
+  margin: 0;
+}
+
+
+/* =========================================================
+   LIMITATIONS
+   ========================================================= */
+
+.limitations {
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+
+  max-width: 760px;
+}
+
+.limitations li {
+  position: relative;
+
+  padding: 0 0 20px 28px;
+  margin-bottom: 20px;
+
+  border-bottom: 1px solid var(--border);
+
+  color: var(--slate);
+}
+
+.limitations li::before {
+  content: "—";
+
+  position: absolute;
+  left: 0;
+  top: 0;
+
+  color: var(--teal);
+
+  font-family: var(--mono);
+}
+
+.limitation-note {
+  width: 100%;
+  max-width: 340px;
+
+  padding: 30px;
+
+  background: var(--mist);
+
+  border-left: 3px solid var(--gold);
+}
+
+.limitation-note p {
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.5;
+
+  color: var(--ink);
+
+  margin: 0;
+}
+
+
+/* =========================================================
+   EVIDENCE
+   ========================================================= */
+
+.evidence-section {
+  background: var(--mist);
+
+  border-top: 1px solid var(--border);
+}
+
+.evidence-section h2 {
+  font-family: var(--display);
+  font-size: clamp(36px, 4vw, 54px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+
+  color: var(--ink);
+
+  margin: 0 0 25px;
+}
+
+.evidence-section p {
+  max-width: 680px;
+
+  color: var(--slate);
+
+  margin-bottom: 30px;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.case-footer {
+  min-height: 100px;
+
+  padding: 30px max(24px, calc((100% - var(--content-width)) / 2));
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: var(--navy);
+
+  color: rgba(255,255,255,0.6);
+
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.case-footer a {
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+
+  transition: color 0.2s ease;
+}
+
+.case-footer a:hover {
+  color: var(--teal);
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .case-hero {
+    padding: 85px 0 80px;
+  }
+
+  .case-title {
+    font-size: clamp(48px, 9vw, 72px);
+  }
+
+  .case-two-column,
+  .finding-layout,
+  .explain-grid {
+    grid-template-columns: 1fr;
+    gap: 45px;
+  }
+
+  .split-section {
+    grid-template-columns: 1fr;
+    gap: 45px;
+  }
+
+  .split-aside {
+    justify-content: flex-start;
+  }
+
+  .method-card,
+  .limitation-note {
+    max-width: none;
+  }
+
+  .data-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .result-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .build-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat:nth-child(2) {
+    border-right: none;
+  }
+
+  .stat:nth-child(-n+2) {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat:nth-child(3) {
+    border-right: 1px solid var(--border);
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVE — MOBILE
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+  body {
+    font-size: 16px;
+  }
+
+  .case-nav-inner,
+  .case-hero-inner,
+  .case-section,
+  .case-intro {
+    width: calc(100% - 36px);
+  }
+
+  .case-nav-inner {
+    min-height: 64px;
+  }
+
+  .case-nav-brand {
+    display: none;
+  }
+
+  .case-hero {
+    padding: 65px 0 65px;
+  }
+
+  .case-kicker {
+    font-size: 9px;
+    margin-bottom: 20px;
+  }
+
+  .case-title {
+    font-size: clamp(44px, 13vw, 60px);
+    margin-bottom: 25px;
+  }
+
+  .case-subtitle {
+    font-size: 18px;
+  }
+
+  .case-meta {
+    gap: 6px;
+  }
+
+  .case-meta span {
+    font-size: 8px;
+    padding: 6px 8px;
+  }
+
+  .case-section,
+  .case-intro,
+  .split-section {
+    padding-top: 72px;
+    padding-bottom: 72px;
+  }
+
+  .case-two-column h2,
+  .split-content h2,
+  .case-section-title,
+  .section-title-light {
+    font-size: 34px;
+  }
+
+  .case-two-column {
+    gap: 30px;
+  }
+
+  .case-two-column .lead {
+    font-size: 18px;
+  }
+
+  .stats-strip {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .stat {
+    min-height: 125px;
+    padding: 22px 18px;
+  }
+
+  .stat-value {
+    font-size: 29px;
+  }
+
+  .stat-label {
+    font-size: 8px;
+  }
+
+  .pipeline {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .pipeline-step {
+    min-width: 0;
+  }
+
+  .pipeline-arrow {
+    width: auto;
+    height: 18px;
+    transform: rotate(90deg);
+  }
+
+  .finding-stat {
+    font-size: 72px;
+  }
+
+  .ad-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-placeholder {
+    min-height: 250px;
+    padding: 25px;
+  }
+
+  .case-links {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .case-btn {
+    width: 100%;
+  }
+
+  .case-footer {
+    min-height: 120px;
+
+    padding: 28px 18px;
+
+    align-items: flex-start;
+
+    flex-direction: column;
+    gap: 18px;
+  }
+}
+
+
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
+}
+
+
+/* =========================================================
+   EXTENDED SECTIONS — generic .section wrapper
+   (used by validation-section, ad-section)
+   ========================================================= */
+
+.section {
+  width: 100%;
+  background: var(--white);
+}
+
+.section-inner {
+  width: min(var(--content-width), calc(100% - 48px));
+  margin: 0 auto;
+
+  padding-top: 105px;
+  padding-bottom: 105px;
+}
+
+.section-kicker {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+
+  color: var(--teal);
+  text-transform: uppercase;
+
+  margin-bottom: 22px;
+}
+
+.section-heading {
+  max-width: 850px;
+  margin-bottom: 48px;
+}
+
+.section-heading h2 {
+  font-family: var(--display);
+  font-size: clamp(34px, 4vw, 52px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+
+  color: var(--ink);
+
+  margin: 0 0 22px;
+}
+
+.section-lead {
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.6;
+
+  color: var(--slate);
+
+  margin: 0;
+}
+
+/* =========================================================
+   TWO COLUMN (generic — used within .section)
+   ========================================================= */
+
+.two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+
+  margin-bottom: 60px;
+}
+
+.two-column .column h3 {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 600;
+
+  color: var(--ink);
+
+  margin: 0 0 16px;
+}
+
+.two-column .column p {
+  color: var(--slate);
+  max-width: 520px;
+}
+
+.two-column.ad-explanation {
+  margin-top: 50px;
+  margin-bottom: 0;
+}
+
+/* Method card variant used inline in a two-column layout
+   (distinct usage from the split-section .method-card, but
+   shares the same dark card treatment) */
+
+.two-column .method-card {
+  max-width: none;
+  box-shadow: none;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.two-column .method-card .method-number {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: var(--teal);
+  color: var(--navy);
+
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+
+  margin-bottom: 20px;
+}
+
+.two-column .method-card h3 {
+  color: var(--white);
+  margin-bottom: 14px;
+}
+
+.two-column .method-card p {
+  color: #A0AEC0;
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: none;
+  margin-bottom: 14px;
+}
+
+.two-column .method-card p:last-child {
+  margin-bottom: 0;
+}
+
+.interpretation-card {
+  height: 100%;
+
+  padding: 32px;
+
+  background: var(--mist);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+
+.interpretation-card h3 {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 600;
+
+  color: var(--ink);
+
+  margin: 0 0 14px;
+}
+
+.interpretation-card p {
+  font-size: 15px;
+  line-height: 1.6;
+
+  color: var(--slate);
+}
+
+.interpretation-card p:last-child {
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   VALIDATION PROCESS STEPS
+   ========================================================= */
+
+.validation-process {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+
+  margin-bottom: 60px;
+}
+
+.validation-step {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  padding: 26px 22px;
+
+  background: var(--mist);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+
+.validation-step .step-label {
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: var(--navy);
+  color: var(--teal);
+
+  font-family: var(--mono);
+  font-size: 9px;
+}
+
+.validation-step h4 {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 600;
+
+  color: var(--ink);
+
+  margin: 0;
+}
+
+.validation-step p {
+  font-size: 14px;
+  line-height: 1.55;
+
+  color: var(--slate);
+
+  margin: 0;
+}
+
+/* =========================================================
+   VALIDATION RESULT
+   ========================================================= */
+
+.validation-result {
+  display: grid;
+  grid-template-columns: 1.3fr 0.9fr;
+  gap: 50px;
+
+  padding: 46px;
+
+  background: var(--navy);
+  border-radius: 6px;
+
+  margin-bottom: 46px;
+}
+
+.result-kicker {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+
+  color: var(--teal);
+  text-transform: uppercase;
+
+  margin-bottom: 16px;
+}
+
+.result-copy h3 {
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 600;
+
+  color: var(--white);
+
+  margin: 0 0 18px;
+}
+
+.result-copy p {
+  color: #A0AEC0;
+  max-width: 560px;
+}
+
+.result-callout {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 12px;
+
+  border-left: 3px solid var(--teal);
+  padding-left: 26px;
+}
+
+.callout-number {
+  font-family: var(--display);
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1;
+
+  color: var(--teal);
+}
+
+.callout-label {
+  font-family: var(--serif);
+  font-size: 14px;
+  line-height: 1.5;
+
+  color: #A0AEC0;
+}
+
+/* =========================================================
+   SECTION ASIDE (callout box, light variant of method-callout)
+   ========================================================= */
+
+.section-aside {
+  padding: 26px 28px;
+
+  border-left: 3px solid var(--gold);
+  background: var(--mist);
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.section-aside strong {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+
+  color: var(--ink);
+}
+
+.section-aside p {
+  font-family: var(--serif);
+  font-size: 15px;
+  line-height: 1.6;
+
+  color: var(--slate);
+
+  margin: 0;
+}
+
+.section-aside p + p {
+  margin-top: 12px;
+}
+
+/* =========================================================
+   APPLICABILITY DOMAIN RESULTS
+   ========================================================= */
+
+.ad-results {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+
+  margin-bottom: 20px;
+}
+
+.ad-result {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding: 30px 26px;
+
+  background: var(--navy);
+  border-radius: 5px;
+}
+
+.ad-value {
+  font-family: var(--display);
+  font-size: 42px;
+  font-weight: 600;
+  line-height: 1;
+
+  color: var(--teal);
+}
+
+.ad-label {
+  font-family: var(--serif);
+  font-size: 14px;
+  line-height: 1.5;
+
+  color: #A0AEC0;
+}
+
+/* =========================================================
+   TECHNICAL SAFEGUARD
+   ========================================================= */
+
+.technical-safeguard {
+  margin-top: 50px;
+  padding: 34px 36px;
+
+  background: var(--mist);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+
+.safeguard-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  color: var(--teal-dark);
+
+  margin-bottom: 16px;
+}
+
+.technical-safeguard h3 {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 600;
+
+  color: var(--ink);
+
+  margin: 0 0 14px;
+}
+
+.technical-safeguard p {
+  color: var(--slate);
+  max-width: 760px;
+}
+
+.technical-safeguard p:last-child {
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   RESPONSIVE — new section types
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .two-column,
+  .validation-process,
+  .validation-result,
+  .ad-results {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .result-callout {
+    border-left: none;
+    border-top: 3px solid var(--teal);
+    padding-left: 0;
+    padding-top: 20px;
+  }
+
+  .validation-result {
+    padding: 34px 26px;
+  }
+
+  .technical-safeguard {
+    padding: 28px 24px;
+  }
+}
+
+
+/* =========================================================
+   SIMPLE DATA TABLE (cohort comparison, etc.)
+   ========================================================= */
+
+.case-table-wrap {
+  margin-top: 32px;
+  overflow-x: auto;
+}
+
+.case-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  font-family: var(--serif);
+  font-size: 15px;
+}
+
+.case-table th,
+.case-table td {
+  padding: 16px 20px;
+  text-align: left;
+
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+
+.case-table th {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: var(--teal);
+}
+
+.case-table td {
+  color: #CBD5E0;
+}
+
+.case-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* light-background variant */
+.case-table.light th,
+.case-table.light td {
+  border-bottom: 1px solid var(--border);
+}
+
+.case-table.light th {
+  color: var(--teal-dark);
+}
+
+.case-table.light td {
+  color: var(--slate);
+}
+</style>
+<nav class="case-nav">
+  <div class="case-nav-inner">
+    <a class="case-nav-back" href="/#projects">← All Projects</a>
+    <div class="case-nav-brand">AC / DATA</div>
+  </div>
+</nav>
+
+
+<section class="case-hero">
+  <div class="case-hero-inner">
+
+    <div class="case-kicker">ANALYTICS ENGINEERING · E-COMMERCE</div>
+
+    <h1 class="case-title">
+      Olist E-Commerce<br>
+      Analytics
+    </h1>
+
+    <p class="case-subtitle">
+      Strong sales. Weak retention. Uneven delivery.
+    </p>
+
+    <p class="case-subtitle" style="font-size:18px;color:#A0AEC0;">
+      I analysed 100,000+ Brazilian marketplace orders to understand
+      what was actually driving Olist's growth — and what wasn't.
+    </p>
+
+    <div class="case-meta">
+      <span>PostgreSQL 16</span>
+      <span>Python / pandas</span>
+      <span>SQLAlchemy</span>
+      <span>Advanced SQL</span>
+      <span>Power BI</span>
+    </div>
+
+    <div class="case-links">
+      <a class="case-btn case-btn-primary" href="https://github.com/agucharles91-cpu/Olist-Ecommerce-Analytics" target="_blank" rel="noopener noreferrer">
+        View GitHub Repository
+      </a>
+    </div>
+
+  </div>
+</section>
+
+
+<section class="stats-strip">
+
+  <div class="stat">
+    <div class="stat-value">R$15.42M</div>
+    <div class="stat-label">Total revenue analysed</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-value">92.09%</div>
+    <div class="stat-label">National on-time delivery</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-value">~97%</div>
+    <div class="stat-label">Customers did not return</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-value">500K+</div>
+    <div class="stat-label">Records across 9 datasets</div>
+  </div>
+
+</section>
+
+
+<section class="case-intro">
+
+  <div class="case-section-num">01 — THE QUESTION</div>
+
+  <h2 class="case-section-title anchored">
+    Was Olist's growth translating into a healthy,
+    sustainable customer base?
+  </h2>
+
+  <p class="section-intro">
+    To answer that, I built an analytical model covering three areas:
+    <strong>Revenue</strong> — what is driving growth; <strong>Operations</strong>
+    — where the delivery network is performing well or poorly; and
+    <strong>Customers</strong> — whether buyers are coming back.
+  </p>
+
+  <p style="max-width:720px;color:var(--slate);">
+    This is a historical, publicly available dataset (Kaggle's Olist
+    Brazilian E-Commerce data, 2016–2018) rather than a live operational
+    engagement — the framing below reflects what the data itself
+    supports, not delivered business consulting.
+  </p>
+
+</section>
+
+
+<section class="dark-section">
+
+  <div class="case-section">
+
+    <div class="case-section-num">02 — FROM RAW FILES TO A DECISION-READY MODEL</div>
+
+    <h2 class="section-title-light anchored">
+      An analytical pipeline,
+      not analysis on raw CSVs
+    </h2>
+
+    <div class="pipeline">
+
+      <div class="pipeline-step">
+        <div class="pipeline-number">01</div>
+        <div>
+          <strong>Raw layer</strong>
+          <span>9 CSVs loaded into PostgreSQL</span>
+        </div>
+      </div>
+
+      <div class="pipeline-arrow">→</div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-number">02</div>
+        <div>
+          <strong>Staging</strong>
+          <span>Cleaning &amp; transformation</span>
+        </div>
+      </div>
+
+      <div class="pipeline-arrow">→</div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-number">03</div>
+        <div>
+          <strong>Star schema</strong>
+          <span>fact_orders + 3 dimensions</span>
+        </div>
+      </div>
+
+      <div class="pipeline-arrow">→</div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-number">04</div>
+        <div>
+          <strong>Advanced SQL</strong>
+          <span>17 analytical queries</span>
+        </div>
+      </div>
+
+      <div class="pipeline-arrow">→</div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-number">05</div>
+        <div>
+          <strong>Power BI</strong>
+          <span>3-page reporting layer</span>
+        </div>
+      </div>
+
+    </div>
+
+    <p style="max-width:720px;margin-top:38px;color:var(--slate);">
+      The resulting model supports analysis across revenue, products,
+      customers, sellers, geography and delivery performance — reusable
+      analytical logic rather than a one-off set of charts.
+    </p>
+
+  </div>
+
+</section>
+
+
+<section class="case-section">
+
+  <div class="case-section-num">03 — REVENUE</div>
+
+  <h2 class="case-section-title anchored">
+    Growth was real.
+    It was also concentrated.
+  </h2>
+
+  <div class="finding-layout">
+
+    <div class="finding-main">
+
+      <div class="finding-heading">
+        R$15.42M in revenue, but not evenly distributed
+      </div>
+
+      <p>
+        Revenue grew from almost nothing in late 2016 to more than R$1M
+        per month by 2018, with a pronounced spike around Black Friday in
+        November 2017.
+      </p>
+
+      <p>
+        Health &amp; Beauty, Watches &amp; Gifts, and Bed, Bath &amp; Table
+        were among the largest category contributors, while São Paulo
+        alone accounted for more than 40,500 orders — a level of
+        geographic and commercial concentration that a single national
+        growth number hides.
+      </p>
+
+      <p>
+        Pareto analysis reinforces the same pattern at the customer
+        level: the top 30% of customers by spend account for roughly 65%
+        of revenue.
+      </p>
+    </div>
+
+    <figure class="chart-placeholder figure" style="max-width:560px;margin:auto;">
+      <img src="reports/figures/revenue_trend_by_month.png" alt="Monthly revenue trend from late 2016 to 2018, showing growth and the November 2017 Black Friday spike" style="width:100%;height:auto;" class="figure-img">
+      <figcaption class="chart-placeholder-label">
+        MONTHLY REVENUE TREND
+      </figcaption>
+    </figure>
+
+  </div>
+
+</section>
+
+
+<section class="dark-section">
+
+  <div class="case-section">
+
+    <div class="case-section-num">04 — OPERATIONS</div>
+
+    <h2 class="section-title-light anchored">
+      92% on-time delivery hides a
+      regional story
+    </h2>
+
+    <div class="finding-layout">
+
+      <div class="finding-main">
+
+        <div class="finding-heading">
+          A single national KPI obscures meaningful regional variation
+        </div>
+
+        <p>
+          At national level, 92.09% of orders were delivered on time —
+          that reads as a strong result until the data is viewed
+          geographically.
+        </p>
+
+        <p>
+          São Paulo averaged 8.7 days to deliver, close to the best in
+          the network. The national average sat at 12.5 days. Acre, by
+          contrast, averaged 20.7 days — more than double the national
+          figure and well over twice São Paulo's.
+        </p>
+
+        <p>
+          Customers in different parts of Brazil are having meaningfully
+          different experiences with the same marketplace, and the
+          national on-time rate doesn't surface that on its own.
+        </p>
+      </div>
+
+      <figure class="chart-placeholder chart-dark figure" style="max-width:560px;margin:auto;">
+        <img src="reports/figures/delivery_time_by_state.png" alt="Average delivery time by Brazilian state, showing São Paulo, national average and Acre" style="width:100%;height:auto;" class="figure-img">
+        <figcaption class="chart-placeholder-label">
+          AVERAGE DELIVERY TIME BY STATE
+        </figcaption>
+      </figure>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="case-section">
+
+  <div class="case-section-num">05 — CUSTOMERS</div>
+
+  <h2 class="case-section-title anchored">
+    The larger gap wasn't delivery.
+    It was retention.
+  </h2>
+
+  <div class="finding-layout">
+
+    <div class="finding-main">
+
+      <div class="finding-heading">
+        Roughly 97% of customers did not make a repeat purchase in the
+        observed period
+      </div>
+
+      <p>
+        A cohort retention matrix shows the monthly repeat-purchase rate
+        falling below 1% by the first month after a customer's initial
+        order, and staying low from there — consistent with the
+        ~97% overall non-repeat figure across the dataset.
+      </p>
+
+      <p>
+        Olist was successfully generating transactions, but very few
+        customers were returning to generate additional value. For a
+        marketplace, that reframes the priority question from "how do we
+        sell more" to <strong>"how do we make the first purchase worth
+        coming back for?"</strong>
+      </p>
+
+      <p style="color:var(--slate);">
+        Worth stating plainly: this dataset doesn't let me test <em>why</em>
+        — whether delivery experience, product category, price, or
+        something else is driving the drop-off. The retention gap is the
+        clearest finding here, not a diagnosed cause.
+      </p>
+    </div>
+
+    <figure class="chart-placeholder figure" style="max-width:560px;margin:auto;">
+      <img src="reports/figures/cohort_retention_matrix.png" alt="Cohort retention matrix showing repeat purchase rate falling below 1 percent by month 1" style="width:100%;height:auto;" class="figure-img">
+      <figcaption class="chart-placeholder-label">
+        COHORT RETENTION, MONTH 0–N
+      </figcaption>
+    </figure>
+
+  </div>
+
+</section>
+
+
+<section class="case-section">
+
+  <div class="case-section-num">06 — THE ANALYTICAL APPROACH</div>
+
+  <h2 class="case-section-title anchored">
+    Reusable analytical logic,
+    not one-off charts
+  </h2>
+
+  <p class="section-intro">
+    I didn't build the dashboard directly from the source files. I built
+    an analytical model first — a star schema in PostgreSQL — then used
+    17 SQL queries (CTEs, window functions, cohort and Pareto analysis,
+    query optimisation) to answer increasingly complex business
+    questions, with Power BI as the final reporting layer on top.
+  </p>
+
+  <div class="source-note" style="margin-top:24px;">
+    <strong>Stack:</strong> PostgreSQL 16 · Python · pandas · SQLAlchemy · Power BI
+  </div>
+
+</section>
+
+
+<section class="split-section">
+
+  <div class="split-content">
+
+    <div class="case-section-num">07 — WHAT THE ANALYSIS SUGGESTS</div>
+
+    <h2 class="anchored">
+      Three conclusions,
+      stated carefully
+    </h2>
+
+    <ul class="limitations">
+
+      <li>
+        <strong>Protect the growth engine.</strong> Revenue is growing,
+        but a relatively small number of categories, regions and
+        customers account for a large share of it — concentration worth
+        monitoring, not just growth worth celebrating.
+      </li>
+
+      <li>
+        <strong>Treat delivery as a regional problem.</strong> A single
+        national KPI hides meaningful differences in customer experience
+        across states; monitoring by region would surface issues the
+        national average cannot.
+      </li>
+
+      <li>
+        <strong>Prioritise retention.</strong> The scale of first-time
+        purchasing makes repeat purchase behaviour an important area for
+        further investigation.
+      </li>
+
+    </ul>
+
+  </div>
+
+  <div class="split-aside">
+
+    <div class="limitation-note">
+      <div class="method-label">SCOPE</div>
+      <p>
+        These are read-throughs of a historical dataset, not
+        recommendations delivered to Olist. They describe what the
+        numbers show, not a tested intervention.
+      </p>
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="case-section">
+
+  <div class="case-section-num">08 — WHAT THE DATA CANNOT TELL US</div>
+
+  <h2 class="case-section-title anchored">
+    Boundaries, stated plainly
+  </h2>
+
+  <div class="data-grid" style="margin-top:12px;">
+
+    <div class="data-card" style="background:var(--mist);border:1px solid var(--border);">
+      <div class="data-heading" style="color:var(--ink);">Historical, public data</div>
+      <p style="color:var(--slate);">
+        This is the public Kaggle Olist dataset (2016–2018), not live
+        operational data — patterns here may not reflect Olist's current
+        business.
+      </p>
+    </div>
+
+    <div class="data-card" style="background:var(--mist);border:1px solid var(--border);">
+      <div class="data-heading" style="color:var(--ink);">No causal test of retention drivers</div>
+      <p style="color:var(--slate);">
+        The dataset doesn't let me test whether delivery speed, price,
+        category, or something else is driving the low repeat-purchase
+        rate — retention is the finding, not the explanation.
+      </p>
+    </div>
+
+    <div class="data-card" style="background:var(--mist);border:1px solid var(--border);">
+      <div class="data-heading" style="color:var(--ink);">Order-level, not customer-lifetime</div>
+      <p style="color:var(--slate);">
+        The observation window ends in 2018 — customers who might have
+        returned after the dataset's cutoff would still show up as
+        non-repeat here.
+      </p>
+    </div>
+
+  </div>
+
+  <div class="method-callout" style="margin-top:38px;">
+    <strong>Most importantly</strong>
+    <span>
+      This is descriptive and diagnostic analysis, not a controlled
+      experiment. The findings describe what happened in this dataset;
+      they don't establish what would happen if Olist changed a
+      particular lever.
+    </span>
+  </div>
+
+</section>
+
+
+<section class="evidence-section">
+
+  <div class="case-section">
+
+    <div class="case-section-num">09 — TAKEAWAY</div>
+
+    <h2 class="anchored">
+      What is actually driving
+      the health of the business?
+    </h2>
+
+    <p>
+      This project turned more than 500,000 raw records across nine
+      datasets into a structured PostgreSQL analytical model and an
+      interactive Power BI reporting layer. But the more important shift
+      was in the question itself — from "how much did Olist sell?" to
+      "what is actually driving the health of the business?"
+    </p>
+
+    <p>
+      Revenue growth, delivery performance and customer retention tell
+      three different stories when looked at separately.
+    </p>
+
+    <p style="font-weight:600;color:var(--ink);">
+      Olist was growing. The harder question was whether that growth was
+      durable — and the retention data suggests there was still a
+      significant gap between making the first sale and creating the
+      next one.
+    </p>
+
+    <div class="case-links">
+
+      <a class="case-btn case-btn-primary" href="https://github.com/agucharles91-cpu/Olist-Ecommerce-Analytics" target="_blank" rel="noopener noreferrer">
+        GitHub Repository
+      </a>
+
+      <a class="case-btn case-btn-secondary" href="/#projects">
+        Back to Projects
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<footer class="case-footer">
+  <div>
+    AC / DATA
+  </div>
+  <a href="/#projects">
+    ← All Projects
+  </a>
+</footer>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
