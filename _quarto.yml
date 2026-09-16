@@ -3,37 +3,4 @@ project:
   output-dir: docs
   render:
     - index.qmd
-
-website:
-  title: "Agu Charles Chibuike"
-
-  navbar:
-    left:
-      - text: "Home"
-        href: index.qmd
-
-      - text: "Projects"
-        menu:
-          - text: "Nairobi Runners"
-            href: https://github.com/agucharles91-cpu/Nairobi-Runners
-
-          - text: "Olist E-Commerce Analytics"
-            href: https://github.com/agucharles91-cpu/Olist-Ecommerce-Analytics
-
-          - text: "Parking Enforcement Analytics"
-            href: https://github.com/agucharles91-cpu/Parking-Enforcement-Analytics
-
-          - text: "Chemical Properties Analytics"
-            href: https://github.com/agucharles91-cpu/Chemistry-Property-Analytics
-
-          - text: "Nairobi Runners Dashboard"
-            href: https://agucharles.shinyapps.io/nairobi-runners/
-
-    right:
-      - icon: github
-        href: https://github.com/agucharles91-cpu
-        aria-label: GitHub
-
-  page-footer:
-    left: "© 2026 Agu Charles Chibuike"
     

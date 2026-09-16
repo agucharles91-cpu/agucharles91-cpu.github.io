@@ -863,12 +863,6 @@ a {
       rigorous analysis, and decision-ready outputs.
     </p>
 
-    <div class="hero-context">
-      5+ YEARS PROFESSIONAL EXPERIENCE &nbsp;·&nbsp;
-      MSc DATA SCIENCE &nbsp;·&nbsp;
-      BSc CHEMISTRY &nbsp;·&nbsp;
-      NAIROBI, KENYA
-    </div>
 
     <div class="hero-actions">
 
@@ -1312,8 +1306,7 @@ a {
         </div>
 
         <div class="experience-description">
-          Built and maintained analytical pipelines around EV charging
-          telemetry, data validation, operational reporting and Power BI.
+          Raised data reliability on live IoT sensor feeds and built the SLA reporting layer used daily by commercial and operations teams across EV charging infrastructure.
         </div>
 
       </div>
@@ -1334,8 +1327,7 @@ a {
         </div>
 
         <div class="experience-description">
-          Worked with ANPR and IoT data, ETL workflows, data-quality
-          pipelines, SQL/Python automation and operational BI.
+          Improved data accuracy from 78% to 94%+ on ANPR sensor pipelines and cut reporting cycle time by 60%+ through SQL and Python automation.
         </div>
 
       </div>
@@ -1356,8 +1348,7 @@ a {
         </div>
 
         <div class="experience-description">
-          Built customer, retention, cohort and revenue analytics,
-          connecting operational data to business decisions.
+          Segmented 1,000+ members by LTV and churn risk, replacing manual reporting with automated dashboards that directly informed pricing and retention strategy.
         </div>
 
       </div>
