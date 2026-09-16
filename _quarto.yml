@@ -23,8 +23,11 @@ website:
           - text: "Parking Enforcement Analytics"
             href: https://github.com/agucharles91-cpu/Parking-Enforcement-Analytics
 
-      - text: "Nairobi Runners Dashboard"
-        href: https://agucharles.shinyapps.io/nairobi-runners/
+          - text: "Chemical Properties Analytics"
+            href: https://github.com/agucharles91-cpu/Chemistry-Property-Analytics
+
+          - text: "Nairobi Runners Dashboard"
+            href: https://agucharles.shinyapps.io/nairobi-runners/
 
     right:
       - icon: github
@@ -33,4 +36,4 @@ website:
 
   page-footer:
     left: "© 2026 Agu Charles Chibuike"
-    right: "· Built with Quarto"
+    
