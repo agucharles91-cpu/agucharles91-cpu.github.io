@@ -499,6 +499,191 @@ a {
 }
 
 
+
+/* =========================================================
+   3D CAROUSEL
+   ========================================================= */
+
+.carousel-scene {
+  width: 100%;
+  perspective: 800px;
+  padding: 0;
+  margin-top: 56px;
+  position: relative;
+}
+
+.carousel-stage {
+  position: relative;
+  height: 600px;
+  transform-style: preserve-3d;
+}
+
+.carousel-item {
+  position: absolute;
+  width: 360px;
+  height: 550px;
+  left: 50%;
+  top: 0;
+  margin-left: -180px;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity   0.85s ease,
+              box-shadow 0.85s ease;
+  backface-visibility: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255,255,255,0.055);
+  border: 1px solid rgba(255,255,255,0.11);
+  pointer-events: auto;
+}
+
+.carousel-item[data-pos="0"] {
+  transform: translateZ(50px) scale(1);
+  opacity: 1;
+  z-index: 10;
+  border-color: rgba(0,168,120,0.7);
+  box-shadow: 0 28px 72px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,168,120,0.35), 0 0 40px rgba(0,168,120,0.12);
+  background: rgba(14, 28, 44, 0.97);
+}
+
+.carousel-item[data-pos="1"] {
+  transform: translateX(220px) translateZ(-60px) scale(0.88);
+  opacity: 0.35;
+  z-index: 5;
+  pointer-events: none;
+}
+.carousel-item[data-pos="2"] {
+  transform: translateZ(-120px) scale(0.80);
+  opacity: 0.10;
+  z-index: 1;
+  pointer-events: none;
+}
+.carousel-item[data-pos="3"] {
+  transform: translateX(-220px) translateZ(-60px) scale(0.88);
+  opacity: 0.35;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.carousel-item:not([data-pos="0"]) .carousel-body {
+  visibility: hidden;
+}
+
+.carousel-item:not([data-pos="0"]) .carousel-thumb {
+  opacity: 0.4;
+}
+
+.carousel-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  margin-top: 30px;
+}
+
+.carousel-arrow {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: var(--teal);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  padding: 0;
+}
+
+.carousel-arrow:hover {
+  background: rgba(0,168,120,0.15);
+  border-color: rgba(0,168,120,0.5);
+  transform: scale(1.08);
+}
+
+.carousel-arrow svg {
+  width: 18px;
+  height: 18px;
+}
+
+.carousel-thumb {
+  width: 100%;
+  height: 230px;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+
+.carousel-body {
+  padding: 22px 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.carousel-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--teal);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.carousel-title {
+  font-family: var(--display);
+  font-size: 21.5px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0 0 12px;
+  line-height: 1.22;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.6);
+}
+
+.carousel-q {
+  font-family: var(--serif);
+  font-size: 14px;
+  color: #E2E8F0;
+  line-height: 1.62;
+  flex: 1;
+}
+
+
+.carousel-footer {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.09);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.carousel-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.carousel-action {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: #00C896;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.carousel-action::after { content: ' →'; }
+
+
 /* =========================================================
    ADDITIONAL WORK
    ========================================================= */
@@ -642,6 +827,10 @@ a {
   background: var(--card);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
+}
+
+.education-bg .section-title {
+  color: var(--ink);
 }
 
 .education-grid {
@@ -1046,149 +1235,113 @@ a {
       to an interpretable result.
     </p>
 
-    <div class="featured-grid">
+        <div class="carousel-scene">
+      <div class="carousel-stage" id="carouselStage">
 
-
-      <!-- PARKING -->
-
-      <a class="project-card"
-         href="projects/parking-enforcement-analytics.html">
-            <img src="images/parking-dashboard.png" alt="Parking Enforcement Power BI dashboard" class="project-thumb-large">
-
-        <div class="project-card-top">
-
-          <div class="project-number">
-            01 / ANALYTICS ENGINEERING
+        <a class="carousel-item"
+           href="projects/parking-enforcement-analytics.html"
+           data-pos="0" data-index="0">
+          <img src="images/parking-dashboard.png" alt="Parking Enforcement" class="carousel-thumb">
+          <div class="carousel-body">
+            <div class="carousel-num">01 / ANALYTICS ENGINEERING</div>
+            <div class="carousel-title">Vehicle Parking Enforcement Analytics</div>
+            <div class="carousel-q">
+              Are automated vehicle parking enforcement operations working as intended? 
+              How can the data be transformed into a reliable analytical system for monitoring performance, workload, and operational coverage?
+              
+            </div>
+            <div class="carousel-footer">
+              <div class="carousel-tags">
+                <span class="tag">Python</span>
+                <span class="tag">DuckDB</span>
+                <span class="tag">dbt</span>
+                <span class="tag">Power BI</span>
+              </div>
+              <div class="carousel-action">VIEW CASE STUDY</div>
+            </div>
           </div>
+        </a>
 
-          <h3 class="project-title">
-            Parking Enforcement Analytics
-          </h3>
-
-          <p class="project-question">
-            How can operational enforcement data be transformed into a
-            reliable analytical system for monitoring performance,
-            workload, and operational coverage?
-          </p>
-
-        </div>
-
-        <div class="project-bottom">
-
-          <div class="project-type">
-            Operational analytics · Analytics engineering
+        <a class="carousel-item"
+           href="projects/nairobi-runners/nairobi-runners.html"
+           data-pos="1" data-index="1">
+          <img src="images/nairobi-runners.png" alt="Nairobi Runners" class="carousel-thumb">
+          <div class="carousel-body">
+            <div class="carousel-num">02 / SPORTS SCIENCE</div>
+            <div class="carousel-title">Nairobi Runners Analytics</div>
+            <div class="carousel-q">
+              How do training load, sleep, and recovery patterns change over time, and what do longitudinal running data reveal about recreational athletes’ performance? 
+              What are the warning signs that we might overlook?
+            </div>
+            <div class="carousel-footer">
+              <div class="carousel-tags">
+                <span class="tag">R</span>
+                <span class="tag">lme4</span>
+                <span class="tag">Shiny</span>
+                <span class="tag">Quarto</span>
+              </div>
+              <div class="carousel-action">VIEW CASE STUDY</div>
+            </div>
           </div>
+        </a>
 
-          <div class="project-tags">
-            <span class="tag">Python</span>
-            <span class="tag">Parquet</span>
-            <span class="tag">DuckDB</span>
-            <span class="tag">dbt</span>
-            <span class="tag">SQL</span>
-            <span class="tag">Power BI</span>
+        <a class="carousel-item"
+           href="projects/chemistry-properties-analytics/chemistry-properties-analytics.html"
+           data-pos="2" data-index="2">
+          <img src="images/Chemistry-dashboard.png" alt="Chemical Property Analytics" class="carousel-thumb">
+          <div class="carousel-body">
+            <div class="carousel-num">03 / SCIENTIFIC DATA SCIENCE</div>
+            <div class="carousel-title">Chemical Property Analytics</div>
+            <div class="carousel-q">
+              Can molecular structure and physicochemical properties predict a chemical compound’s ability to dissolve in water, and how accurately can machine learning make those predictions?
+            </div>
+            <div class="carousel-footer">
+              <div class="carousel-tags">
+                <span class="tag">Python</span>
+                <span class="tag">RDKit</span>
+                <span class="tag">ML</span>
+                <span class="tag">PostgreSQL</span>
+              </div>
+              <div class="carousel-action">VIEW CASE STUDY</div>
+            </div>
           </div>
+        </a>
 
-          <div class="project-action">
-            VIEW CASE STUDY
+        <a class="carousel-item"
+           href="projects/african-air-quality-analytics/african-air-quality-analytics.html"
+           data-pos="3" data-index="3">
+          <img src="images/african-air-quality.png" alt="African Air Quality" class="carousel-thumb">
+          <div class="carousel-body">
+            <div class="carousel-num">04 / ENVIRONMENTAL ANALYTICS</div>
+            <div class="carousel-title">African Air Quality Analytics</div>
+            <div class="carousel-q">
+              How public air quality sensors measuring PM2.5 concentrations vary across African monitoring stations? 
+              Can the data quality be controlled to
+              support reliable environmental insights and forecasts on pollution hotspots?
+            </div>
+            <div class="carousel-footer">
+              <div class="carousel-tags">
+                <span class="tag">Snowflake</span>
+                <span class="tag">dbt</span>
+                <span class="tag">R</span>
+                <span class="tag">Power BI</span>
+              </div>
+              <div class="carousel-action">VIEW CASE STUDY</div>
+            </div>
           </div>
+        </a>
 
-        </div>
+      </div>
 
-      </a>
+      <div class="carousel-nav">
+        <button class="carousel-arrow" id="carouselPrev" aria-label="Previous">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
 
-
-      <!-- NAIROBI RUNNERS -->
-
-      <a class="project-card"
-         href="projects/nairobi-runners/nairobi-runners.html">
-         <img src="images/nairobi-runners.png" alt="Nairobi Runners research report" class="project-thumb-large">
-
-        <div class="project-card-top">
-
-          <div class="project-number">
-            02 / SPORTS SCIENCE
-          </div>
-
-          <h3 class="project-title">
-            Nairobi Runners Analytics
-          </h3>
-
-          <p class="project-question">
-            How do training behaviour, sleep, and recovery interact
-            longitudinally across recreational runners?
-          </p>
-
-        </div>
-
-        <div class="project-bottom">
-
-          <div class="project-type">
-            Longitudinal analysis · Applied statistics
-          </div>
-
-          <div class="project-tags">
-            <span class="tag">R</span>
-            <span class="tag">Longitudinal</span>
-            <span class="tag">Mixed Effects</span>
-            <span class="tag">Quarto</span>
-            <span class="tag">Garmin</span>
-          </div>
-
-          <div class="project-action">
-            VIEW CASE STUDY
-          </div>
-
-        </div>
-
-      </a>
-
-
-      <!-- AQSOLDB -->
-
-      <a class="project-card"
-         href="projects/chemistry-properties-analytics/chemistry-properties-analytics.html">
-         <img src="images/Chemistry-dashboard.png" alt="Chemical solubility analytics" class="project-thumb-large">
-        <div class="project-card-top">
-
-          <div class="project-number">
-            03 / SCIENTIFIC DATA SCIENCE
-          </div>
-
-          <h3 class="project-title">
-            Chemical Property Analytics
-          </h3>
-
-          <p class="project-question">
-            Can molecular structure and physicochemical properties be used
-            to predict aqueous solubility, and what can the model reveal
-            about chemical behaviour?
-          </p>
-
-        </div>
-
-        <div class="project-bottom">
-
-          <div class="project-type">
-            Chemistry · Machine learning · Scientific modelling
-          </div>
-
-          <div class="project-tags">
-            <span class="tag">Python</span>
-            <span class="tag">RDKit</span>
-            <span class="tag">PostgreSQL</span>
-            <span class="tag">Machine Learning</span>
-            <span class="tag">Validation</span>
-          </div>
-
-          <div class="project-action">
-            VIEW CASE STUDY
-          </div>
-
-        </div>
-
-      </a>
-
-    </div>
+        <button class="carousel-arrow" id="carouselNext" aria-label="Next">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
 
 
     <!-- ADDITIONAL WORK -->
@@ -1559,4 +1712,48 @@ a {
   </div>
 
 </footer>
+
+
+<script>
+(function() {
+  var items   = Array.from(document.querySelectorAll('.carousel-item'));
+  var stage   = document.getElementById('carouselStage');
+  var btnPrev = document.getElementById('carouselPrev');
+  var btnNext = document.getElementById('carouselNext');
+  var n       = items.length;
+  var current = 0;
+  var timer   = null;
+
+  function setPositions(front) {
+    items.forEach(function(item, i) {
+      var offset = ((i - front) % n + n) % n;
+      item.setAttribute('data-pos', String(offset));
+    });
+  }
+
+  function advance() {
+    current = (current + 1) % n;
+    setPositions(current);
+  }
+
+  function retreat() {
+    current = (current - 1 + n) % n;
+    setPositions(current);
+  }
+
+  function start() { timer = setInterval(advance, 3200); }
+  function stop()  { clearInterval(timer); }
+
+  // Pause on hover over stage
+  stage.addEventListener('mouseenter', stop);
+  stage.addEventListener('mouseleave', start);
+
+  // Arrow buttons
+  btnNext.addEventListener('click', function() { stop(); advance(); start(); });
+  btnPrev.addEventListener('click', function() { stop(); retreat(); start(); });
+
+  start();
+})();
+</script>
+
 ```
