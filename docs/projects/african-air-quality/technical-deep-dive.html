@@ -1,0 +1,1998 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>technical-deep-dive</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+
+
+<script src="technical-deep-dive_files/libs/clipboard/clipboard.min.js"></script>
+<script src="technical-deep-dive_files/libs/quarto-html/tabby.min.js"></script>
+<script src="technical-deep-dive_files/libs/quarto-html/popper.min.js"></script>
+<script src="technical-deep-dive_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="technical-deep-dive_files/libs/quarto-html/anchor.min.js"></script>
+<link href="technical-deep-dive_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="technical-deep-dive_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="technical-deep-dive_files/libs/quarto-html/quarto-html-734cb40618f438257b19a1e532635a32.min.css" rel="stylesheet" append-hash="true" data-mode="light">
+<link href="technical-deep-dive_files/libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<style>html{ scroll-behavior: smooth; }</style>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Technical deep dive: a reproducible analytical pipeline for reconstructing, validating, tracing, and analyzing heterogeneous PM2.5 sensor data from Sensors.AFRICA.">
+
+
+</head>
+
+<body>
+
+
+
+
+
+<style>
+/* =========================================================
+   DESIGN TOKENS
+   ========================================================= */
+:root {
+  --navy: #0D1B2A;
+  --navy-2: #14263A;
+  --teal: #00A878;
+  --teal-dark: #007D5A;
+  --gold: #E8C547;
+  --ink: #172331;
+  --slate: #4A5568;
+  --muted: #6B7A8A;
+  --mist: #F3F6F8;
+  --border: #DCE3E9;
+  --white: #FFFFFF;
+  --on-dark: #C6D3DD;
+  --on-dark-muted: #9FB0BF;
+  --display: "Space Grotesk", Arial, sans-serif;
+  --serif: "Source Serif 4", Georgia, serif;
+  --mono: "JetBrains Mono", monospace;
+  --content-width: 1120px;
+  --text-width: 780px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--white);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+/* Hide Quarto chrome and remove its width limits */
+#quarto-header, #quarto-footer, #quarto-sidebar, #quarto-margin-sidebar,
+.quarto-title-block, .navbar, .sidebar, .page-navigation, #TOC {
+  display: none !important;
+}
+#quarto-content, .page-columns, main.content, .quarto-container {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+p { margin: 0 0 18px; max-width: var(--text-width); }
+a { color: var(--teal-dark); text-underline-offset: 3px; }
+a:hover { color: var(--navy); }
+strong { font-weight: 600; }
+ul, ol { padding-left: 22px; max-width: var(--text-width); }
+li { margin-bottom: 8px; }
+::selection { background: rgba(0,168,120,.18); }
+
+h1, h2, h3, h4 { font-family: var(--display); line-height: 1.15; letter-spacing: -0.03em; }
+h2 { margin: 0 0 22px; font-size: clamp(28px, 3.4vw, 42px); font-weight: 600; }
+h3 { margin: 38px 0 14px; font-size: 21px; font-weight: 600; }
+
+code, pre { font-family: var(--mono); }
+:not(pre) > code {
+  padding: 2px 5px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--mist);
+  color: var(--navy);
+  font-size: .82em;
+  overflow-wrap: anywhere;
+}
+pre {
+  margin: 20px 0;
+  padding: 18px 20px;
+  overflow-x: auto;
+  border-radius: 5px;
+  background: var(--navy);
+  color: #E8EEF3;
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+/* =========================================================
+   LAYOUT BANDS
+   ========================================================= */
+.band { width: 100%; padding: 84px 0; background: var(--white); }
+.band.dark { background: var(--navy); color: var(--on-dark); }
+.band.mist { background: var(--mist); }
+.wrap {
+  width: 100%;
+  max-width: calc(var(--content-width) + 48px);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.kicker {
+  margin-bottom: 14px;
+  color: var(--teal-dark);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.lead {
+  max-width: var(--text-width);
+  margin-bottom: 30px;
+  color: var(--slate);
+  font-size: 20px;
+  line-height: 1.6;
+}
+
+/* Dark band overrides */
+.band.dark h2, .band.dark h3, .band.dark h4, .band.dark strong { color: var(--white); }
+.band.dark .kicker { color: var(--teal); }
+.band.dark .lead { color: var(--on-dark); }
+.band.dark a { color: #55D7B0; }
+.band.dark :not(pre) > code { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.16); color: #E8EEF3; }
+
+/* =========================================================
+   NAV AND HERO
+   ========================================================= */
+.nav {
+  background: var(--navy);
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 70px;
+}
+.nav a {
+  color: rgba(255,255,255,.68);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.nav a:hover { color: var(--teal); }
+.nav-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px 20px; }
+
+.hero {
+  padding: 96px 0 84px;
+  color: var(--white);
+  background:
+    radial-gradient(ellipse at 88% 8%, rgba(0,168,120,.16), transparent 38%),
+    linear-gradient(135deg, var(--navy), var(--navy-2));
+}
+.hero .kicker { color: var(--teal); margin-bottom: 24px; }
+.hero h1 {
+  max-width: 900px;
+  margin: 0 0 22px;
+  color: var(--white);
+  font-size: clamp(42px, 6.4vw, 78px);
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+.hero-sub {
+  max-width: 800px;
+  margin-bottom: 26px;
+  color: #CBD5E0;
+  font-size: clamp(20px, 2.4vw, 26px);
+  line-height: 1.45;
+}
+.hero p { color: #B7C5D2; font-size: 16px; }
+.hero strong { color: var(--white); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+.chips span {
+  padding: 6px 10px;
+  border: 1px solid rgba(0,168,120,.32);
+  border-radius: 2px;
+  background: rgba(0,168,120,.07);
+  color: var(--teal);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+/* =========================================================
+   STATS STRIP
+   ========================================================= */
+.stats { background: var(--mist); border-bottom: 1px solid var(--border); }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+.stat { padding: 30px 24px; border-right: 1px solid var(--border); }
+.stat:first-child { padding-left: 0; }
+.stat:last-child { border-right: 0; }
+.stat-value {
+  display: block;
+  color: var(--navy);
+  font-family: var(--display);
+  font-size: clamp(26px, 3vw, 34px);
+  font-weight: 600;
+  line-height: 1.1;
+}
+.stat-label {
+  display: block;
+  margin-top: 9px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .08em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+/* =========================================================
+   CARDS, GRIDS, CALLOUTS
+   ========================================================= */
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 28px 0; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 28px 0; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 30px 0; }
+
+.card {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--white);
+}
+.band.dark .card { border-color: rgba(255,255,255,.13); background: rgba(255,255,255,.04); }
+.card h3 { margin: 0 0 10px; font-size: 18px; }
+.card p { margin: 0; max-width: none; color: var(--slate); font-size: 15px; line-height: 1.6; }
+.band.dark .card p { color: var(--on-dark); }
+.card-label {
+  margin-bottom: 10px;
+  color: var(--teal-dark);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.band.dark .card-label { color: var(--gold); }
+.card-value {
+  margin-bottom: 8px;
+  color: var(--navy);
+  font-family: var(--display);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.band.dark .card-value { color: var(--white); }
+
+.step { padding: 18px 16px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); }
+.step .n { margin-bottom: 12px; color: var(--teal-dark); font-family: var(--mono); font-size: 10px; }
+.step strong { display: block; margin-bottom: 6px; color: var(--navy); font-family: var(--display); font-size: 14px; }
+.step p { margin: 0; color: var(--slate); font-size: 13px; line-height: 1.55; }
+
+.callout {
+  max-width: var(--text-width);
+  margin: 28px 0;
+  padding: 20px 24px;
+  border-left: 3px solid var(--teal);
+  background: var(--mist);
+}
+.callout .card-label { margin-bottom: 8px; }
+.callout p { margin: 0 0 10px; color: var(--slate); font-size: 15px; }
+.callout p:last-child { margin-bottom: 0; }
+.band.dark .callout { background: rgba(255,255,255,.05); }
+.band.dark .callout p { color: var(--on-dark); }
+.band.mist .callout { background: var(--white); }
+
+.formula {
+  max-width: var(--text-width);
+  margin: 24px 0;
+  padding: 20px 24px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--mist);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.band.dark .formula { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.13); color: #E8EEF3; }
+
+.chain { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 22px 0; }
+.chain span {
+  padding: 7px 10px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 3px;
+  background: rgba(255,255,255,.05);
+  font-family: var(--mono);
+  font-size: 10px;
+}
+.chain b { color: var(--teal); }
+
+/* =========================================================
+   TABLES
+   ========================================================= */
+.table-scroll { max-width: 860px; margin: 22px 0 28px; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-family: var(--display); font-size: 14px; line-height: 1.5; }
+thead { background: var(--navy); color: var(--white); }
+th { padding: 11px 14px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: .04em; }
+td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tbody tr:nth-child(even) { background: var(--mist); }
+.band.dark thead { background: #20374D; }
+.band.dark td { border-color: rgba(255,255,255,.14); }
+.band.dark tbody tr:nth-child(even) { background: rgba(255,255,255,.045); }
+.band.mist tbody tr:nth-child(even) { background: var(--white); }
+.num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+
+/* =========================================================
+   FIGURES
+   ========================================================= */
+.figure { max-width: 940px; margin: 38px 0; padding: 0; }
+.figure .fig-label {
+  margin-bottom: 10px;
+  color: var(--teal-dark);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--white);
+}
+.figure figcaption {
+  max-width: var(--text-width);
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.figure.panels { display: block; }
+.panel-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.band.dark .figure .fig-label { color: var(--gold); }
+.band.dark .figure img { border-color: rgba(255,255,255,.14); }
+.band.dark .figure figcaption { color: var(--on-dark-muted); }
+.band.mist .figure img { border-color: var(--border); }
+
+/* =========================================================
+   LISTS OF LIMITS / V2
+   ========================================================= */
+.limits { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 26px; }
+.limit { padding: 18px 20px; border-top: 2px solid var(--teal); background: rgba(255,255,255,.045); }
+.limit strong { display: block; margin-bottom: 6px; font-family: var(--display); font-size: 14px; }
+.limit p { margin: 0; max-width: none; color: var(--on-dark); font-size: 14px; line-height: 1.55; }
+.v2 { border-top: 3px solid var(--teal); }
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+.case-foot {
+  padding: 34px 0;
+  background: #08131F;
+  color: rgba(255,255,255,.62);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.case-foot-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; }
+.case-foot a { color: rgba(255,255,255,.7); text-decoration: none; }
+.case-foot a:hover { color: var(--teal); }
+.case-foot strong { color: var(--white); font-weight: 500; }
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 900px) {
+  .band { padding: 64px 0; }
+  .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat:nth-child(2) { border-right: 0; }
+  .stat:nth-child(-n+2) { border-bottom: 1px solid var(--border); }
+  .stat:nth-child(3) { padding-left: 0; }
+  .limits { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  body { font-size: 16px; }
+  .band { padding: 52px 0; }
+  .hero { padding: 64px 0 56px; }
+  .nav-links { display: none; }
+  .grid-2, .grid-3, .grid-4, .panel-row { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .stat { padding: 20px 14px; }
+  .lead { font-size: 18px; }
+  .case-foot-inner { flex-direction: column; align-items: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <a href="/#projects">← All Projects</a>
+    <div class="nav-links">
+      <a href="#architecture">Architecture</a>
+      <a href="#data">Data</a>
+      <a href="#quality">Quality control</a>
+      <a href="#nairobi">Nairobi</a>
+      <a href="#forecasting">Forecasting</a>
+      <a href="#limitations">Limitations</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Technical deep dive · Data engineering · Environmental analytics</div>
+    <h1>African Air Quality Analytics</h1>
+    <p class="hero-sub">Engineering a reproducible analytical pipeline from a heterogeneous African air-quality archive.</p>
+    <p>The main case study presents this project from an analytical and portfolio perspective. This deep dive documents how the dataset was reconstructed, validated, modeled, and analyzed, and why specific engineering decisions were made.</p>
+    <p>The central design principle was simple: <strong>do not make the data look cleaner than the evidence allows.</strong> Observations were preserved wherever possible, while structural validity, temporal continuity, analytical eligibility, provenance, and quality concerns were handled explicitly.</p>
+    <div class="chips">
+      <span>Python</span><span>Snowflake</span><span>dbt</span><span>R</span><span>Power BI</span><span>Quarto</span>
+    </div>
+  </div>
+</header>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="wrap">
+    <div class="stats-grid">
+      <div class="stat"><span class="stat-value">656,534</span><span class="stat-label">Canonical hourly records</span></div>
+      <div class="stat"><span class="stat-value">293</span><span class="stat-label">Physical sensor/location units</span></div>
+      <div class="stat"><span class="stat-value">8</span><span class="stat-label">Analytical cities</span></div>
+      <div class="stat"><span class="stat-value">3.68%</span><span class="stat-label">Mean per-series RMSE improvement · Nairobi, 60 evaluated series · baseline, before QC sensitivity analysis</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 01 ARCHITECTURE -->
+<section class="band" id="architecture">
+  <div class="wrap">
+    <div class="kicker">01 · System design</div>
+    <h2 class="anchored">Project architecture</h2>
+    <p class="lead">The project began with a public archive of low-cost air-quality observations from Sensors.AFRICA, accessed through the openAFRICA CKAN API. The objective was not a PM2.5 dashboard. It was a reproducible analytical system that could answer five progressively harder questions.</p>
+
+    <ol>
+      <li>What data actually exist in the archive?</li>
+      <li>Can those observations be reconstructed into a coherent canonical dataset?</li>
+      <li>Which sensor histories are suitable for which analytical tasks?</li>
+      <li>What should happen when observations appear anomalous or extreme?</li>
+      <li>What statistical and forecasting conclusions can legitimately be supported by the resulting population?</li>
+    </ol>
+
+    <div class="grid-4">
+      <div class="step"><div class="n">01 · AUDIT</div><strong>Source reconstruction</strong><p>Catalogue datasets and resources; inspect formats; record download and parsing outcomes.</p></div>
+      <div class="step"><div class="n">02 · BUILD</div><strong>Canonicalization</strong><p>Parse PM2.5, validate structure, and aggregate to hourly sensor/location records.</p></div>
+      <div class="step"><div class="n">03 · QUALIFY</div><strong>Eligibility and QC</strong><p>Identify continuous histories; separate eligibility from temporal validity and QC flags.</p></div>
+      <div class="step"><div class="n">04 · ANALYZE</div><strong>Model and report</strong><p>Snowflake, dbt, R, and Power BI for reproducible analysis and communication.</p></div>
+    </div>
+
+    <p>The archive audit catalogued <strong>95 datasets and 641 resources</strong>, and 324 resources associated with the target-city investigation were downloaded and audited. The archive carries PM1, PM2.5, PM10, temperature, and humidity measurements; Version 1 deliberately focuses on PM2.5.</p>
+    <p>The analytical city population is Nairobi, Nakuru, Accra, Abuja, Lagos, Kano, Kumasi, and Awka. Ado-Ekiti, Akure, and Lusaka were encountered during source reconstruction and retained as provenance context only. They were not carried into the analytical population, which is a scope decision rather than a failed quality test, and the eight-city population is not a ranking of cities by data quality or importance.</p>
+
+    <figure class="figure">
+      <div class="fig-label">Figure 1 · Source volume by city</div>
+      <img src="reports/figures/01_pm25_source_volume_by_city.png" alt="Bar chart of raw PM2.5 source observation volume by city." loading="lazy">
+      <figcaption>Source-level PM2.5 observation volume by investigated city. Row counts show how much data existed, not whether those observations form histories continuous enough for a given analysis; city volume was never used as a proxy for analytical suitability.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 02 SOURCE RECONSTRUCTION -->
+<section class="band dark" id="data">
+  <div class="wrap">
+    <div class="kicker">02 · Source reconstruction</div>
+    <h2 class="anchored">Structural validity comes before analytical eligibility</h2>
+    <p class="lead">The archive was not treated as a collection of clean CSV files. Resource-level identity was retained, and parsing and structural validation were separated from every later analytical decision.</p>
+
+    <p>A naive pipeline would have been <em>download, concatenate, clean, aggregate, chart</em>. That sequence cannot answer where an observation came from, which resources contributed to an hour, or how much of the archive was excluded.</p>
+
+    <h3 class="anchored">Reconciliation of PM2.5 observations</h3>
+    <div class="table-scroll">
+      
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Category</th>
+<th class="num" data-quarto-table-cell-role="th">Observations</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Raw PM2.5 observations</td>
+<td class="num">28,374,186</td>
+</tr>
+<tr class="even">
+<td>Out of analytical scope</td>
+<td class="num">24,229</td>
+</tr>
+<tr class="odd">
+<td>In scope but structurally invalid</td>
+<td class="num">432</td>
+</tr>
+<tr class="even">
+<td>Structurally valid and in scope</td>
+<td class="num">28,349,525</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+    <p>The 432 invalid observations were 144 nonnumeric values and 288 negative values. Zero readings were retained rather than treated as automatically invalid. The reconciliation closes exactly: 28,349,525 + 24,229 + 432 = 28,374,186. Out-of-scope and structurally invalid are different classifications, and neither was a silent cleaning step.</p>
+
+    <h3 class="anchored">Provenance as part of the data model</h3>
+    <div class="chain"><span>city</span><b>→</b><span>sensor</span><b>→</b><span>location</span><b>→</b><span>source resource</span><b>→</b><span>source file</span><b>→</b><span>timestamp</span><b>→</b><span>observation</span></div>
+    <p>A canonical hourly record can aggregate observations from several source resources, so <code>RESOURCE_IDS</code> and <code>SOURCE_FILES</code> are deliberately plural. A resource identifier is not a sensor identifier: one sensor can contribute through multiple files, and one canonical hour can draw on multiple resources.</p>
+    <p>Retaining that lineage is what later made it possible to trace an extreme reading back to its source material instead of deleting it.</p>
+  </div>
+</section>
+
+<!-- 03 CANONICAL -->
+<section class="band">
+  <div class="wrap">
+    <div class="kicker">03 · Canonical data product</div>
+    <h2 class="anchored">The canonical hourly PM2.5 dataset</h2>
+    <p>The validated observations were aggregated to a defined analytical grain.</p>
+    <pre>city + sensor_id + sensor_type + location + timestamp_hour</pre>
+
+    <div class="grid-3">
+      <div class="card"><div class="card-label">Rows</div><div class="card-value">656,534</div><p>Hourly canonical observations.</p></div>
+      <div class="card"><div class="card-label">Units</div><div class="card-value">293</div><p>Physical sensor/location units.</p></div>
+      <div class="card"><div class="card-label">Integrity</div><div class="card-value">0</div><p>Duplicate keys at the declared grain.</p></div>
+    </div>
+
+    <p>The canonical file is <code>data/processed/multicity_pm25_hourly_canonical.csv</code> (about 175 MB), which is why it is reproduced from scripts rather than committed to the repository.</p>
+
+    <h3 class="anchored">Why the hourly value is weighted</h3>
+    <p>Where several observations contributed to one hour, the hourly mean was rebuilt from observation sums and counts rather than by averaging resource-level means.</p>
+    <div class="formula">hourly mean = (sum of PM2.5 sums across resources) ÷ (sum of observation counts across resources)</div>
+    <p>This preserves observation weighting. An unweighted average of resource means would give a resource containing one reading the same influence as one containing hundreds. It also matters later: the 1,000 µg/m³ QC threshold is applied to this hourly mean.</p>
+    <p>The canonical output keeps minimum and maximum PM2.5, observation counts, negative, zero, and high-value counts, exact-duplicate counts, resource counts, and source identifiers, so that each hourly value stays connected to the evidence behind it. Hourly aggregation does not imply that all sensors sample identically.</p>
+  </div>
+</section>
+
+<!-- 04 ELIGIBILITY -->
+<section class="band dark">
+  <div class="wrap">
+    <div class="kicker">04 · Eligibility contract</div>
+    <h2 class="anchored">Eligibility is not structural validity</h2>
+    <p class="lead">A structurally valid observation can belong to a short or interrupted history. The project separates four questions that a single "valid" flag would blur.</p>
+
+    <div class="grid-4">
+      <div class="card"><div class="card-label">Structural validity</div><p>Can the observation be parsed and does it satisfy basic rules?</p></div>
+      <div class="card"><div class="card-label">Rule A eligibility</div><p>Does the sensor/location history contain a qualifying continuous segment?</p></div>
+      <div class="card"><div class="card-label">Temporal validity</div><p>Does the row fall in a known temporal anomaly?</p></div>
+      <div class="card"><div class="card-label">Modeling eligibility</div><p>Does the row belong to the final forecasting population?</p></div>
+    </div>
+
+    <h3 class="anchored">Rule A</h3>
+    <p>A segment is eligible when it contains a continuous run of at least <strong>24 hours</strong> and at least <strong>24 usable forecasting rows</strong>. Usable rows are the observed hours in a segment that remain after subtracting hours flagged by two screens: PM2.5 above 1,000 µg/m³, and an absolute robust z-score above 6 (computed from the sensor-level median and median absolute deviation, and only where the deviation is positive). A third screen, observations above the sensor-specific 99.9th percentile, is a diagnostic flag for inspection and is not deducted from the usable-hour count. The two Rule A thresholds are evaluated separately, and these are project screening rules, not universal physical limits or proof of sensor failure.</p>
+    <p>Rule A is a minimum-history contract, not a verdict on data quality and not a claim that an eligible segment suffices for every model.</p>
+
+    <div class="table-scroll">
+      
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Eligibility measure</th>
+<th class="num" data-quarto-table-cell-role="th">Count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Segment records assessed</td>
+<td class="num">21,303</td>
+</tr>
+<tr class="even">
+<td>Eligible segments</td>
+<td class="num">3,996</td>
+</tr>
+<tr class="odd">
+<td>Noneligible segments</td>
+<td class="num">17,307</td>
+</tr>
+<tr class="even">
+<td>Physical units with at least one eligible history</td>
+<td class="num">183 of 293</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+    <p>The remaining 110 units are not "bad data"; their histories simply do not meet the continuity requirement for analyses that need sustained temporal structure.</p>
+
+    <figure class="figure">
+      <div class="fig-label">Figure 2 · Eligibility population</div>
+      <img src="reports/figures/02_eligibility_population.png" alt="Chart showing the canonical sensor/location population and the Rule A eligible population." loading="lazy">
+      <figcaption>Eligibility is a suitability contract: 293 canonical units, 183 Rule-A eligible units, and 641,341 analytically eligible rows.</figcaption>
+    </figure>
+
+    <h3 class="anchored">Sensor-type composition</h3>
+    <div class="table-scroll">
+      
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Sensor-type group</th>
+<th class="num" data-quarto-table-cell-role="th">Eligible physical units</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>pms5003</code></td>
+<td class="num">95</td>
+</tr>
+<tr class="even">
+<td><code>SDS011</code></td>
+<td class="num">75</td>
+</tr>
+<tr class="odd">
+<td><code>SDS011|pms5003</code></td>
+<td class="num">12</td>
+</tr>
+<tr class="even">
+<td><code>BAM 1020</code></td>
+<td class="num">1</td>
+</tr>
+<tr class="odd">
+<td><strong>Total</strong></td>
+<td class="num"><strong>183</strong></td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+    <p>The groups are mutually exclusive physical units. Twelve units are represented by both underlying sensor types, so counting sensor-type <em>representations</em> instead gives 107 pms5003, 87 SDS011, and 1 BAM 1020, a total of 195. That is not a network size; the physical count remains 183. <code>DHT22</code> was excluded from the PM2.5 analytical sensor population.</p>
+
+    <h3 class="anchored">Temporal validity and the modeling population</h3>
+    <p>A row can satisfy every structural and eligibility rule and still sit inside a known anomalous period. The documented case is Kano, where four segments (sensors 4990/4016 and 4995/4017) carry corrupted epoch timestamps from 1970 and 2000. A blanket rule such as <code>timestamp &gt;= 2020</code> would have removed them, but it would also have imposed an arbitrary cutoff on heterogeneous source histories. The anomaly was instead characterized explicitly in an intermediate dbt model, <code>INT_KNOWN_TEMPORAL_ANOMALIES</code>, and each row receives a <code>TEMPORAL_VALIDITY_STATUS</code> of <code>NORMAL</code> or <code>KNOWN_EPOCH_ANOMALY</code>.</p>
+    <div class="formula">ANALYTICALLY_ELIGIBLE = TRUE<br>AND TEMPORAL_VALIDITY_STATUS = 'NORMAL'<br>→ MODELING_ELIGIBLE</div>
+    <div class="table-scroll">
+      
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Population</th>
+<th class="num" data-quarto-table-cell-role="th">Rows</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Canonical hourly rows</td>
+<td class="num">656,534</td>
+</tr>
+<tr class="even">
+<td>Rule-A eligible rows</td>
+<td class="num">641,341</td>
+</tr>
+<tr class="odd">
+<td>Removed by explicit temporal-validity rules</td>
+<td class="num">31</td>
+</tr>
+<tr class="even">
+<td><strong>Final modeling population</strong></td>
+<td class="num"><strong>641,310</strong></td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+    <p>These are different analytical states, not a single "clean rows" funnel. The point is not that 31 rows were bad; it is that the final population has a documented rule explaining why they were excluded.</p>
+  </div>
+</section>
+
+<!-- 05 WAREHOUSE -->
+<section class="band">
+  <div class="wrap">
+    <div class="kicker">05 · Warehouse engineering</div>
+    <h2 class="anchored">Snowflake and dbt</h2>
+    <p class="lead">Snowflake holds the layered analytical data; dbt makes the transformation logic explicit and tested.</p>
+
+<pre>AIR_QUALITY
+├── RAW
+│   ├── MULTICITY_STAGE            (stage)
+│   ├── CSV_STANDARD               (file format)
+│   └── MULTICITY_PM25_SEGMENTS    (21,303 segment records)
+├── STAGING
+│   └── MULTICITY_PM25_HOURLY      (656,534 rows)
+└── ANALYTICS
+    ├── STG_MULTICITY_PM25_HOURLY
+    ├── INT_KNOWN_TEMPORAL_ANOMALIES
+    ├── FCT_PM25_HOURLY
+    └── FCT_PM25_FORECASTING_POPULATION</pre>
+
+    <p>The staging table holds 656,534 rows with 656,534 distinct grain keys, confirming that canonical uniqueness survives warehouse loading. <code>FCT_PM25_HOURLY</code> carries the PM2.5 statistics, observation counts, provenance fields, eligibility, temporal validity, QC flag, and modeling eligibility. The forecasting population is derived from it with a single, auditable filter:</p>
+    <div class="formula">FCT_PM25_HOURLY WHERE MODELING_ELIGIBLE = TRUE → FCT_PM25_FORECASTING_POPULATION</div>
+    <p>dbt tests cover not-null constraints, grain uniqueness, and a row-count regression check on the forecasting population. They protect the assumptions that downstream analysis depends on.</p>
+  </div>
+</section>
+
+<!-- 06 QC -->
+<section class="band dark" id="quality">
+  <div class="wrap">
+    <div class="kicker">06 · Quality control</div>
+    <h2 class="anchored">Flag, retain, investigate</h2>
+    <p class="lead">A large PM2.5 value can be a genuine episode, sensor-specific behavior, a fault, or a source problem. Deleting it would remove exactly the evidence needed to tell which.</p>
+
+    <div class="formula">hourly PM2.5 mean &gt; 1,000 µg/m³ → PM25_ABOVE_SENSOR_RANGE = TRUE</div>
+    <p>This is an adopted analytical screening threshold. It is not a universal health limit and not a claim that 1,000 µg/m³ is the physical maximum of every sensor. The field name reads more strongly than the rule: it marks a review trigger, not a demonstrated sensor-range violation.</p>
+
+    <div class="grid-3">
+      <div class="card"><div class="card-label">Flagged rows</div><div class="card-value">3,007</div><p>Retained, never deleted.</p></div>
+      <div class="card"><div class="card-label">Sensors</div><div class="card-value">22</div><p>Affected by at least one flag.</p></div>
+      <div class="card"><div class="card-label">Locations</div><div class="card-value">20</div><p>Affected by at least one flag.</p></div>
+    </div>
+
+    <div class="table-scroll">
+      
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Sensor type</th>
+<th class="num" data-quarto-table-cell-role="th">Flagged rows</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>pms5003</code></td>
+<td class="num">3,003</td>
+</tr>
+<tr class="even">
+<td><code>DHT22</code></td>
+<td class="num">2</td>
+</tr>
+<tr class="odd">
+<td><code>SDS011</code></td>
+<td class="num">2</td>
+</tr>
+<tr class="even">
+<td><code>BAM 1020</code></td>
+<td class="num">0</td>
+</tr>
+<tr class="odd">
+<td><code>SPH0645_MIC</code></td>
+<td class="num">0</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+    <p>Almost all flagged rows sit on one sensor type, which is a reason to investigate, but not enough evidence to declare that type defective. The archive also contains PM2.5-labelled readings from device types such as <code>DHT22</code> and <code>SPH0645_MIC</code> that are not conventional PM2.5 instruments, which further limits direct comparability across the network.</p>
+  </div>
+</section>
+
+<!-- 07 NAIROBI SPATIAL -->
+<section class="band" id="nairobi">
+  <div class="wrap">
+    <div class="kicker">07 · Spatial analysis</div>
+    <h2 class="anchored">Nairobi: proximity is not equivalence</h2>
+    <p class="lead">The engineering layer covers eight cities. The deeper spatial, anomaly, and forecasting work focuses on Nairobi, and that was a methodological choice, not a geographic one.</p>
+
+    <p>Nairobi holds the densest sensor network in the archive: 389,721 of the 641,310 modeling rows and 128 of the 183 modeling-eligible series. Several other cities have only a handful of sufficiently continuous series, so the same analysis there would have rested on substantially less robust evidence. Rather than force identical depth everywhere, the detailed work went where the temporal and spatial structure could support it.</p>
+
+    <h3 class="anchored">Coordinates are evidence, not fixed truth</h3>
+    <p>A durable lookup was built at <code>metadata/sensor_location_coordinates.csv</code>: 3,417 coordinate records, 129 unique locations, and 323 unique sensors. Five sensor/location combinations and four location IDs have more than one coordinate pair, so a location ID cannot be assumed to be a fixed point. The lookup was kept separate from the PM2.5 fact table instead of forcing a join on non-unique keys.</p>
+
+    <h3 class="anchored">Which pairs can be compared?</h3>
+    <p>Among Nairobi locations with at least 1,000 observations (45 locations, 990 pairs):</p>
+    <div class="table-scroll">
+      
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Comparison criterion</th>
+<th class="num" data-quarto-table-cell-role="th">Pairs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Any temporal-window overlap</td>
+<td class="num">547</td>
+</tr>
+<tr class="even">
+<td>At least 30 days of overlap</td>
+<td class="num">533</td>
+</tr>
+<tr class="odd">
+<td>At least 180 days of overlap</td>
+<td class="num">383</td>
+</tr>
+<tr class="even">
+<td>Same sensor type (separate dimension)</td>
+<td class="num">322</td>
+</tr>
+<tr class="odd">
+<td>Same sensor type and at least 30 days of overlap</td>
+<td class="num">87</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+    <p>The overlap rows are progressively stricter versions of one condition; the same-sensor-type row is a different dimension, so the table is not a single funnel. Overlap in the broad window does not mean two locations ever reported in the same hour, so exact simultaneous observations were counted separately: 74 pairs had any, 62 had at least 168 paired hours, and 46 had at least 720.</p>
+
+    <figure class="figure">
+      <div class="fig-label">Figure 3 · Pairwise hourly correlation</div>
+      <img src="reports/figures/05_nairobi_pairwise_correlation.png" alt="Bar chart comparing same-hour Pearson correlation for selected Nairobi location pairs." loading="lazy">
+      <figcaption>Same-hour Pearson correlations for two Nairobi location pairs. Locations 3573 and 3580 agree strongly (r ≈ 0.78), while locations 3966 and 3967 do not (r ≈ 0.002).</figcaption>
+    </figure>
+
+    <h3 class="anchored">A concrete example: locations 3966 and 3967</h3>
+    <p>The two locations are about 0.6 km apart and share the same <code>pms5003</code> sensor-type label. They have 4,166 simultaneous hourly observations, yet their Pearson correlation is approximately 0.002.</p>
+    <div class="grid-2">
+      <div class="card"><div class="card-label">Median signed difference (3966 − 3967)</div><div class="card-value">+19.3 µg/m³</div><p>Median absolute difference: 21.8 µg/m³.</p></div>
+      <div class="card"><div class="card-label">Pairwise RMSE</div><div class="card-value">≈ 219 µg/m³</div><p>Root-mean-square difference across the paired hours.</p></div>
+    </div>
+    <p>A near-zero Pearson correlation means no detectable <em>linear</em> relationship between paired hourly readings. It does not rule out nonlinear or lagged association, and Pearson is sensitive to outliers: both of these sensors contain readings above 3,000 µg/m³, and the inventory in section 10 lists 17 flagged hourly rows for sensor 4900 at location 3967, so a rank-based or flagged-hours-excluded check would be a useful robustness test that was not run in Version 1. Location 3967 also has a median of about 0.3 µg/m³ against 30.7 for 3966, so part of the divergence may reflect that sensor's behavior and not purely local air quality.</p>
+
+    <div class="callout">
+      <div class="card-label">Interpretation</div>
+      <p><strong>Geographic proximity alone is insufficient to establish comparable hourly PM2.5 behavior.</strong></p>
+      <p>The comparison does not show the two locations experienced independent ambient conditions. Differences could reflect local exposure, sensor behavior, data-quality problems, or a mixture.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 08 ANOMALY -->
+<section class="band dark">
+  <div class="wrap">
+    <div class="kicker">08 · Anomaly investigation</div>
+    <h2 class="anchored">Investigating Nairobi's extreme observations</h2>
+    <p class="lead">The question was whether extreme values reflected a shared pollution event, or were concentrated in particular sensor histories and source resources.</p>
+
+    <p>Four locations were examined: 3573 as a clean comparison location, 3626 for its prolonged extreme regime, and 3966 and 3967 for isolated extremes and their proximity. Two thresholds serve different purposes. Observations above <strong>100 µg/m³</strong> define exploratory extreme episodes; the broader QC flag fires above <strong>1,000 µg/m³</strong>. A reading above 100 is not automatically QC-flagged.</p>
+
+    <div class="table-scroll">
+      
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Location</th>
+<th class="num" data-quarto-table-cell-role="th">Obs.</th>
+<th class="num" data-quarto-table-cell-role="th">Median</th>
+<th class="num" data-quarto-table-cell-role="th">Mean</th>
+<th class="num" data-quarto-table-cell-role="th">95th pct</th>
+<th class="num" data-quarto-table-cell-role="th">Max</th>
+<th class="num" data-quarto-table-cell-role="th">&gt;100 µg/m³</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>3573</td>
+<td class="num">16,231</td>
+<td class="num">19.1</td>
+<td class="num">20.8</td>
+<td class="num">39.0</td>
+<td class="num">96.3</td>
+<td class="num">0</td>
+</tr>
+<tr class="even">
+<td>3626</td>
+<td class="num">1,744</td>
+<td class="num">40.2</td>
+<td class="num">≈811</td>
+<td class="num">≈3,333</td>
+<td class="num">≈3,346</td>
+<td class="num">414</td>
+</tr>
+<tr class="odd">
+<td>3966</td>
+<td class="num">7,734</td>
+<td class="num">30.7</td>
+<td class="num">32.7</td>
+<td class="num">50.8</td>
+<td class="num">4,550</td>
+<td class="num">26</td>
+</tr>
+<tr class="even">
+<td>3967</td>
+<td class="num">5,792</td>
+<td class="num">0.3</td>
+<td class="num">21.0</td>
+<td class="num">41.4</td>
+<td class="num">≈3,341</td>
+<td class="num">31</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+    <p>The mean at 3626 is dominated by its extreme regime, which is why medians and upper-tail measures describe it better.</p>
+
+    <figure class="figure panels">
+      <div class="fig-label">Figure 4 · Extreme observations and episode duration</div>
+      <div class="panel-row">
+        <img src="reports/figures/03_nairobi_extreme_observations.png" alt="Bar chart of Nairobi observations above 100 micrograms per cubic metre by location." loading="lazy">
+        <img src="reports/figures/04_extreme_episode_duration.png" alt="Bar chart of the longest extreme PM2.5 episode duration by Nairobi location." loading="lazy">
+      </div>
+      <figcaption>Left: observations above 100 µg/m³ by location. Right: longest contiguous episode above that level. The extreme tail is concentrated in a few location histories, and duration separates isolated spikes from sustained regimes.</figcaption>
+    </figure>
+
+    <p>An extreme episode is a contiguous run of observations above 100 µg/m³, split whenever the gap exceeds one hour, so the episode count depends on that declared rule and is not a count of distinct physical events. Across the three locations that exceed the threshold, there are <strong>471 extreme observations in 43 episodes</strong>, associated with <strong>13 source resources</strong>. Five episodes and 15 peak observations were selected by script logic for detailed examination; they are illustrative, not a statistical sample.</p>
+
+    <h3 class="anchored">Resource concentration</h3>
+    <p>Every one of the 471 observations retained a provenance path to its source resource and file, and all 13 resources matched the resource audit. Two resources account for 438 observations (92.99%) and five account for 458 (97.24%). All 13 resources also contain other canonical series, and nine contain another non-target series above 100 µg/m³. Concentration is a clue, not proof of a faulty resource, and resource-level co-occurrence does not show that different series recorded the same physical event.</p>
+
+    <h3 class="anchored">Same-resource, exact-hour co-occurrence</h3>
+    <p>The next test compared each target extreme with non-target series from the <em>same source resources</em> at the exact same hour.</p>
+    <div class="table-scroll">
+      
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Measure</th>
+<th class="num" data-quarto-table-cell-role="th">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Target extreme observations</td>
+<td class="num">471</td>
+</tr>
+<tr class="even">
+<td>Unique target timestamps</td>
+<td class="num">466</td>
+</tr>
+<tr class="odd">
+<td>Target source resources</td>
+<td class="num">13</td>
+</tr>
+<tr class="even">
+<td>Timestamps with another series in the same source resource</td>
+<td class="num">466 (100%)</td>
+</tr>
+<tr class="odd">
+<td>Timestamps with usable exact-hour comparison data</td>
+<td class="num">463 (99.36%)</td>
+</tr>
+<tr class="even">
+<td>Timestamps with no usable comparison data</td>
+<td class="num">3</td>
+</tr>
+<tr class="odd">
+<td>Comparison rows returned</td>
+<td class="num">1,841</td>
+</tr>
+<tr class="even">
+<td>Comparison rows above 100 µg/m³</td>
+<td class="num">20</td>
+</tr>
+<tr class="odd">
+<td>Comparison rows at or above 50 µg/m³</td>
+<td class="num">116</td>
+</tr>
+<tr class="even">
+<td>Target timestamps with another series above 100 µg/m³</td>
+<td class="num">11</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+    <p>A comparison is usable when another non-target sensor/location has an observation with the same source resource and the exact same hour as the target observation. All 466 target timestamps had another series in the same source resource; 463 (99.36%) had usable comparison data and 3 had none. The comparison returned 1,841 rows, of which 20 were above 100 µg/m³ and 116 were at or above 50 µg/m³. Eleven of the 463 target timestamps with usable comparison data had at least one other series recording PM2.5 above 100 µg/m³ (the 20 is a count of comparison rows; the 11 is a count of target timestamps). The test covers the same source resources only; it does not mean no other Nairobi sensor was operating at those hours.</p>
+    <p>These results show that extreme readings were not uniformly shared across co-recorded series, but they do not establish that every unshared extreme was erroneous or identify its cause. They also do not establish that no city-wide pollution event occurred. The stronger evidence is the temporal pattern at 3626.</p>
+
+    <h3 class="anchored">Location 3626: a recurring extreme level after dropouts</h3>
+    <p>The extreme-episode analysis for location 3626 focuses on the period from 2024-08-07 16:00 to 2024-10-12 00:00 UTC, which contains two multi-week gaps (the sensor's full history is longer and is used separately for forecasting): about 583 hours (11 August to 4 September) and about 408 hours (15 September to 2 October).</p>
+    <ul>
+      <li><strong>First regime, 4–15 September:</strong> the series returned from the first gap already near 3,330 µg/m³. The episode algorithm split this regime into five contiguous episodes of 34, 11, 107, 53, and 55 hours, totalling 260 extreme hours. Each episode begins exactly two hours after the previous one ends (one missing hourly slot), so the split into five follows from the rule that a gap greater than one hour starts a new episode; the intervals show no data loss beyond those single missing hours, and in effect this is one near-continuous regime. The 107-hour episode (6 September 17:00 to 11 September 03:00) peaked at 3,346.3 with a median near 3,332.</li>
+      <li><strong>Second regime, 2–8 October:</strong> after the second gap the series returned near the same level for a single 150-hour episode (2 October 17:00 to 8 October 22:00), with a maximum of 3,336.9 and a median near 3,331.9. It then returned toward normal values, and the data end on 12 October.</li>
+    </ul>
+
+    <figure class="figure">
+      <div class="fig-label">Figure 5 · Location 3626 chronology</div>
+      <img src="reports/figures/3626_temporal_episode_timeline.png" alt="Hourly PM2.5 at location 3626 with genuine multi-week data gaps shaded grey and two extreme regimes near 3,330 micrograms per cubic metre shaded gold, above the 1,000 microgram QC threshold." loading="lazy">
+      <figcaption>Hourly PM2.5 for sensor 4849 at location 3626. Grey bands mark the genuine multi-week data gaps; gold bands mark the two regimes above the 1,000 µg/m³ QC threshold. Each regime begins immediately after a gap.</figcaption>
+    </figure>
+
+    <p>The two regimes are separate, each beginning immediately after a genuine multi-week data gap, not one continuous event. The same near-identical level reappearing after independent dropouts is consistent with a recurring sensor or data-quality fault, and it is not what a city-wide pollution signal would look like. The mechanism could not be established: there was no firmware history, device diagnostic, or reference-instrument comparison. The finding is therefore treated as a data-quality investigation, not as evidence of ambient concentrations near 3,330 µg/m³, and the observations remain in the dataset.</p>
+  </div>
+</section>
+
+<!-- 09 FORECASTING -->
+<section class="band" id="forecasting">
+  <div class="wrap">
+    <div class="kicker">09 · Forecasting experiment</div>
+    <h2 class="anchored">A chronological baseline comparison</h2>
+    <p class="lead">Does a lagged linear model improve next-hour PM2.5 forecasts over persistence?</p>
+
+    <p>The population comes from <code>FCT_PM25_FORECASTING_POPULATION</code>, extracted by <code>R/scripts/05_modeling_extract.R</code> for Nairobi: 389,721 rows across 128 sensor/location series. Each series is sorted chronologically, segmented wherever a gap exceeds one hour, and reduced to its longest continuous segment. That avoids stitching discontinuous periods into one sequence, but it also means the evaluation does not use every row; 389,721 is the extracted population, not the number of rows entering the folds.</p>
+
+    <h3 class="anchored">Model and baseline</h3>
+    <p>The baseline is persistence: the next-hour prediction equals the current value. It is a deliberately strong baseline for a short horizon. The model is a linear regression on past information only.</p>
+    <pre>PM25_MEAN ~ lag1 + lag2 + lag3 + lag6 + lag24
+          + roll_mean_24h + hour_of_day + day_of_week</pre>
+
+    <h3 class="anchored">Validation</h3>
+    <p>A random split would let later observations inform the model evaluated on earlier ones. The experiment instead uses <strong>five-fold expanding-window walk-forward validation</strong>: the training window grows with each fold and the next chronological block is the test set. Each test block is 15% of the series' modeling rows (floored), so the five blocks together cover about 75% of each series and the first training window is only about the first 25%. That is a test-heavy design: early folds are fitted on short histories, which may understate what the model could achieve with more training data. A series is marked insufficient if its longest continuous segment has fewer than 200 rows, or if fewer than 200 complete rows remain after lag and rolling features are built. The 200-row minimum is a practical implementation threshold, not an optimized sample-size guarantee.</p>
+
+    <h3 class="anchored">Evaluation coverage</h3>
+    <div class="table-scroll">
+      
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Status</th>
+<th class="num" data-quarto-table-cell-role="th">Series</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Evaluated (<code>ok</code>)</td>
+<td class="num">60</td>
+</tr>
+<tr class="even">
+<td>Insufficient continuous-segment data</td>
+<td class="num">64</td>
+</tr>
+<tr class="odd">
+<td>Insufficient data after lagging</td>
+<td class="num">4</td>
+</tr>
+<tr class="even">
+<td><strong>Total</strong></td>
+<td class="num"><strong>128</strong></td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+
+    <figure class="figure">
+      <div class="fig-label">Figure 6 · Forecasting evaluation coverage</div>
+      <img src="reports/powerbi/page-3-forecasting-evaluation-coverage.png" alt="Chart of Nairobi forecasting series by evaluation status: 60 evaluated, 68 not evaluated." loading="lazy">
+      <figcaption>Only 60 of 128 Nairobi series had enough continuous history for the full evaluation. Results describe that subset, not the whole network.</figcaption>
+    </figure>
+
+    <h3 class="anchored">Results</h3>
+    <div class="table-scroll">
+      
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Per-series RMSE improvement over persistence</th>
+<th class="num" data-quarto-table-cell-role="th">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Mean</td>
+<td class="num">3.68%</td>
+</tr>
+<tr class="even">
+<td>Median</td>
+<td class="num">5.15%</td>
+</tr>
+<tr class="odd">
+<td>First / third quartile</td>
+<td class="num">−0.33% / 9.38%</td>
+</tr>
+<tr class="even">
+<td>Minimum / maximum</td>
+<td class="num">−43.5% / +21.0%</td>
+</tr>
+<tr class="odd">
+<td>Series that improved</td>
+<td class="num">42 of 60 (70%)</td>
+</tr>
+<tr class="even">
+<td>Series improving by more than 3%</td>
+<td class="num">37 of 60</td>
+</tr>
+<tr class="odd">
+<td>Series with zero or negative improvement</td>
+<td class="num">18 of 60</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+
+    <div class="callout">
+      <div class="card-label">Headline result</div>
+      <p>Across the 60 Nairobi sensor/location series with sufficient continuous history, the lagged linear-regression model reduced mean walk-forward RMSE by <strong>3.68% relative to persistence</strong>, with substantial heterogeneity across series.</p>
+      <p>The 3.68% is the arithmetic mean of per-series percentage improvements. It is not a pooled RMSE improvement and is not weighted by series length.</p>
+    </div>
+
+    <figure class="figure">
+      <div class="fig-label">Figure 7 · Forecasting evaluation results</div>
+      <img src="reports/figures/06_forecasting_evaluation.png" alt="Distribution of per-series RMSE improvement of linear regression over persistence across 60 Nairobi series." loading="lazy">
+      <figcaption>The spread of per-series improvement, from −43.5% to +21.0%, matters more than the mean. The model beats persistence for most evaluated series and loses for a meaningful minority.</figcaption>
+    </figure>
+
+    <p>Examples of the spread include sensor 4849 at location 3626 (+16.3%), sensor 4898 at location 3966 (+11.6% as originally evaluated; see section 10), sensor 792 at location 3981 (+4.4% as originally evaluated; see section 10), and, on the negative side, sensor 53 at location 28 (−43.5%), sensor 128 at location 68 (−20.4%), and sensor 55 at location 30 (−14.5%). A simple temporal model gives modest average gains for most evaluable series, but its usefulness is strongly series-dependent. This is not evidence of uniform superiority and does not extend automatically to the other 68 series. Three examples were checked against QC flags (section 10): the 3626 result is unaffected, while the 3966 and 3981 results are sensitive to how flagged observations are treated.</p>
+  </div>
+</section>
+
+<!-- 10 QC AUDIT -->
+<section class="band dark">
+  <div class="wrap">
+    <div class="kicker">10 · Forecasting QC audit</div>
+    <h2 class="anchored">Flagged observations inside the evaluated series</h2>
+    <p class="lead">Flagged observations are retained in the modeling population by design, so a fair question is whether they touch the forecasting results.</p>
+
+    <p>A post-evaluation audit took the 60 evaluated sensor/location pairs from <code>R/outputs/nairobi_forecasting_generalization.csv</code> (<code>status = 'ok'</code>) and matched them against the Snowflake hourly fact view for <code>PM25_ABOVE_SENSOR_RANGE = TRUE</code>.</p>
+    <div class="table-scroll">
+      
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Measure</th>
+<th class="num" data-quarto-table-cell-role="th">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Evaluated series</td>
+<td class="num">60</td>
+</tr>
+<tr class="even">
+<td>Series with at least one flagged observation</td>
+<td class="num">4</td>
+</tr>
+<tr class="odd">
+<td>Flagged hourly observations in those series</td>
+<td class="num">415</td>
+</tr>
+<tr class="even">
+<td>Distinct flagged hourly keys</td>
+<td class="num">415</td>
+</tr>
+<tr class="odd">
+<td>Sensor types represented</td>
+<td class="num">1</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+
+    <h3 class="anchored">What this establishes, and what it does not</h3>
+    <p>The forecasting extraction does not filter on the QC flag, so these rows were not removed by it. The initial audit matched flags to the 60 <em>series</em>, not to the exact longest continuous segment used in each fold, so a follow-up audit checked all eight flagged pairs against their selected segments and chronological folds. For sensor 4849 (location 3626), the selected segment (523 rows, 499 modeling rows) begins in January 2024, before the September and October extreme episodes, and contains no flagged rows; the 410 flagged observations for that series lie outside it, so the +16.3% result is not directly affected. For sensor 4898 (location 3966), one flagged observation lies inside the segment. It is a test target in fold 1 and appears in the prior-24-hour history of 24 further test rows in that fold (25 affected test rows, but one flagged observation), and it is part of the training data in folds 2 to 5. The +11.6% result for that series therefore needed a sensitivity check, reported below. Sensor 792 at location 3981 also has one flagged observation in its segment, as a test target in fold 2. Sensor 4930 at location 3981 has none. Nor does the flag prove the values are wrong.</p>
+    <h3 class="anchored">Full-population flag inventory</h3>
+    <p>A separate query listed every Nairobi sensor/location pair with at least one flagged modeling row. Shares are flagged rows divided by modeling rows, so they describe the whole modeling history, not the selected forecasting segments.</p>
+    <div class="table-scroll">
+      
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Sensor / location</th>
+<th class="num" data-quarto-table-cell-role="th">Modeling rows</th>
+<th class="num" data-quarto-table-cell-role="th">Flagged rows</th>
+<th class="num" data-quarto-table-cell-role="th">Flagged share</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>4849 / 3626</td>
+<td class="num">1,744</td>
+<td class="num">410</td>
+<td class="num">23.51%</td>
+</tr>
+<tr class="even">
+<td>4900 / 3967</td>
+<td class="num">5,792</td>
+<td class="num">17</td>
+<td class="num">0.29%</td>
+</tr>
+<tr class="odd">
+<td>4962 / 76</td>
+<td class="num">4,281</td>
+<td class="num">4</td>
+<td class="num">0.09%</td>
+</tr>
+<tr class="even">
+<td>3 / 6</td>
+<td class="num">521</td>
+<td class="num">2</td>
+<td class="num">0.38%</td>
+</tr>
+<tr class="odd">
+<td>4898 / 3966</td>
+<td class="num">7,734</td>
+<td class="num">2</td>
+<td class="num">0.03%</td>
+</tr>
+<tr class="even">
+<td>792 / 3981</td>
+<td class="num">8,176</td>
+<td class="num">2</td>
+<td class="num">0.02%</td>
+</tr>
+<tr class="odd">
+<td>4930 / 3981</td>
+<td class="num">8,057</td>
+<td class="num">1</td>
+<td class="num">0.01%</td>
+</tr>
+<tr class="even">
+<td>4976 / 76</td>
+<td class="num">4,795</td>
+<td class="num">1</td>
+<td class="num">0.02%</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+    <p>Eight pairs carry 439 flagged rows in total. The four pairs in the evaluated set (4849/3626, 4898/3966, 792/3981 and 4930/3981) account for 415 of them, which matches the audit above; the other four pairs (24 flagged rows) were not evaluated for forecasting: three have selected segments of only 31, 51 and 70 rows, and one (3 / 6) falls short after lagging. Population counts do not substitute for segment-level analysis: 4849/3626 has 410 flagged rows, 23.51% of its modeling rows, yet none in its selected forecasting segment.</p>
+
+    <h3 class="anchored">Segment and fold overlap for all eight pairs</h3>
+    <p>The overlap audit (<code>R/scripts/15_nairobi_forecast_qc_overlap.R</code>) covers all eight flagged pairs. A pair can carry flagged observations in its full modeling history without any falling in the longest contiguous segment used for forecasting.</p>
+    <div class="table-scroll">
+      
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Sensor / location</th>
+<th class="num" data-quarto-table-cell-role="th">Segment rows</th>
+<th class="num" data-quarto-table-cell-role="th">Flagged segment rows</th>
+<th class="num" data-quarto-table-cell-role="th">Modeling rows</th>
+<th class="num" data-quarto-table-cell-role="th">Flagged modeling rows</th>
+<th data-quarto-table-cell-role="th">Audit status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>3 / 6</td>
+<td class="num">220</td>
+<td class="num">0</td>
+<td class="num">196</td>
+<td class="num">0</td>
+<td>Insufficient after lagging</td>
+</tr>
+<tr class="even">
+<td>4849 / 3626</td>
+<td class="num">523</td>
+<td class="num">0</td>
+<td class="num">499</td>
+<td class="num">0</td>
+<td>OK</td>
+</tr>
+<tr class="odd">
+<td>4898 / 3966</td>
+<td class="num">2,493</td>
+<td class="num">1</td>
+<td class="num">2,469</td>
+<td class="num">1</td>
+<td>OK</td>
+</tr>
+<tr class="even">
+<td>4900 / 3967</td>
+<td class="num">31</td>
+<td class="num">0</td>
+<td class="num">—</td>
+<td class="num">—</td>
+<td>Insufficient data</td>
+</tr>
+<tr class="odd">
+<td>4930 / 3981</td>
+<td class="num">1,844</td>
+<td class="num">0</td>
+<td class="num">1,820</td>
+<td class="num">0</td>
+<td>OK</td>
+</tr>
+<tr class="even">
+<td>4962 / 76</td>
+<td class="num">51</td>
+<td class="num">0</td>
+<td class="num">—</td>
+<td class="num">—</td>
+<td>Insufficient data</td>
+</tr>
+<tr class="odd">
+<td>4976 / 76</td>
+<td class="num">70</td>
+<td class="num">0</td>
+<td class="num">—</td>
+<td class="num">—</td>
+<td>Insufficient data</td>
+</tr>
+<tr class="even">
+<td>792 / 3981</td>
+<td class="num">1,844</td>
+<td class="num">1</td>
+<td class="num">1,820</td>
+<td class="num">1</td>
+<td>OK</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+    <p>A dash means no modeling population was produced. The four pairs without a fold-level result could not be evaluated, which does not show that their data are free of QC flags. Of the four evaluated pairs, two (4849/3626 and 4930/3981) have no flagged rows in their selected segments, and two overlap the evaluation folds:</p>
+    <div class="table-scroll">
+      
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Sensor / location</th>
+<th class="num" data-quarto-table-cell-role="th">Affected fold</th>
+<th class="num" data-quarto-table-cell-role="th">Flagged test targets</th>
+<th class="num" data-quarto-table-cell-role="th">Test rows with flagged prior-24-hour history</th>
+<th class="num" data-quarto-table-cell-role="th">Total affected test rows</th>
+<th data-quarto-table-cell-role="th">Flag in training data</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>4898 / 3966</td>
+<td class="num">1</td>
+<td class="num">1</td>
+<td class="num">24</td>
+<td class="num">25</td>
+<td>Folds 2 to 5</td>
+</tr>
+<tr class="even">
+<td>792 / 3981</td>
+<td class="num">2</td>
+<td class="num">1</td>
+<td class="num">24</td>
+<td class="num">25</td>
+<td>Folds 3 to 5</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+    <p>The 25 affected test rows in each case are one flagged target plus 24 rows whose preceding 24 hourly records include it; they are not 25 flagged observations. Because lagged and rolling features carry a flagged value forward, its influence extends beyond the flagged hour. The original forecasts are therefore not uniformly affected, but the two series that are affected turn out to be sensitive. Audit outputs are saved as <code>R/outputs/nairobi_forecast_qc_overlap.csv</code> and <code>R/outputs/nairobi_forecast_qc_overlap_folds.csv</code>.</p>
+
+    <h3 class="anchored">Sensitivity to flagged observations</h3>
+    <p>Two series with a flagged observation inside their evaluated segment (4898 / 3966 and 792 / 3981) were examined in three separate ways, so that a change in the test population is not confused with a change in model training or in RMSE aggregation: the <strong>baseline</strong> evaluation reported in section 9, an <strong>evaluation-population</strong> sensitivity, and a <strong>training-population</strong> sensitivity.</p>
+
+    <h3 class="anchored">Evaluation-population sensitivity</h3>
+    <p>Pooled out-of-fold RMSE, weighted by the number of retained test observations. The restricted population drops test rows whose target or preceding 24 hourly records carry a sensor-range flag. Both models are scored on the same rows in each case.</p>
+    <div class="table-scroll">
+      
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Sensor / location</th>
+<th data-quarto-table-cell-role="th">Evaluation population</th>
+<th class="num" data-quarto-table-cell-role="th">Test rows</th>
+<th class="num" data-quarto-table-cell-role="th">Persistence RMSE</th>
+<th class="num" data-quarto-table-cell-role="th">Regression RMSE</th>
+<th class="num" data-quarto-table-cell-role="th">Regression vs persistence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>4898 / 3966</td>
+<td>Unrestricted</td>
+<td class="num">1,850</td>
+<td class="num">107.804</td>
+<td class="num">90.661</td>
+<td class="num">+15.90%</td>
+</tr>
+<tr class="even">
+<td>4898 / 3966</td>
+<td>Restricted</td>
+<td class="num">1,825</td>
+<td class="num">14.074</td>
+<td class="num">14.435</td>
+<td class="num">−2.56%</td>
+</tr>
+<tr class="odd">
+<td>792 / 3981</td>
+<td>Unrestricted</td>
+<td class="num">1,365</td>
+<td class="num">245.236</td>
+<td class="num">224.928</td>
+<td class="num">+8.28%</td>
+</tr>
+<tr class="even">
+<td>792 / 3981</td>
+<td>Restricted</td>
+<td class="num">1,340</td>
+<td class="num">6.859</td>
+<td class="num">11.574</td>
+<td class="num">−68.74%</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+    <p>Improvement is 100 × (RMSE persistence − RMSE regression) / RMSE persistence; positive values favour the regression. The two sources of change can be read apart. The original evaluation (section 9) averaged the five fold-level RMSEs without weighting (mean persistence RMSE 58.60 and 115.05; mean regression RMSE 51.79 and 109.97), giving +11.6% and +4.4%. Using the same unrestricted test population and walk-forward fold structure, switching from the unweighted mean of fold-level RMSEs to pooled RMSEs changes the improvement from +11.6% to +15.90% for sensor 4898 / location 3966, and from +4.4% to +8.28% for sensor 792 / location 3981: about four points from aggregation alone. The original and sensitivity scripts use the same fold construction, training rows, eight-predictor regression and persistence baseline; individual predictions were not saved and compared row by row, so the equivalence rests on the matching procedure. Removing 25 rows from each series (1.4% and 1.8% of test rows) moves them to −2.56% and −68.74%, a far larger change. The evaluation results are therefore highly sensitive to a small subset of test rows: persistence RMSE falls from 107.8 to 14.1 in one series and from 245.2 to 6.9 in the other. On the restricted population the regression does not beat persistence in either series, so the original advantage does not hold there. Because the step from the original to the restricted figures changes both the aggregation and the test population, the restricted figures are not a direct correction of the original results.</p>
+
+    <h3 class="anchored">Training-population sensitivity</h3>
+    <p>The regression was then retrained using only rows with no sensor-range flag in the target or the preceding 24 hourly records, and scored on the restricted population.</p>
+    <div class="table-scroll">
+      
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Sensor / location</th>
+<th class="num" data-quarto-table-cell-role="th">Persistence RMSE</th>
+<th class="num" data-quarto-table-cell-role="th">Original regression RMSE</th>
+<th class="num" data-quarto-table-cell-role="th">Restricted-training RMSE</th>
+<th class="num" data-quarto-table-cell-role="th">Original vs persistence</th>
+<th class="num" data-quarto-table-cell-role="th">Restricted-training vs persistence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>4898 / 3966</td>
+<td class="num">14.074</td>
+<td class="num">14.435</td>
+<td class="num">12.47</td>
+<td class="num">−2.6%</td>
+<td class="num">+11.4%</td>
+</tr>
+<tr class="even">
+<td>792 / 3981</td>
+<td class="num">6.859</td>
+<td class="num">11.574</td>
+<td class="num">6.25</td>
+<td class="num">−68.7%</td>
+<td class="num">+8.9%</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+    <p>Restricting training to unflagged rows turns both series into gains on the restricted population. The +11.4% for location 3966 is close to the baseline +11.6% but is a different quantity (a different model on a different test population) and does not confirm it.</p>
+
+    <p>These results show that the measured forecasting performance of these two series depends on how flagged observations are treated. They do not show that the flagged measurements are erroneous. One limit remains: the restricted regression still uses lag features computed from the original series, so a flagged observation can influence later predictors even when the training target is eligible. This is a training-row sensitivity test, not a rebuild of the series with flagged observations removed from all feature calculations.</p>
+    <div class="callout">
+      <div class="card-label">Evidence boundary</div>
+      <p>The 3.68% mean and 5.15% median improvements across the 60 series are baseline results from the original implementation, before this sensitivity analysis, and have not been recomputed under any QC treatment. Two series are not enough to recompute the aggregate consistently. Because both tested series were sensitive, the aggregate should not be described as robust to QC flags, and how much it would change is unknown.</p>
+      </div>
+  </div>
+</section>
+
+<!-- 11 REPORTING -->
+<section class="band">
+  <div class="wrap">
+    <div class="kicker">11 · Reporting layer</div>
+    <h2 class="anchored">Power BI as the communication layer</h2>
+    <p class="lead">The report has three pages, each built around one question. It communicates the work done in Python, Snowflake, dbt, and R; it does not replace it.</p>
+
+    <h3 class="anchored">1 · What does the dataset look like?</h3>
+    <p>KPI cards for the canonical, Rule-A eligible, and modeling populations, physical units, and cities; a sensor-type breakdown; the PM2.5 distribution on a log scale with the 1,000 µg/m³ threshold marked; and temporal coverage by city.</p>
+    <figure class="figure">
+      <div class="fig-label">Figure 8 · Overview and data quality</div>
+      <img src="reports/powerbi/page-1-overview-data-quality.png" alt="Power BI page one: overview and data quality." loading="lazy">
+      <figcaption>Page 1 establishes what the dataset contains before any finding is presented, including the uneven temporal coverage across cities.</figcaption>
+    </figure>
+
+    <h3 class="anchored">2 · What happens in Nairobi?</h3>
+    <p>A map of monitoring locations (flagged versus not flagged, sized by observation count), the 3966 versus 3967 comparison, and the 3626 time series with the finding stated in the chart title. The map is spatial context only and does not imply that every mapped sensor was active at the same time.</p>
+    <figure class="figure">
+      <div class="fig-label">Figure 9 · Nairobi spatial patterns and anomalies</div>
+      <img src="reports/powerbi/page-2-nairobi-spatial-anomalies.png" alt="Power BI page two: Nairobi spatial patterns and anomalies." loading="lazy">
+      <figcaption>Page 2 pairs the map with the statistical comparison, so proximity is never presented as evidence of comparability on its own.</figcaption>
+    </figure>
+
+    <h3 class="anchored">3 · Can PM2.5 be forecast?</h3>
+    <p>Evaluation coverage, the distribution of per-series improvement, persistence versus regression RMSE (log scale), and a short description of the validation design. The report shows both successful and unsuccessful series.</p>
+    <figure class="figure">
+      <div class="fig-label">Figure 10 · Nairobi forecasting performance</div>
+      <img src="reports/powerbi/page-3-nairobi-forecasting-performance.png" alt="Power BI page three: Nairobi forecasting performance." loading="lazy">
+      <figcaption>Page 3 reports the evaluated population with its coverage limit visible: 60 of 128 series.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 12 LIMITATIONS -->
+<section class="band dark" id="limitations">
+  <div class="wrap">
+    <div class="kicker">12 · Interpretation boundaries</div>
+    <h2 class="anchored">What Version 1 does not claim</h2>
+    <p class="lead">The workflow improves traceability and reproducibility. It cannot resolve uncertainties the source archive does not contain enough evidence to settle.</p>
+
+    <ul>
+      <li>That every sensor measurement is physically accurate.</li>
+      <li>That every extreme value is a hardware failure.</li>
+      <li>That nearby sensors measure the same ambient concentration.</li>
+      <li>That Nairobi results generalize to every city in the archive.</li>
+      <li>That the forecasting model is operationally superior, or that 3.68% applies to every series.</li>
+      <li>That the 1,000 µg/m³ threshold is a universal physical or health boundary.</li>
+    </ul>
+
+    <h3 class="anchored">Limitations</h3>
+    <div class="limits">
+      <div class="limit"><strong>Heterogeneous archive</strong><p>Resources differ in format, completeness, and measurement behavior. Provenance cannot recover metadata that was never supplied.</p></div>
+      <div class="limit"><strong>Sensor non-equivalence</strong><p>Sensor labels do not establish calibration equivalence, and some PM2.5-labelled readings come from non-PM2.5 device types.</p></div>
+      <div class="limit"><strong>Coordinate ambiguity</strong><p>Some sensor/location combinations have multiple coordinate pairs, so a mapped point does not prove a fixed deployment.</p></div>
+      <div class="limit"><strong>Limited corroboration test</strong><p>The exact-hour comparison covered the same source resources only and did not test every Nairobi sensor. Eleven of the 463 timestamps with usable comparison data had another series above 100 µg/m³; the comparison does not establish the cause of any unshared extreme.</p></div>
+      <div class="limit"><strong>Pearson sensitivity</strong><p>The 3966/3967 correlation includes extreme readings and was not re-run with a rank-based or outlier-excluded measure.</p></div>
+      <div class="limit"><strong>Unresolved mechanism</strong><p>The 3626 pattern is consistent with a recurring sensor or data-quality fault; its cause cannot be established from these data.</p></div>
+      <div class="limit"><strong>Forecasting coverage</strong><p>Only 60 of 128 Nairobi series were evaluable, each on its longest continuous segment, so results describe a selected subset of the available history.</p></div>
+      <div class="limit"><strong>Fold design</strong><p>Test blocks cover about 75% of each series, so early folds train on short histories. Results may be sensitive to fold size, which was not varied.</p></div>
+      <div class="limit"><strong>QC overlap</strong><p>Eight Nairobi pairs carry flagged modeling rows and all were audited. Four could not be evaluated for forecasting, two evaluated series have no flagged rows in their segments, and two (3966 and 3981) overlap the folds and were sensitive. The 60-series aggregate was not recomputed, and restricted training still uses lag features from the original series.</p></div>
+      <div class="limit"><strong>Model scope</strong><p>Persistence versus a lagged linear model on PM2.5 and calendar features, with no meteorological inputs and no causal interpretation.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 V2 -->
+<section class="band">
+  <div class="wrap">
+    <div class="kicker">13 · Next iteration</div>
+    <h2 class="anchored">What I would do differently in Version 2</h2>
+    <p class="lead">Prioritize improvements that address demonstrated limitations, not model complexity for its own sake.</p>
+
+    <div class="grid-2">
+      <div class="card v2"><h3 class="anchored">1 · Extend the QC sensitivity analysis</h3><p>Recompute the 60-series aggregate under a documented treatment of flagged rows, rebuild lag features with flagged observations handled throughout, and test any remaining flagged series.</p></div>
+      <div class="card v2"><h3 class="anchored">2 · Rank-based robustness</h3><p>Add a rank-based or outlier-excluded correlation check for sensor pairs with extreme readings, such as locations 3966 and 3967.</p></div>
+      <div class="card v2"><h3 class="anchored">3 · Meteorological covariates</h3><p>Temperature and humidity were catalogued during source reconstruction but excluded from V1. They are a natural test of whether environmental variables improve next-hour forecasts.</p></div>
+      <div class="card v2"><h3 class="anchored">4 · Nonlinear models</h3><p>Compare nonlinear approaches under the same chronological validation to see whether the modest linear gain reflects real structure.</p></div>
+      <div class="card v2"><h3 class="anchored">5 · Sensor metadata</h3><p>Capture device types, deployment changes, coordinate uncertainty, and calibration information, including sensor-type-specific behavior.</p></div>
+      <div class="card v2"><h3 class="anchored">6 · Cautious geographic extension</h3><p>Extend the spatial framework to other cities only where overlap and comparability support the inference.</p></div>
+    </div>
+    <p>The principle stays the same: the design should grow because the data support a stronger question, not because a more complex model is available.</p>
+  </div>
+</section>
+
+<!-- 14 CONCLUSION -->
+<section class="band dark">
+  <div class="wrap">
+    <div class="kicker">14 · Conclusion</div>
+    <h2 class="anchored">A defensible path, not a claim of perfect data</h2>
+    <p class="lead">The most significant output is the analytical infrastructure underneath the dashboard and the forecast.</p>
+
+    <p>The project reconstructs a heterogeneous archive into a canonical hourly dataset, reconciles every structural exclusion, separates eligibility from temporal validity, implements the analytical layer in Snowflake and dbt, and uses R and Power BI to investigate spatial differences, extreme observations, and forecasting performance. At each stage the pipeline keeps enough information to answer two questions: where did this number come from, and why was it considered appropriate for this analysis?</p>
+    <p>The forecasting result is modest and uneven: a simple lag model beat persistence for most evaluable Nairobi series, not all, and the QC sensitivity analysis shows that results for flagged series depend on how flagged observations are treated. The system does not eliminate uncertainty from heterogeneous public sensor data. It makes that uncertainty visible, traceable, and analytically manageable.</p>
+
+    <div class="callout">
+      <div class="card-label">Central lesson</div>
+      <p>Good analytics begins with knowing exactly what the data represents, what it does not represent, and what evidence is required before making a stronger claim.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="case-foot">
+  <div class="wrap case-foot-inner">
+    <div><strong>Agu Charles Chibuike</strong> · African Air Quality Analytics · Technical deep dive</div>
+    <a href="/#projects">← Back to projects</a>
+  </div>
+</footer>
+
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+    tabsets.forEach(function(tabset) {
+      const tabby = new Tabby('#' + tabset.id);
+    });
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+
+
+
+
+<script src="technical-deep-dive_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

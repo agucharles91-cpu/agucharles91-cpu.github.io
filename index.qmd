@@ -1239,7 +1239,7 @@ a {
       <div class="carousel-stage" id="carouselStage">
 
         <a class="carousel-item"
-           href="projects/parking-enforcement-analytics.html"
+           href="projects/parking-enforcement-analytics/parking-enforcement-analytics.html"
            data-pos="0" data-index="0">
           <img src="images/parking-dashboard.png" alt="Parking Enforcement" class="carousel-thumb">
           <div class="carousel-body">
