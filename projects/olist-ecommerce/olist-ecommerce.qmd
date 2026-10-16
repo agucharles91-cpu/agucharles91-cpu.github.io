@@ -9,14 +9,14 @@ format:
     include-in-header:
       text: |
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-        <meta name="description" content="Nairobi Runners — a longitudinal Garmin wearable study of 14 recreational runners investigating how training, sleep and recovery move together over time, using mixed-effects modelling and an interactive Shiny dashboard.">
+        <meta name="description" content="Olist E-Commerce Analytics — an end-to-end PostgreSQL, SQL and Power BI analysis of 100,000+ Brazilian marketplace orders, examining revenue concentration, regional delivery performance and customer retention.">
 ---
 
 ```{=html}
 <style>
 /* =========================================================
    AGU CHARLES CHIBUIKE — CASE STUDY
-   Scientific Data Science / AqSolDB
+   Scientific Data Science / OLIST
    ========================================================= */
 
 
@@ -930,7 +930,7 @@ strong {
 .finding-main p {
   max-width: 520px;
 
-  color: #A0AEC0;
+  color: var(--slate);
 }
 
 .calibration-callout {
@@ -1943,59 +1943,37 @@ strong {
 <section class="case-hero">
   <div class="case-hero-inner">
 
-    <div class="case-kicker">APPLIED DATA SCIENCE · SPORTS ANALYTICS</div>
+    <div class="case-kicker">ANALYTICS ENGINEERING · E-COMMERCE</div>
 
     <h1 class="case-title">
-      Nairobi Runners:<br>
-      Training, Sleep &amp; Recovery
+      Olist E-Commerce<br>
+      Analytics
     </h1>
 
     <p class="case-subtitle">
-      What happens to recovery after a runner trains hard today?
+      Strong sales. Weak retention. Uneven delivery.
     </p>
 
     <p class="case-subtitle" style="font-size:18px;color:#A0AEC0;">
-      I analysed more than 12,700 participant-days of Garmin data from 14
-      recreational runners in Nairobi, covering training, sleep, heart
-      rate and recovery from January 2022 to February 2026. Rather than
-      treating each day as an independent observation, I examined how
-      these measures changed <strong style="color:#CBD5E0;">within the same
-      runner over time</strong> — including what happened in the days
-      following training.
+      I analysed 100,000+ Brazilian marketplace orders to understand
+      what was actually driving Olist's growth — and what wasn't.
     </p>
 
     <div class="case-meta">
-      <span>R 4.5.1</span>
-      <span>Shiny</span>
-      <span>lme4 / lmerTest</span>
-      <span>mgcv</span>
-      <span>Quarto</span>
-      <span>renv</span>
+      <span>PostgreSQL 16</span>
+      <span>Python / pandas</span>
+      <span>SQLAlchemy</span>
+      <span>Advanced SQL</span>
+      <span>Power BI</span>
     </div>
 
     <div class="case-links">
       <a
         class="case-btn case-btn-primary"
-        href="https://github.com/agucharles91-cpu/Nairobi-Runners"
+        href="https://github.com/agucharles91-cpu/Olist-Ecommerce-Analytics"
         target="_blank"
         rel="noopener noreferrer">
         View GitHub Repository
-      </a>
-      <a
-        class="case-btn case-btn-secondary"
-        href="reports/nairobi-runners-report.html"
-        target="_blank"
-        rel="noopener noreferrer"
-        style="color:#fff;border-color:rgba(255,255,255,0.3);">
-        Read Full Report
-      </a>
-      <a
-        class="case-btn case-btn-secondary"
-        href="https://agucharles.shinyapps.io/nairobi-runners"
-        target="_blank"
-        rel="noopener noreferrer"
-        style="color:#fff;border-color:rgba(255,255,255,0.3);">
-        Open Live Dashboard
       </a>
     </div>
 
@@ -2006,23 +1984,23 @@ strong {
 <section class="stats-strip">
 
   <div class="stat">
-    <div class="stat-value">14</div>
-    <div class="stat-label">Recreational runners</div>
+    <div class="stat-value">R$15.42M</div>
+    <div class="stat-label">Total revenue analysed</div>
   </div>
 
   <div class="stat">
-    <div class="stat-value">~12,760</div>
-    <div class="stat-label">Participant-days of data</div>
+    <div class="stat-value">92.09%</div>
+    <div class="stat-label">National on-time delivery</div>
   </div>
 
   <div class="stat">
-    <div class="stat-value">4+ yrs</div>
-    <div class="stat-label">Jan 2022 – Feb 2026</div>
+    <div class="stat-value">~97%</div>
+    <div class="stat-label">Customers did not return</div>
   </div>
 
   <div class="stat">
-    <div class="stat-value">Day 0–3</div>
-    <div class="stat-label">Lagged relationship window</div>
+    <div class="stat-value">500K+</div>
+    <div class="stat-label">Records across 9 datasets</div>
   </div>
 
 </section>
@@ -2032,42 +2010,24 @@ strong {
 
   <div class="case-section-num">01 — THE QUESTION</div>
 
-  <div class="case-two-column">
+  <h2 class="case-section-title">
+    Was Olist's growth translating into a healthy,
+    sustainable customer base?
+  </h2>
 
-    <div>
-      <h2>
-        Timing matters more than
-        a single correlation
-      </h2>
-    </div>
+  <p class="section-intro">
+    To answer that, I built an analytical model covering three areas:
+    <strong>Revenue</strong> — what is driving growth; <strong>Operations</strong>
+    — where the delivery network is performing well or poorly; and
+    <strong>Customers</strong> — whether buyers are coming back.
+  </p>
 
-    <div>
-      <p class="lead">
-        Wearable devices generate large amounts of longitudinal data, but
-        the interesting question is not simply whether two variables are
-        correlated. A demanding training session may not be reflected in
-        recovery immediately. Sleep may influence how a runner feels the
-        following morning. And these relationships may differ
-        substantially between individuals.
-      </p>
-
-      <p>
-        I focused the analysis around three questions: how does training
-        behaviour vary over time, what happens in the days following
-        training, and which sleep measures are most closely associated
-        with next-day recovery — <strong>sleep duration</strong> or
-        <strong>sleep quality</strong>?
-      </p>
-
-      <p>
-        The analysis was primarily descriptive and longitudinal, with an
-        emphasis on <strong>within-person patterns</strong> rather than
-        broad population-level inference: what are runners doing, what
-        happens afterward, and which variables matter most.
-      </p>
-    </div>
-
-  </div>
+  <p style="max-width:720px;color:var(--slate);">
+    This is a historical, publicly available dataset (Kaggle's Olist
+    Brazilian E-Commerce data, 2016–2018) rather than a live operational
+    engagement — the framing below reflects what the data itself
+    supports, not delivered business consulting.
+  </p>
 
 </section>
 
@@ -2076,124 +2036,70 @@ strong {
 
   <div class="case-section">
 
-    <div class="case-section-num">02 — THE DATA</div>
+    <div class="case-section-num">02 — FROM RAW FILES TO A DECISION-READY MODEL</div>
 
     <h2 class="section-title-light">
-      Deciding what could be
-      compared meaningfully
+      An analytical pipeline,
+      not analysis on raw CSVs
     </h2>
 
-    <div class="data-grid">
+    <div class="pipeline">
 
-      <div class="data-card">
-        <div class="data-number">14</div>
-        <div class="data-heading">Recreational runners</div>
-        <p>
-          Garmin-tracked participants in Nairobi, covering training
-          duration/distance/session load, heart rate, sleep, Body Battery,
-          respiration, VO₂max and daily activity.
-        </p>
+      <div class="pipeline-step">
+        <div class="pipeline-number">01</div>
+        <div>
+          <strong>Raw layer</strong>
+          <span>9 CSVs loaded into PostgreSQL</span>
+        </div>
       </div>
 
-      <div class="data-card">
-        <div class="data-number">~12,760</div>
-        <div class="data-heading">Participant-days</div>
-        <p>
-          Each row is one participant on one calendar day. Because the
-          data were collected continuously in natural settings, the
-          challenge was deciding which measurements could be compared
-          meaningfully.
-        </p>
+      <div class="pipeline-arrow">→</div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-number">02</div>
+        <div>
+          <strong>Staging</strong>
+          <span>Cleaning & transformation</span>
+        </div>
       </div>
 
-      <div class="data-card">
-        <div class="data-number">4</div>
-        <div class="data-heading">Derived signals</div>
-        <p>
-          Recovery Score, Sleep Quality %, Session Intensity and Running
-          Economy — created to turn raw Garmin measurements into
-          analytical variables suited to longitudinal comparison.
-        </p>
+      <div class="pipeline-arrow">→</div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-number">03</div>
+        <div>
+          <strong>Star schema</strong>
+          <span>fact_orders + 3 dimensions</span>
+        </div>
       </div>
 
-    </div>
+      <div class="pipeline-arrow">→</div>
 
-    <div class="two-column" style="margin-top:8px;">
-
-      <div class="column">
-        <h3 style="color:#fff;">Recovery Score</h3>
-        <p style="color:#A0AEC0;">
-          A within-person recovery <strong style="color:#fff;">proxy</strong>
-          based on the difference between a runner's daily resting heart
-          rate and their own 7-day rolling mean. Higher values indicate a
-          lower-than-usual resting heart rate relative to that runner's
-          recent baseline.
-        </p>
-        <h3 style="color:#fff;margin-top:22px;">Sleep Quality %</h3>
-        <p style="color:#A0AEC0;">
-          The proportion of recorded sleep represented by deep and REM
-          sleep, used here as a <strong style="color:#fff;">study-specific
-          sleep composition metric</strong>. Values above 75% were
-          excluded as likely device artefacts.
-        </p>
+      <div class="pipeline-step">
+        <div class="pipeline-number">04</div>
+        <div>
+          <strong>Advanced SQL</strong>
+          <span>17 analytical queries</span>
+        </div>
       </div>
 
-      <div class="column">
-        <h3 style="color:#fff;">Session Intensity</h3>
-        <p style="color:#A0AEC0;">
-          Training sessions were classified as Light, Moderate or High
-          using data-derived tertile thresholds.
-        </p>
-        <h3 style="color:#fff;margin-top:22px;">Running Economy</h3>
-        <p style="color:#A0AEC0;">
-          Average running speed divided by average heart rate, used as a
-          descriptive efficiency measure.
-        </p>
+      <div class="pipeline-arrow">→</div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-number">05</div>
+        <div>
+          <strong>Power BI</strong>
+          <span>3-page reporting layer</span>
+        </div>
       </div>
 
     </div>
 
-    <div class="source-note">
-      <strong>Source:</strong> Garmin wearable exports · 1 Jan 2022 – 14 Feb 2026
-    </div>
-
-    <div class="case-table-wrap">
-      <table class="case-table">
-        <thead>
-          <tr>
-            <th>Coverage gap</th>
-            <th>Extent</th>
-            <th>Handling</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Sleep-stage data</td>
-            <td>Restricted to 11 of 14 participants</td>
-            <td>Separate sleep-staging cohort maintained</td>
-          </tr>
-          <tr>
-            <td>Body Battery</td>
-            <td>Unavailable for 1 participant</td>
-            <td>Excluded from Body Battery analyses</td>
-          </tr>
-          <tr>
-            <td>VO₂max</td>
-            <td>~2.6% residual missingness</td>
-            <td>Last-observation-carried-forward imputation</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="method-callout" style="margin-top:32px;background:rgba(255,255,255,0.035);border-left-color:var(--gold);">
-      <strong style="color:var(--gold);">Why this matters</strong>
-      <span style="color:#A0AEC0;">
-        These differences were retained in the analytical design rather
-        than silently treating the dataset as complete — missingness
-        changes what can legitimately be analysed.
-      </span>
-    </div>
+    <p style="max-width:720px;margin-top:38px;color: #C5CED8 ;">
+      The resulting model supports analysis across revenue, products,
+      customers, sellers, geography and delivery performance — reusable
+      analytical logic rather than a one-off set of charts.
+    </p>
 
   </div>
 
@@ -2202,66 +2108,53 @@ strong {
 
 <section class="case-section">
 
-  <div class="case-section-num">03 — FROM WEARABLE DATA TO EVIDENCE</div>
+  <div class="case-section-num">03 — REVENUE</div>
 
   <h2 class="case-section-title">
-    Progressively more targeted analyses,
-    not a single statistical technique
+    Growth was real.
+    It was also concentrated.
   </h2>
 
-  <p class="section-intro">
-    The emphasis throughout was on association and temporal structure, not
-    causal inference.
-  </p>
+  <div class="finding-layout">
 
-  <div class="pipeline">
+    <div class="finding-main">
 
-    <div class="pipeline-step">
-      <div class="pipeline-number">01</div>
-      <div>
-        <strong>Describe</strong>
-        <span>Distributions & trajectories</span>
+      <div class="finding-heading">
+        R$15.42M in revenue, but not evenly distributed
       </div>
+
+      <p>
+        Revenue grew from almost nothing in late 2016 to more than R$1M
+        per month by 2018, with a pronounced spike around Black Friday in
+        November 2017.
+      </p>
+
+      <p>
+        Health &amp; Beauty, Watches &amp; Gifts, and Bed, Bath &amp; Table
+        were among the largest category contributors, while São Paulo
+        alone accounted for more than 40,500 orders — a level of
+        geographic and commercial concentration that a single national
+        growth number hides.
+      </p>
+
+      <p>
+        Pareto analysis reinforces the same pattern at the customer
+        level: the top 30% of customers by spend account for roughly 65%
+        of revenue.
+      </p>
     </div>
 
-    <div class="pipeline-arrow">→</div>
-
-    <div class="pipeline-step">
-      <div class="pipeline-number">02</div>
-      <div>
-        <strong>Correlate</strong>
-        <span>Spearman, same-day</span>
-      </div>
-    </div>
-
-    <div class="pipeline-arrow">→</div>
-
-    <div class="pipeline-step">
-      <div class="pipeline-number">03</div>
-      <div>
-        <strong>Introduce time</strong>
-        <span>Lag Day 0–3, within participant</span>
-      </div>
-    </div>
-
-    <div class="pipeline-arrow">→</div>
-
-    <div class="pipeline-step">
-      <div class="pipeline-number">04</div>
-      <div>
-        <strong>Account for baselines</strong>
-        <span>Mixed-effects, random intercept</span>
-      </div>
-    </div>
+    <figure class="chart-placeholder" style="max-width:560px;margin:auto;">
+      <img
+        src="reports/figures/revenue_trend_by_month.png"
+        alt="Monthly revenue trend from late 2016 to 2018, showing growth and the November 2017 Black Friday spike"
+        style="width:100%;height:auto;">
+      <figcaption class="chart-placeholder-label">
+        MONTHLY REVENUE TREND
+      </figcaption>
+    </figure>
 
   </div>
-
-  <p style="max-width:720px;margin-top:38px;color:var(--slate);">
-    This progression matters because a same-day correlation cannot
-    distinguish between an immediate relationship and one that emerges
-    later — and a cohort-level average cannot distinguish a universal
-    effect from one runner's baseline.
-  </p>
 
 </section>
 
@@ -2270,50 +2163,48 @@ strong {
 
   <div class="case-section">
 
-    <div class="case-section-num">04 — TRAINING LOAD OVER TIME</div>
+    <div class="case-section-num">04 — OPERATIONS</div>
 
     <h2 class="section-title-light">
-      Training was highly uneven
-      across the observation period
+      92% on-time delivery hides a
+      regional story
     </h2>
 
     <div class="finding-layout">
 
       <div class="finding-main">
 
-        <div class="finding-heading">
-          This dataset contains training cycles, not independent daily
-          observations
+        <div class="finding-heading"> 
+          A single national KPI obscures meaningful regional variation
         </div>
 
-        <p>
-          Rest and light-training days consistently accounted for roughly
-          65–75% of observed days, while moderate and high-load days
-          became more prominent in particular training blocks.
+        <p style="color: #C5CED8 ;">
+          At national level, 92.09% of orders were delivered on time —
+          that reads as a strong result until the data is viewed
+          geographically.
         </p>
 
-        <p>
-          Session load was strongly right-skewed: most active days sat
-          below 20,000 AU, with a long upper tail extending toward the
-          dataset's 65,000 AU cap. Longer runs also tended to occur at
-          lower relative intensity, with most high-distance sessions below
-          90% relative intensity.
+        <p style="color: #C5CED8 ;">
+          São Paulo averaged 8.7 days to deliver, close to the best in
+          the network. The national average sat at 12.5 days. Acre, by
+          contrast, averaged 20.7 days — more than double the national
+          figure and well over twice São Paulo's.
         </p>
 
-        <p>
-          The point is not to prove a particular training philosophy — it
-          establishes the temporal structure and variability that the
-          later lag and mixed-effects analyses need to account for.
+        <p style="color: #C5CED8 ;">
+          Customers in different parts of Brazil are having meaningfully
+          different experiences with the same marketplace, and the
+          national on-time rate doesn't surface that on its own.
         </p>
       </div>
 
       <figure class="chart-placeholder chart-dark" style="max-width:560px;margin:auto;">
         <img
-          src="reports/figures/session_load_distribution.png"
-          alt="Distribution of session load across the observation period"
+          src="reports/figures/delivery_time_by_state.png"
+          alt="Average delivery time by Brazilian state, showing São Paulo, national average and Acre"
           style="width:100%;height:auto;">
         <figcaption class="chart-placeholder-label">
-          SESSION LOAD DISTRIBUTION
+          AVERAGE DELIVERY TIME BY STATE
         </figcaption>
       </figure>
 
@@ -2326,301 +2217,54 @@ strong {
 
 <section class="case-section">
 
-  <div class="case-section-num">05 — TRAINING &amp; SLEEP</div>
+  <div class="case-section-num">05 — CUSTOMERS</div>
 
   <h2 class="case-section-title">
-    Related, but not simply
+    The larger gap wasn't delivery.
+    It was retention.
   </h2>
 
-  <div class="case-two-column">
+  <div class="finding-layout">
 
-    <div>
-      <p class="lead">
-        <strong>Harder training → worse sleep</strong> is too simple an
-        interpretation of what the data show.
-      </p>
-    </div>
+    <div class="finding-main">
 
-    <div>
+      <div class="finding-heading">
+        Roughly 97% of customers did not make a repeat purchase in the
+        observed period
+      </div>
+
       <p>
-        Training intensity was associated with differences in subsequent
-        sleep measures, but the relationship was not monotonic. High- and
-        light-intensity days were associated with greater reductions in
-        next-night sleep duration than moderate-intensity days, relative
-        to rest. Sleep efficiency showed a different pattern, while sleep
-        architecture and fragmentation showed little consistent
-        relationship with training intensity.
+        A cohort retention matrix shows the monthly repeat-purchase rate
+        falling below 1% by the first month after a customer's initial
+        order, and staying low from there — consistent with the
+        ~97% overall non-repeat figure across the dataset.
       </p>
 
       <p>
-        The observed relationships depended on <strong>which sleep
-        measure was considered and when it was measured</strong> — which
-        led to the more important question this project was built to
-        answer: do these relationships appear immediately, or do they
-        change across the following days?
+        Olist was successfully generating transactions, but very few
+        customers were returning to generate additional value. For a
+        marketplace, that reframes the priority question from "how do we
+        sell more" to <strong>"how do we make the first purchase worth
+        coming back for?"</strong>
+      </p>
+
+      <p style="color:var(--slate);">
+        Worth stating plainly: this dataset doesn't let me test <em>why</em>
+        — whether delivery experience, product category, price, or
+        something else is driving the drop-off. The retention gap is the
+        clearest finding here, not a diagnosed cause.
       </p>
     </div>
 
-  </div>
-
-</section>
-
-
-<!-- ============================================================
-     06 — LAGGED ANALYSIS (CENTERPIECE)
-     ============================================================ -->
-
-<section class="section validation-section" id="lag-analysis">
-  <div class="section-inner">
-
-    <div class="section-kicker">06 — THE CENTRAL ANALYSIS</div>
-
-    <div class="section-heading">
-      <h2>Recovery is not just a same-day measurement</h2>
-      <p class="section-lead">
-        A same-day relationship can miss the actual timeline of recovery.
-        To examine this, training and sleep measures were shifted forward
-        by one, two and three days within each participant. The pattern
-        changed with time.
-      </p>
-    </div>
-
-    <div class="validation-process">
-
-      <div class="validation-step">
-        <span class="step-label">D0–1</span>
-        <div>
-          <h4>Training → Recovery (early)</h4>
-          <p>
-            Higher Session Load was associated with lower Recovery Score
-            on Day 0 and Day 1.
-          </p>
-        </div>
-      </div>
-
-      <div class="validation-step">
-        <span class="step-label">D2–3</span>
-        <div>
-          <h4>Training → Recovery (later)</h4>
-          <p>
-            By Day 2 the observed association changed direction, with the
-            largest positive association occurring on Day 3 of the
-            examined window.
-          </p>
-        </div>
-      </div>
-
-      <div class="validation-step">
-        <span class="step-label">TL→S</span>
-        <div>
-          <h4>Training → Sleep</h4>
-          <p>
-            Negatively associated with sleep duration same-day, followed
-            by a stronger positive association on Day 1 and smaller
-            positive associations on Days 2–3.
-          </p>
-        </div>
-      </div>
-
-      <div class="validation-step">
-        <span class="step-label">S→R</span>
-        <div>
-          <h4>Sleep → Recovery</h4>
-          <p>
-            Positive same-day relationship with Recovery Score, but the
-            direction became negative on subsequent lag days.
-          </p>
-        </div>
-      </div>
-
-    </div>
-
-    <figure class="chart-placeholder" style="max-width:820px;margin:42px auto 0;">
+    <figure class="chart-placeholder" style="max-width:560px;margin:auto;">
       <img
-        src="reports/figures/lag_correlation_by_day.png"
-        alt="Training Load and Sleep Duration correlation with Recovery Score across the Day 0-3 lag window"
+        src="reports/figures/cohort_retention_matrix.png"
+        alt="Cohort retention matrix showing repeat purchase rate falling below 1 percent by month 1"
         style="width:100%;height:auto;">
       <figcaption class="chart-placeholder-label">
-        LAGGED ASSOCIATION WITH RECOVERY SCORE, DAY 0–3
+        COHORT RETENTION, MONTH 0–N
       </figcaption>
     </figure>
-
-    <div class="validation-result">
-
-      <div class="result-copy">
-        <div class="result-kicker">WHAT THE LAG WINDOW SHOWS</div>
-
-        <h3>The relationship is temporally structured, not instantaneous.</h3>
-
-        <p>
-          This does <strong>not</strong> establish that hard training
-          causes a three-day recovery response. But it shows why looking
-          only at contemporaneous correlations would have provided an
-          incomplete picture — each of these relationships is an
-          observational pattern, not evidence of a biological mechanism.
-        </p>
-      </div>
-
-      <div class="result-callout">
-        <span class="callout-number">D0 → D3</span>
-        <span class="callout-label">
-          Training Load–Recovery association flips from negative to
-          positive across the four-day lag window
-        </span>
-      </div>
-
-    </div>
-
-    <div class="section-aside">
-      <strong>Interpretation boundary</strong>
-      <p>
-        The lagged analysis identifies temporal associations within the
-        observed data. It does not establish how long physiological
-        recovery takes, or that training caused the observed changes.
-      </p>
-    </div>
-
-  </div>
-</section>
-
-
-<section class="results-section">
-
-  <div class="case-section">
-
-    <div class="case-section-num">07 — MIXED-EFFECTS MODEL</div>
-
-    <h2 class="case-section-title">
-      Sleep quality carried more signal
-      than sleep duration
-    </h2>
-
-    <p class="section-intro">
-      The lagged analysis showed that timing mattered. The next question
-      was whether sleep measures were associated with next-day recovery
-      <strong>after accounting for differences between runners</strong>.
-      I fitted a mixed-effects model:
-    </p>
-
-    <div class="method-callout" style="margin-bottom:38px;">
-      <strong>The model</strong>
-      <span style="font-family:var(--mono);font-size:14px;">
-        Recovery Score ~ Sleep Quality % + Sleep Duration + Session Load + (1 | Participant)
-      </span>
-    </div>
-
-    <p class="section-intro">
-      The random intercept lets each runner have their own baseline
-      Recovery Score, rather than assuming every participant starts from
-      the same physiological level.
-    </p>
-
-    <div class="result-grid">
-
-      <div class="result-card result-primary">
-        <div class="result-label">SLEEP QUALITY %</div>
-        <div class="result-number" style="font-size:38px;">+0.0098 / pt</div>
-        <div class="result-caption">95% CI [0.0037, 0.0160] · p = 0.0017</div>
-      </div>
-
-      <div class="result-card">
-        <div class="result-label">SLEEP DURATION</div>
-        <div class="result-number" style="font-size:38px;">β ≈ −0.037</div>
-        <div class="result-caption">95% CI [−0.091, 0.018] · p = 0.185</div>
-      </div>
-
-      <div class="result-card">
-        <div class="result-label">SESSION LOAD (LAGGED)</div>
-        <div class="result-number" style="font-size:38px;">≈ 0</div>
-        <div class="result-caption">Significant, not practically meaningful</div>
-      </div>
-
-    </div>
-
-    <figure class="chart-placeholder" style="max-width:720px;margin:42px auto 0;">
-      <img
-        src="reports/figures/mixed_effects_coefficients.png"
-        alt="Mixed-effects model coefficient estimates with 95% confidence intervals for Sleep Quality %, Sleep Duration and Session Load"
-        style="width:100%;height:auto;">
-      <figcaption class="chart-placeholder-label">
-        MODEL COEFFICIENTS &amp; 95% CONFIDENCE INTERVALS
-      </figcaption>
-    </figure>
-
-    <div class="method-callout" style="margin-top:42px;">
-      <strong>Interpretation</strong>
-      <span>
-        Sleep Quality % was positively associated with next-day Recovery
-        Score (β = 0.0098, 95% CI 0.0037–0.0160, p = 0.0017), while Sleep
-        Duration was not statistically significant.
-      </span>
-    </div>
-
-    <div class="method-callout" style="margin-top:24px;">
-      <strong>What this does not mean</strong>
-      <span>
-        This does not show that increasing sleep quality will cause a
-        corresponding improvement in physiological recovery. Recovery
-        Score is itself a wearable-derived proxy, and the study is
-        observational. Session Load's near-zero coefficient despite
-        statistical significance is a useful reminder that significance
-        and practical magnitude are different things.
-      </span>
-    </div>
-
-  </div>
-
-</section>
-
-
-<section class="dark-section">
-
-  <div class="case-section">
-
-    <div class="case-section-num">08 — INDIVIDUAL DIFFERENCES</div>
-
-    <h2 class="section-title-light">
-      Individual differences
-      were substantial
-    </h2>
-
-    <div class="explain-grid">
-
-      <div>
-
-        <p class="lead-light">
-          Cohort-level summaries hide substantial variation between
-          runners.
-        </p>
-
-        <p class="light-text">
-          Participants differed in their baseline Recovery Scores, sleep
-          variability, training distributions and longitudinal
-          trajectories. Some runners showed relatively stable recovery
-          patterns, while others experienced longer periods of positive
-          or negative deviation from their own baseline.
-        </p>
-
-        <p class="light-text">
-          The analysis therefore prioritised <strong>within-person
-          comparisons</strong> wherever possible. The model can identify
-          relationships between changes in a runner's sleep, training and
-          recovery, but the small sample does not justify treating those
-          relationships as universal effects for recreational runners.
-        </p>
-
-      </div>
-
-      <div class="interpretation-card" style="background:rgba(255,255,255,0.035);border-color:rgba(255,255,255,0.1);">
-        <h3 style="color:#fff;">Positioning</h3>
-        <p style="color:#A0AEC0;">
-          The project is better viewed as a <strong style="color:#fff;">longitudinal
-          analytical framework for understanding individual patterns</strong>
-          than as a population-level predictive model.
-        </p>
-      </div>
-
-    </div>
 
   </div>
 
@@ -2629,63 +2273,23 @@ strong {
 
 <section class="case-section">
 
-  <div class="case-section-num">09 — WHAT I BUILT</div>
+  <div class="case-section-num">06 — THE ANALYTICAL APPROACH</div>
 
   <h2 class="case-section-title">
-    A reproducible workflow, not
-    an analysis notebook
+    Reusable analytical logic,
+    not one-off charts
   </h2>
 
   <p class="section-intro">
-    raw wearable data → validated transformations → longitudinal analysis
-    → statistical modelling → interactive dashboard → reproducible report
+    I didn't build the dashboard directly from the source files. I built
+    an analytical model first — a star schema in PostgreSQL — then used
+    17 SQL queries (CTEs, window functions, cohort and Pareto analysis,
+    query optimisation) to answer increasingly complex business
+    questions, with Power BI as the final reporting layer on top.
   </p>
 
-  <div class="build-grid">
-
-    <div class="build-card">
-      <div class="build-number">01</div>
-      <h3>Interactive R Shiny dashboard</h3>
-      <p>
-        Interactive views across training behaviour, sleep and circadian
-        patterns, recovery, cross-domain relationships and individual
-        trajectories, with global filters by date and sex.
-      </p>
-    </div>
-
-    <div class="build-card">
-      <div class="build-number">02</div>
-      <h3>Reproducible analytical report</h3>
-      <p>
-        A Quarto report documents the complete analytical workflow,
-        including data preparation, derived variables, statistical
-        analysis and figures.
-      </p>
-    </div>
-
-    <div class="build-card">
-      <div class="build-number">03</div>
-      <h3>Reproducible project environment</h3>
-      <p>
-        <code>renv</code> for dependency management and Git/GitHub for
-        version control, so results depend on a defined environment
-        rather than an undocumented setup.
-      </p>
-    </div>
-
-    <div class="build-card">
-      <div class="build-number">04</div>
-      <h3>Automated testing</h3>
-      <p>
-        15 automated tests (<code>testthat</code>) covering key
-        analytical components of the pipeline.
-      </p>
-    </div>
-
-  </div>
-
-  <div class="source-note" style="margin-top:38px;">
-    <strong>Stack:</strong> R · Shiny · Quarto · tidyverse · ggplot2 · plotly · lme4 · lmerTest · mgcv · renv · testthat
+  <div class="source-note" style="margin-top:24px;">
+    <strong>Stack:</strong> PostgreSQL 16 · Python · pandas · SQLAlchemy · Power BI
   </div>
 
 </section>
@@ -2695,7 +2299,7 @@ strong {
 
   <div class="split-content">
 
-    <div class="case-section-num">10 — WHAT THE ANALYSIS SUPPORTS</div>
+    <div class="case-section-num">07 — WHAT THE ANALYSIS SUGGESTS</div>
 
     <h2>
       Three conclusions,
@@ -2705,25 +2309,23 @@ strong {
     <ul class="limitations">
 
       <li>
-        <strong>Timing matters.</strong> Relationships between training,
-        sleep and recovery changed across the days following an
-        observation — same-day correlations provide only part of the
-        picture.
+        <strong>Protect the growth engine.</strong> Revenue is growing,
+        but a relatively small number of categories, regions and
+        customers account for a large share of it — concentration worth
+        monitoring, not just growth worth celebrating.
       </li>
 
       <li>
-        <strong>Sleep quality showed more signal than sleep
-        duration.</strong> Sleep Quality % showed the clearest
-        statistically supported association with next-day Recovery Score
-        in the mixed-effects model, while Sleep Duration was not
-        statistically significant.
+        <strong>Treat delivery as a regional problem.</strong> A single
+        national KPI hides meaningful differences in customer experience
+        across states; monitoring by region would surface issues the
+        national average cannot.
       </li>
 
       <li>
-        <strong>Individual baselines matter.</strong> Runners differed
-        substantially in their normal training, sleep and recovery
-        patterns, making within-person analysis more informative than
-        relying only on cohort averages.
+        <strong>Prioritise retention.</strong> The scale of first-time
+        purchasing makes repeat purchase behaviour an important area for
+        further investigation.
       </li>
 
     </ul>
@@ -2735,9 +2337,9 @@ strong {
     <div class="limitation-note">
       <div class="method-label">SCOPE</div>
       <p>
-        These findings make wearable data useful for monitoring individual
-        patterns and generating hypotheses — they do not establish causal
-        effects or clinical thresholds.
+        These are read-throughs of a historical dataset, not
+        recommendations delivered to Olist. They describe what the
+        numbers show, not a tested intervention.
       </p>
     </div>
 
@@ -2748,7 +2350,7 @@ strong {
 
 <section class="case-section">
 
-  <div class="case-section-num">11 — WHAT THE DATA CANNOT TELL US</div>
+  <div class="case-section-num">08 — WHAT THE DATA CANNOT TELL US</div>
 
   <h2 class="case-section-title">
     Boundaries, stated plainly
@@ -2757,52 +2359,29 @@ strong {
   <div class="data-grid" style="margin-top:12px;">
 
     <div class="data-card" style="background:var(--mist);border:1px solid var(--border);">
-      <div class="data-heading" style="color:var(--ink);">Small cohort</div>
+      <div class="data-heading" style="color:var(--ink);">Historical, public data</div>
       <p style="color:var(--slate);">
-        Only 14 runners were available, limiting statistical power and
-        making between-person comparisons exploratory.
+        This is the public Kaggle Olist dataset (2016–2018), not live
+        operational data — patterns here may not reflect Olist's current
+        business.
       </p>
     </div>
 
     <div class="data-card" style="background:var(--mist);border:1px solid var(--border);">
-      <div class="data-heading" style="color:var(--ink);">Wearable measurements</div>
+      <div class="data-heading" style="color:var(--ink);">No causal test of retention drivers</div>
       <p style="color:var(--slate);">
-        Garmin-derived sleep, recovery and physiological measures are
-        consumer-device estimates rather than laboratory measurements.
+        The dataset doesn't let me test whether delivery speed, price,
+        category, or something else is driving the low repeat-purchase
+        rate — retention is the finding, not the explanation.
       </p>
     </div>
 
     <div class="data-card" style="background:var(--mist);border:1px solid var(--border);">
-      <div class="data-heading" style="color:var(--ink);">Recovery is a proxy</div>
+      <div class="data-heading" style="color:var(--ink);">Order-level, not customer-lifetime</div>
       <p style="color:var(--slate);">
-        Derived from resting heart rate relative to an individual's
-        rolling baseline. HRV or laboratory measures would provide a more
-        direct physiological assessment.
-      </p>
-    </div>
-
-    <div class="data-card" style="background:var(--mist);border:1px solid var(--border);">
-      <div class="data-heading" style="color:var(--ink);">Uneven coverage</div>
-      <p style="color:var(--slate);">
-        Sleep staging was unavailable for three participants, and Body
-        Battery coverage was incomplete.
-      </p>
-    </div>
-
-    <div class="data-card" style="background:var(--mist);border:1px solid var(--border);">
-      <div class="data-heading" style="color:var(--ink);">Imputation</div>
-      <p style="color:var(--slate);">
-        VO₂max contains last-observation-carried-forward imputation, which
-        can produce artificial plateaus.
-      </p>
-    </div>
-
-    <div class="data-card" style="background:var(--mist);border:1px solid var(--border);">
-      <div class="data-heading" style="color:var(--ink);">No external outcome</div>
-      <p style="color:var(--slate);">
-        The dataset lacks sufficient race-performance or laboratory data
-        to determine whether the patterns translate into improved
-        athletic performance.
+        The observation window ends in 2018 — customers who might have
+        returned after the dataset's cutoff would still show up as
+        non-repeat here.
       </p>
     </div>
 
@@ -2811,17 +2390,12 @@ strong {
   <div class="method-callout" style="margin-top:38px;">
     <strong>Most importantly</strong>
     <span>
-      This is observational data. The results describe associations and
-      temporal patterns; they do not establish that changing training or
-      sleep would cause a particular recovery outcome.
+      This is descriptive and diagnostic analysis, not a controlled
+      experiment. The findings describe what happened in this dataset;
+      they don't establish what would happen if Olist changed a
+      particular lever.
     </span>
   </div>
-
-  <p style="max-width:720px;margin-top:32px;color:var(--slate);font-family:var(--serif);font-size:15px;">
-    <strong>Next iteration:</strong> incorporate HRV, race performance and
-    additional participants to test whether the observed longitudinal
-    patterns generalise beyond this cohort.
-  </p>
 
 </section>
 
@@ -2830,59 +2404,41 @@ strong {
 
   <div class="case-section">
 
-    <div class="case-section-num">12 — TAKEAWAY</div>
+    <div class="case-section-num">09 — TAKEAWAY</div>
 
     <h2>
-      What happens after
-      a runner trains?
+      What is actually driving
+      the health of the business?
     </h2>
 
     <p>
-      The analysis showed that the answer cannot be reduced to a single
-      same-day relationship. Training, sleep and recovery displayed
-      time-dependent relationships, and the clearest statistically
-      supported association in the mixed-effects model was between Sleep
-      Quality % and next-day Recovery Score.
+      This project turned more than 500,000 raw records across nine
+      datasets into a structured PostgreSQL analytical model and an
+      interactive Power BI reporting layer. But the more important shift
+      was in the question itself — from "how much did Olist sell?" to
+      "what is actually driving the health of the business?"
     </p>
 
     <p>
-      Just as importantly, the analysis demonstrated why longitudinal
-      wearable data needs to be handled carefully: participant baselines
-      differ, measurements are imperfect, missingness is uneven, and
-      statistical significance does not automatically imply practical
-      importance.
+      Revenue growth, delivery performance and customer retention tell
+      three different stories when looked at separately.
     </p>
 
     <p style="font-weight:600;color:var(--ink);">
-      The result is not a prescription for how runners should train. It is
-      a reproducible analytical system for turning four years of messy
-      wearable data into interpretable longitudinal evidence.
+      Olist was growing. The harder question was whether that growth was
+      durable — and the retention data suggests there was still a
+      significant gap between making the first sale and creating the
+      next one.
     </p>
 
     <div class="case-links">
 
       <a
         class="case-btn case-btn-primary"
-        href="https://github.com/agucharles91-cpu/Nairobi-Runners"
+        href="https://github.com/agucharles91-cpu/Olist-Ecommerce-Analytics"
         target="_blank"
         rel="noopener noreferrer">
         GitHub Repository
-      </a>
-
-      <a
-        class="case-btn case-btn-secondary"
-        href="reports/nairobi-runners-report.html"
-        target="_blank"
-        rel="noopener noreferrer">
-        Read Full Report
-      </a>
-
-      <a
-        class="case-btn case-btn-secondary"
-        href="https://agucharles.shinyapps.io/nairobi-runners"
-        target="_blank"
-        rel="noopener noreferrer">
-        Live Dashboard
       </a>
 
       <a
