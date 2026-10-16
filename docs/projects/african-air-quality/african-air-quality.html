@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>case-study</title>
+<title>african-air-quality</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -17,25 +17,25 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
 .display.math{display: block; text-align: center; margin: 0.5rem auto;}
 </style>
 
 
-<script src="case-study_files/libs/clipboard/clipboard.min.js"></script>
-<script src="case-study_files/libs/quarto-html/quarto.js" type="module"></script>
-<script src="case-study_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="case-study_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
-<script src="case-study_files/libs/quarto-html/popper.min.js"></script>
-<script src="case-study_files/libs/quarto-html/tippy.umd.min.js"></script>
-<script src="case-study_files/libs/quarto-html/anchor.min.js"></script>
-<link href="case-study_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="case-study_files/libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="case-study_files/libs/bootstrap/bootstrap.min.js"></script>
-<link href="case-study_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="case-study_files/libs/bootstrap/bootstrap-9e3ffae467580fdb927a41352e75a2e0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="african-air-quality_files/libs/clipboard/clipboard.min.js"></script>
+<script src="african-air-quality_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="african-air-quality_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="african-air-quality_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="african-air-quality_files/libs/quarto-html/popper.min.js"></script>
+<script src="african-air-quality_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="african-air-quality_files/libs/quarto-html/anchor.min.js"></script>
+<link href="african-air-quality_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="african-air-quality_files/libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="african-air-quality_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="african-air-quality_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="african-air-quality_files/libs/bootstrap/bootstrap-9e3ffae467580fdb927a41352e75a2e0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
 <meta name="description" content="African Air Quality Analytics — a reproducible data-engineering and analytics pipeline for reconstructing, validating, tracing, and analyzing heterogeneous PM2.5 sensor data from Sensors.AFRICA.">
 
@@ -343,6 +343,16 @@ strong {
 .case-btn-primary:hover {
   background: #08B985;
   color: var(--navy);
+}
+
+.case-btn-ghost {
+  background: transparent;
+  color: var(--on-dark, #C6D3DD);
+  border: 1px solid rgba(255,255,255,.35);
+}
+.case-btn-ghost:hover {
+  border-color: var(--teal);
+  color: var(--teal);
 }
 
 .case-btn-secondary {
@@ -2103,6 +2113,7 @@ figure.chart-placeholder {
     </div>
     <div class="case-links">
       <a class="case-btn case-btn-primary" href="technical-deep-dive.html">Technical Deep Dive →</a>
+      <a class="case-btn case-btn-ghost" href="https://github.com/agucharles91-cpu/african-air-quality" target="_blank" rel="noopener">GitHub Repository ↗</a>
     </div>
   </div>
 </section>
@@ -2581,7 +2592,7 @@ Power BI</div>
     anchorJS.add('.anchored');
     const isCodeAnnotation = (el) => {
       for (const clz of el.classList) {
-        if (clz.startsWith('code-annotation-')) {
+        if (clz.startsWith('code-annotation-')) {                     
           return true;
         }
       }
@@ -2601,11 +2612,11 @@ Power BI</div>
         button.setAttribute("data-bs-toggle", "tooltip");
         button.setAttribute("data-bs-placement", "left");
         button.setAttribute("data-bs-title", "Copied!");
-        tooltip = new bootstrap.Tooltip(button,
-          { trigger: "manual",
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
             customClass: "code-copy-button-tooltip",
             offset: [0, -8]});
-        tooltip.show();
+        tooltip.show();    
       }
       setTimeout(function() {
         if (tooltip) {
@@ -2682,7 +2693,7 @@ Power BI</div>
       if (onUntriggerFn) {
         config.onUntrigger = onUntriggerFn;
       }
-      window.tippy(el, config);
+      window.tippy(el, config); 
     }
     const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
     for (var i=0; i<noterefs.length; i++) {
@@ -2757,7 +2768,7 @@ Power BI</div>
       tippyHover(xref, undefined, function(instance) {
         instance.disable();
         let url = xref.getAttribute('href');
-        let hash = undefined;
+        let hash = undefined; 
         if (url.startsWith('#')) {
           hash = url;
         } else {
@@ -2785,7 +2796,7 @@ Power BI</div>
               if (note !== null) {
                 const html = processXRef(id, note);
                 instance.setContent(html);
-              }
+              } 
             }).finally(() => {
               instance.enable();
               instance.show();
@@ -2809,7 +2820,7 @@ Power BI</div>
               }
               const html = processXRef(null, note);
               instance.setContent(html);
-            }
+            } 
           }).finally(() => {
             instance.enable();
             instance.show();
@@ -2849,7 +2860,7 @@ Power BI</div>
               height = bottom - top;
             }
             if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it
+              // cook up a div (if necessary) and position it 
               let div = window.document.getElementById("code-annotation-line-highlight");
               if (div === null) {
                 div = window.document.createElement("div");

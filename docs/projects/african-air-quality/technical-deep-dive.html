@@ -17,7 +17,7 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
 .display.math{display: block; text-align: center; margin: 0.5rem auto;}
@@ -395,6 +395,15 @@ tbody tr:nth-child(even) { background: var(--mist); }
 .limit p { margin: 0; max-width: none; color: var(--on-dark); font-size: 14px; line-height: 1.55; }
 .v2 { border-top: 3px solid var(--teal); }
 
+.hero-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.hero-links a {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 11px 17px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+  text-decoration: none; border-radius: 3px;
+  background: var(--teal); color: var(--navy); border: 1px solid var(--teal);
+}
+.hero-links a:hover { background: #08B985; }
+
 /* =========================================================
    FOOTER
    ========================================================= */
@@ -452,6 +461,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
       <a href="#nairobi">Nairobi</a>
       <a href="#forecasting">Forecasting</a>
       <a href="#limitations">Limitations</a>
+      <a href="https://github.com/agucharles91-cpu/african-air-quality" target="_blank" rel="noopener">GitHub ↗</a>
     </div>
   </div>
 </nav>
@@ -467,6 +477,9 @@ tbody tr:nth-child(even) { background: var(--mist); }
     <div class="chips">
       <span>Python</span><span>Snowflake</span><span>dbt</span><span>R</span><span>Power BI</span><span>Quarto</span>
     </div>
+    <div class="hero-links">
+  <a href="https://github.com/agucharles91-cpu/african-air-quality" target="_blank" rel="noopener">View the repository on GitHub →</a>
+</div>
   </div>
 </header>
 
@@ -526,7 +539,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
 
     <h3 class="anchored">Reconciliation of PM2.5 observations</h3>
     <div class="table-scroll">
-
+      
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -607,7 +620,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
     <p>Rule A is a minimum-history contract, not a verdict on data quality and not a claim that an eligible segment suffices for every model.</p>
 
     <div class="table-scroll">
-
+      
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -646,7 +659,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
 
     <h3 class="anchored">Sensor-type composition</h3>
     <div class="table-scroll">
-
+      
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -685,7 +698,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
     <p>A row can satisfy every structural and eligibility rule and still sit inside a known anomalous period. The documented case is Kano, where four segments (sensors 4990/4016 and 4995/4017) carry corrupted epoch timestamps from 1970 and 2000. A blanket rule such as <code>timestamp &gt;= 2020</code> would have removed them, but it would also have imposed an arbitrary cutoff on heterogeneous source histories. The anomaly was instead characterized explicitly in an intermediate dbt model, <code>INT_KNOWN_TEMPORAL_ANOMALIES</code>, and each row receives a <code>TEMPORAL_VALIDITY_STATUS</code> of <code>NORMAL</code> or <code>KNOWN_EPOCH_ANOMALY</code>.</p>
     <div class="formula">ANALYTICALLY_ELIGIBLE = TRUE<br>AND TEMPORAL_VALIDITY_STATUS = 'NORMAL'<br>→ MODELING_ELIGIBLE</div>
     <div class="table-scroll">
-
+      
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -761,7 +774,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
     </div>
 
     <div class="table-scroll">
-
+      
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -813,7 +826,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
     <h3 class="anchored">Which pairs can be compared?</h3>
     <p>Among Nairobi locations with at least 1,000 observations (45 locations, 990 pairs):</p>
     <div class="table-scroll">
-
+      
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -880,7 +893,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
     <p>Four locations were examined: 3573 as a clean comparison location, 3626 for its prolonged extreme regime, and 3966 and 3967 for isolated extremes and their proximity. Two thresholds serve different purposes. Observations above <strong>100 µg/m³</strong> define exploratory extreme episodes; the broader QC flag fires above <strong>1,000 µg/m³</strong>. A reading above 100 is not automatically QC-flagged.</p>
 
     <div class="table-scroll">
-
+      
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -953,7 +966,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
     <h3 class="anchored">Same-resource, exact-hour co-occurrence</h3>
     <p>The next test compared each target extreme with non-target series from the <em>same source resources</em> at the exact same hour.</p>
     <div class="table-scroll">
-
+      
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1045,7 +1058,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
 
     <h3 class="anchored">Evaluation coverage</h3>
     <div class="table-scroll">
-
+      
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1083,7 +1096,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
 
     <h3 class="anchored">Results</h3>
     <div class="table-scroll">
-
+      
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1150,7 +1163,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
 
     <p>A post-evaluation audit took the 60 evaluated sensor/location pairs from <code>R/outputs/nairobi_forecasting_generalization.csv</code> (<code>status = 'ok'</code>) and matched them against the Snowflake hourly fact view for <code>PM25_ABOVE_SENSOR_RANGE = TRUE</code>.</p>
     <div class="table-scroll">
-
+      
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1189,7 +1202,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
     <h3 class="anchored">Full-population flag inventory</h3>
     <p>A separate query listed every Nairobi sensor/location pair with at least one flagged modeling row. Shares are flagged rows divided by modeling rows, so they describe the whole modeling history, not the selected forecasting segments.</p>
     <div class="table-scroll">
-
+      
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1257,7 +1270,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
     <h3 class="anchored">Segment and fold overlap for all eight pairs</h3>
     <p>The overlap audit (<code>R/scripts/15_nairobi_forecast_qc_overlap.R</code>) covers all eight flagged pairs. A pair can carry flagged observations in its full modeling history without any falling in the longest contiguous segment used for forecasting.</p>
     <div class="table-scroll">
-
+      
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1340,7 +1353,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
     </div>
     <p>A dash means no modeling population was produced. The four pairs without a fold-level result could not be evaluated, which does not show that their data are free of QC flags. Of the four evaluated pairs, two (4849/3626 and 4930/3981) have no flagged rows in their selected segments, and two overlap the evaluation folds:</p>
     <div class="table-scroll">
-
+      
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1381,7 +1394,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
     <h3 class="anchored">Evaluation-population sensitivity</h3>
     <p>Pooled out-of-fold RMSE, weighted by the number of retained test observations. The restricted population drops test rows whose target or preceding 24 hourly records carry a sensor-range flag. Both models are scored on the same rows in each case.</p>
     <div class="table-scroll">
-
+      
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1435,7 +1448,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
     <h3 class="anchored">Training-population sensitivity</h3>
     <p>The regression was then retrained using only rows with no sensor-range flag in the target or the preceding 24 hourly records, and scored on the restricted population.</p>
     <div class="table-scroll">
-
+      
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1582,6 +1595,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
 <footer class="case-foot">
   <div class="wrap case-foot-inner">
     <div><strong>Agu Charles Chibuike</strong> · African Air Quality Analytics · Technical deep dive</div>
+    <div><a href="https://github.com/agucharles91-cpu/african-air-quality" target="_blank" rel="noopener">GitHub repository ↗</a> &nbsp;·&nbsp; <a href="/#projects">← Back to projects</a></div>
     <a href="/#projects">← Back to projects</a>
   </div>
 </footer>
@@ -1601,7 +1615,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
     anchorJS.add('.anchored');
     const isCodeAnnotation = (el) => {
       for (const clz of el.classList) {
-        if (clz.startsWith('code-annotation-')) {
+        if (clz.startsWith('code-annotation-')) {                     
           return true;
         }
       }
@@ -1621,11 +1635,11 @@ tbody tr:nth-child(even) { background: var(--mist); }
         button.setAttribute("data-bs-toggle", "tooltip");
         button.setAttribute("data-bs-placement", "left");
         button.setAttribute("data-bs-title", "Copied!");
-        tooltip = new bootstrap.Tooltip(button,
-          { trigger: "manual",
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
             customClass: "code-copy-button-tooltip",
             offset: [0, -8]});
-        tooltip.show();
+        tooltip.show();    
       }
       setTimeout(function() {
         if (tooltip) {
@@ -1702,7 +1716,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
       if (onUntriggerFn) {
         config.onUntrigger = onUntriggerFn;
       }
-      window.tippy(el, config);
+      window.tippy(el, config); 
     }
     const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
     for (var i=0; i<noterefs.length; i++) {
@@ -1777,7 +1791,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
       tippyHover(xref, undefined, function(instance) {
         instance.disable();
         let url = xref.getAttribute('href');
-        let hash = undefined;
+        let hash = undefined; 
         if (url.startsWith('#')) {
           hash = url;
         } else {
@@ -1805,7 +1819,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
               if (note !== null) {
                 const html = processXRef(id, note);
                 instance.setContent(html);
-              }
+              } 
             }).finally(() => {
               instance.enable();
               instance.show();
@@ -1829,7 +1843,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
               }
               const html = processXRef(null, note);
               instance.setContent(html);
-            }
+            } 
           }).finally(() => {
             instance.enable();
             instance.show();
@@ -1869,7 +1883,7 @@ tbody tr:nth-child(even) { background: var(--mist); }
               height = bottom - top;
             }
             if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it
+              // cook up a div (if necessary) and position it 
               let div = window.document.getElementById("code-annotation-line-highlight");
               if (div === null) {
                 div = window.document.createElement("div");
