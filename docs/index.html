@@ -585,7 +585,7 @@ a {
 
 .carousel-stage {
   position: relative;
-  height: min(560px, 82vh);
+  height: min(580px, 82vh);
   transform-style: preserve-3d;
 }
 
@@ -684,13 +684,22 @@ a {
 
 .carousel-thumb {
   width: 100%;
-  height: 230px;
+  height: 210px;
   object-fit: cover;
   object-position: center top;
   display: block;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
+@media (max-width: 480px) {
+  .carousel-thumb {
+    height: auto;
+    max-height: 160px;
+    object-fit: contain;
+    object-position: center;
+    background: rgba(0,0,0,0.2);
+  }
+}
 
 .carousel-body {
   padding: 22px 24px;
@@ -1769,7 +1778,6 @@ a {
   var btnNext = document.getElementById('carouselNext');
   var n       = items.length;
   var current = 0;
-  var timer   = null;
 
   function setPositions(front) {
     items.forEach(function(item, i) {
@@ -1788,18 +1796,31 @@ a {
     setPositions(current);
   }
 
-  function start() { timer = setInterval(advance, 3200); }
-  function stop()  { clearInterval(timer); }
+    // Arrow buttons
+  btnNext.addEventListener('click', function() { advance(); });
+  btnPrev.addEventListener('click', function() { retreat(); });
 
-  // Pause on hover over stage
-  stage.addEventListener('mouseenter', stop);
-  stage.addEventListener('mouseleave', start);
 
-  // Arrow buttons
-  btnNext.addEventListener('click', function() { stop(); advance(); start(); });
-  btnPrev.addEventListener('click', function() { stop(); retreat(); start(); });
+  // Touch swipe
+  var touchStartX = 0;
 
-  start();
+  stage.addEventListener('touchstart', function(e) {
+    touchStartX = e.touches[0].clientX;
+    stop();
+  }, { passive: true });
+
+  stage.addEventListener('touchend', function(e) {
+    var diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        advance();
+      } else {
+        retreat();
+      }
+    }
+    start();
+  }, { passive: true });
+
 })();
 </script>
 
