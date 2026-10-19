@@ -620,16 +620,6 @@ a {
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
-@media (max-width: 480px) {
-  .carousel-thumb {
-    height: auto;
-    max-height: 160px;
-    object-fit: contain;
-    object-position: center;
-    background: rgba(0,0,0,0.2);
-  }
-}
-
 .carousel-body {
   padding: 22px 24px;
   flex: 1;
@@ -953,7 +943,6 @@ a {
    ========================================================= */
 
 @media (max-width: 850px) {
-
   .featured-grid {
     grid-template-columns: 1fr;
   }
@@ -970,11 +959,9 @@ a {
   .skills-grid {
     grid-template-columns: 1fr;
   }
-
 }
 
 @media (max-width: 650px) {
-
   .hero {
     padding: 72px 24px 65px;
   }
@@ -1004,6 +991,44 @@ a {
     margin-top: 6px;
   }
 
+  .carousel-scene {
+    margin-top: 32px;
+  }
+
+  .carousel-stage {
+    height: 360px;
+  }
+
+  .carousel-item {
+    width: 58vw;
+    height: 340px;
+    margin-left: calc(58vw / -2);
+  }
+
+  .carousel-thumb {
+    height: 110px;
+    object-fit: contain;
+    object-position: center;
+    background: rgba(0,0,0,0.2);
+  }
+
+  .carousel-item[data-pos="1"] {
+    transform: translateX(36vw) translateZ(-60px) scale(0.88);
+  }
+
+  .carousel-item[data-pos="3"] {
+    transform: translateX(-36vw) translateZ(-60px) scale(0.88);
+  }
+
+  .carousel-body {
+    padding: 14px 16px;
+  }
+
+  .carousel-title { font-size: 16px; }
+  .carousel-q { font-size: 12px; }
+  .carousel-num { font-size: 9px; }
+  .carousel-action { font-size: 10px; }
+  .tag { font-size: 9px; }
 }
 
 </style>
@@ -1756,22 +1781,23 @@ a {
 
   // Touch swipe
   var touchStartX = 0;
+  var touchStartY = 0;
 
   stage.addEventListener('touchstart', function(e) {
     touchStartX = e.touches[0].clientX;
-    stop();
+    touchStartY = e.touches[0].clientY;
   }, { passive: true });
 
   stage.addEventListener('touchend', function(e) {
-    var diff = touchStartX - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 40) {
-      if (diff > 0) {
+    var diffX = touchStartX - e.changedTouches[0].clientX;
+    var diffY = touchStartY - e.changedTouches[0].clientY;
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+      if (diffX > 0) {
         advance();
       } else {
         retreat();
       }
     }
-    start();
   }, { passive: true });
 
 })();
